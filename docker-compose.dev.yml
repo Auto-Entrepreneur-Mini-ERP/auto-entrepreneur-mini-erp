@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+       context: ./server
+    command: npm run dev            # Run app in dev mode with nodemon
+    ports:
+      - "3001:3001"                # Host : Container
+    volumes:
+      - ./server:/app                      # Mount your project folder for live reload
+      - server_node_modules:/app/node_modules 
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    # depends_on:
+    #   - mysql
+    networks:
+      - mini-erp-network
+
+  mysql:
+    image: mysql:8
+    ports:
+      - "3306:3306"                 # Optional: connect via host GUI
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auto-entrepreneur-erp-db
+    volumes:
+      - mysql_data:/var/lib/mysql   # Persistent DB storage
+    networks:
+      - mini-erp-network
+
+  client:
+    build: 
+      context: ./client
+    command: npm run dev --host
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - client_node_modules:/app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    # depends_on:
+    #   - backend
+    networks:
+      - mini-erp-network
+
+volumes:
+    server_node_modules:
+    client_node_modules:
+    mysql_data:
+
+networks:
+  mini-erp-network:
+    driver: bridge
