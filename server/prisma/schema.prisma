@@ -12,3 +12,8 @@ generator client {
 datasource db {
   provider = "mysql"
 }
+
+model Test{
+  Id Int @id @default(autoincrement())
+  name String 
+}
