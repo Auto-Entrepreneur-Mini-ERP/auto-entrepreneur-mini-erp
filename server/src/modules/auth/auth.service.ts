@@ -5,6 +5,7 @@ import { passwordHash, passwordMatch } from "../../utils/passwordHash.js";
 import type { loginSchemaInput, registerSchemaInput } from "./auth.types.js";
 
 import { env } from "../../config/env.js"
+import type { AutoEntrepreneur } from "../auto-entrepreneur/auto-entrepreneur.types.js";
 
 const createAutoEntrepreneur = async (data: registerSchemaInput) => {
 
@@ -12,7 +13,7 @@ const createAutoEntrepreneur = async (data: registerSchemaInput) => {
 
     const hashPass = await passwordHash(data.password);
 
-    const AutoE = await prisma.autoentrepreneur.create({
+    const AutoE = await prisma.autoEntrepreneur.create({
         data: {
             nom: data.nom,
             prenom: data.prenom,
@@ -27,11 +28,11 @@ const createAutoEntrepreneur = async (data: registerSchemaInput) => {
 
 const loginAutoEntrepreneur = async (data: loginSchemaInput) => {
     
-    const user = await prisma.autoentrepreneur.findUnique({
+    const user = await prisma.autoEntrepreneur.findFirst({
         where:{
             email: data.email
         }
-    });
+    }) as AutoEntrepreneur;
     if(!user) throw new AppError("Invalid Credentials", 400);
 
     const matchedPass = await passwordMatch(data.password, user.password);
@@ -43,9 +44,27 @@ const loginAutoEntrepreneur = async (data: loginSchemaInput) => {
     if(!token) throw new Error();
 
     user.jwtToken = token;
-    delete user['password'];
+    delete user.password;
     return user;
 }
+
+// const logout = async (data: logoutSchemaInput) => {
+
+//     const user = await prisma.autoEntrepreneur.findUnique({
+//         where: {
+//             id: data.id,
+//         }
+//     }) as AutoEntrepreneur;
+//     if(!user) throw new AppError("Usernot found!", 400);
+
+//     user.jwtToken = "";
+//     await prisma.autoEntrepreneur.update({
+//         where: {
+//             id: data.id,
+//         },
+//         data: user,
+//     });
+// }
 
 export const authService = {
     createAutoEntrepreneur,
