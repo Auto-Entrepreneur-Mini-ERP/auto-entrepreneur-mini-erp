@@ -11,10 +11,9 @@ services:
       - ./server:/app                      # Mount your project folder for live reload
       - server_node_modules:/app/node_modules 
     environment:
-      - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
-    # depends_on:
-    #   - mysql
+    depends_on:
+      - mysql
     networks:
       - mini-erp-network
 
@@ -24,7 +23,7 @@ services:
       - "3306:3306"                 # Optional: connect via host GUI
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: auto-entrepreneur-erp-db
+      MYSQL_DATABASE: auto_entrepreneur_erp_db
     volumes:
       - mysql_data:/var/lib/mysql   # Persistent DB storage
     networks:
@@ -41,8 +40,6 @@ services:
       - client_node_modules:/app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
-    # depends_on:
-    #   - backend
     networks:
       - mini-erp-network
 
