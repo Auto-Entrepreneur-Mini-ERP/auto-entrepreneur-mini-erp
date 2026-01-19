@@ -11,3 +11,7 @@ export interface loginSchemaInput {
     email: string,
     password: string
 }
+
+// export interface logoutSchemaInput {
+//     id: string
+// }
