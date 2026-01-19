@@ -13,7 +13,7 @@ export class AppError extends Error{
 }
 
 export const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunction) => {
-    console.log(err.stack);
+    console.log(err.message);
     
     const statusCode = err.statusCode || 500;
     if(statusCode === 500) err.message = "Something Went wrong!";
