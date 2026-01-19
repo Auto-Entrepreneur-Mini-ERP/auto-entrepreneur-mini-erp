@@ -11,8 +11,8 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
-app.get('/', async (req: express.Request, res: express.Response) => {
-    const users = await prisma.test.findMany()
+app.get('/api', async (req: express.Request, res: express.Response) => {
+    const users = await prisma.autoEntrepreneur.findMany()
     res.status(200).json({
         message: 'Hello',
         users
@@ -22,8 +22,8 @@ app.get('/', async (req: express.Request, res: express.Response) => {
 app.use(cors());
 app.use(helmet());
 app.use(morgan('common'));
-app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.use("/api", router);
 

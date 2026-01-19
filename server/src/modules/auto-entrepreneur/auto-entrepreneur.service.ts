@@ -35,15 +35,7 @@ const updateAutoEntrepreneur = async (data: AutoEntrepreneurUpdateInput) => {
         where: {
             id: data.id,
         },
-        data: {
-            prenom: data.prenom ?? user.prenom,
-            nom: data.nom ?? user.nom,
-            telephone: data.telephone ?? user.telephone,
-            address: data.address ?? user.address,
-            typeActivite: activity,
-            ice: data.ice ?? user.ice,
-            logo: data.logo ?? user.logo
-        }
+        data: {},
     }) as AutoEntrepreneur;
 
     delete updatedUser.password;
@@ -51,5 +43,6 @@ const updateAutoEntrepreneur = async (data: AutoEntrepreneurUpdateInput) => {
 };
 
 export const autoEntrepreneurService = {
-    profileAutoEntrepreneur
+    profileAutoEntrepreneur,
+    updateAutoEntrepreneur
 }

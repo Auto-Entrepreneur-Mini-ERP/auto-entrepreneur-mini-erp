@@ -12,7 +12,7 @@ export const registerAutoEntrepreneurSchema = {
 
 export const loginEntrepreneurSchema = {
     body: z.object({
-        email: z.email().nonempty(),
-        password: z.string().min(6).max(16).nonempty(),
+        email: z.email('string').nonempty(),
+        password: z.string('string').min(6).max(16).nonempty(),
     })
 }
