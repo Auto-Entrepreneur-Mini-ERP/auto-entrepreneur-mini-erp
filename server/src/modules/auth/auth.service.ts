@@ -6,6 +6,8 @@ import type { loginSchemaInput, registerSchemaInput } from "./auth.types.js";
 
 import { env } from "../../config/env.js"
 import type { AutoEntrepreneur } from "../auto-entrepreneur/auto-entrepreneur.types.js";
+import type { AutoEntrepreneurUncheckedUpdateInput } from "../../../generated/prisma/models.js";
+import type { Response } from "express";
 
 const createAutoEntrepreneur = async (data: registerSchemaInput) => {
 
@@ -48,25 +50,31 @@ const loginAutoEntrepreneur = async (data: loginSchemaInput) => {
     return user;
 }
 
-// const logout = async (data: logoutSchemaInput) => {
+const resetPassword = async (req: Request) => {
+    return 'reset password'
+}
 
-//     const user = await prisma.autoEntrepreneur.findUnique({
-//         where: {
-//             id: data.id,
-//         }
-//     }) as AutoEntrepreneur;
-//     if(!user) throw new AppError("Usernot found!", 400);
+const logout = async (data: { id: string }) => {
 
-//     user.jwtToken = "";
-//     await prisma.autoEntrepreneur.update({
-//         where: {
-//             id: data.id,
-//         },
-//         data: user,
-//     });
-// }
+    const user = await prisma.autoEntrepreneur.findUnique({
+        where: {
+            id: data.id,
+        }
+    }) as AutoEntrepreneur;
+    if(!user) throw new AppError("Usernot found!", 400);
+
+    user.jwtToken = "";
+    await prisma.autoEntrepreneur.update({
+        where: {
+            id: data.id,
+        },
+        data: user as AutoEntrepreneurUncheckedUpdateInput,
+    });
+}
 
 export const authService = {
     createAutoEntrepreneur,
     loginAutoEntrepreneur,
+    resetPassword,
+    logout
 }

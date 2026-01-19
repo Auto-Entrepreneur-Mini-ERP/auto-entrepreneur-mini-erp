@@ -4,7 +4,8 @@ import { isAthenticated } from "../../middlewares/auth.middelware.js";
 
 const router = Router();
 
-router.get("/profile", isAthenticated, autoEntrepreneurController.getProfile);
+router.get("/profile/:id", isAthenticated, autoEntrepreneurController.getProfile);
+router.put("/profile/:id", isAthenticated, autoEntrepreneurController.editProfile);
 
 
 export default router;

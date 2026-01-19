@@ -12,7 +12,8 @@ const login = async (req: Request, res: Response): Promise<Response> => {
 }
 
 const resetPassword = async (req: Request, res: Response): Promise<Response> => {
-    return res.status(200).json();
+    const result = await authService.resetPassword(req.body);
+    return res.status(200).json(result);
 }
 
 const logout = async (req: Request, res: Response): Promise<Response> => {

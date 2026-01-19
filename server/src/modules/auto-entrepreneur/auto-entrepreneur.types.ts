@@ -22,12 +22,7 @@ export interface AutoEntrepreneur {
     jwtToken?: string;
 }
 
-export interface AutoEntrepreneurProfileInput {
-    id: string;
-}
-
 export interface AutoEntrepreneurUpdateInput {
-    id: string;
     prenom?: string;
     nom?: string;
     telephone?: string;
