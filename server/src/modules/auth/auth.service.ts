@@ -2,14 +2,22 @@ import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/errorHandler.js";
 import { JWT } from "../../utils/jwt.js";
 import { passwordHash, passwordMatch } from "../../utils/passwordHash.js";
-import type { loginSchemaInput, registerSchemaInput } from "./auth.types.js";
+import type { loginSchemaInput, registerSchemaInput, resetPasswordInput } from "./auth.types.js";
+import otpGenerator from "otp-generator"
 
 import { env } from "../../config/env.js"
 import type { AutoEntrepreneur } from "../auto-entrepreneur/auto-entrepreneur.types.js";
 import type { AutoEntrepreneurUncheckedUpdateInput } from "../../../generated/prisma/models.js";
-import type { Response } from "express";
 
 const createAutoEntrepreneur = async (data: registerSchemaInput) => {
+
+    const emailExist = await prisma.autoEntrepreneur.findFirst({
+        where:{
+            email: data.email
+        }
+    });
+
+    if(emailExist) throw new AppError('Email already exist!', 400);
 
     if(data.password !== data.passwordConfirmation) throw new AppError("Passwords does't match", 400);
 
@@ -22,9 +30,10 @@ const createAutoEntrepreneur = async (data: registerSchemaInput) => {
             email: data.email,
             password: hashPass,
         }
-    });
+    }) as AutoEntrepreneur;
 
     if(!AutoE) throw new Error();
+    delete AutoE.password;
     return AutoE;
 }
 
@@ -50,31 +59,72 @@ const loginAutoEntrepreneur = async (data: loginSchemaInput) => {
     return user;
 }
 
-const resetPassword = async (req: Request) => {
-    return 'reset password'
-}
+const forgotPassword = async (email: string) => {
 
-const logout = async (data: { id: string }) => {
-
-    const user = await prisma.autoEntrepreneur.findUnique({
+    const user = await prisma.autoEntrepreneur.findFirst({
         where: {
-            id: data.id,
+            email,
         }
     }) as AutoEntrepreneur;
-    if(!user) throw new AppError("Usernot found!", 400);
+    if(!user) throw new AppError("User not found!", 400);
 
-    user.jwtToken = "";
+    // Generate OTP
+    const otp = otpGenerator.generate(6, {digits: true, lowerCaseAlphabets : false, upperCaseAlphabets: false, specialChars: false });
+    const otpExpiration = Date.now() + 5 * 60 * 1000;
+    
     await prisma.autoEntrepreneur.update({
         where: {
-            id: data.id,
+            id: user.id
         },
-        data: user as AutoEntrepreneurUncheckedUpdateInput,
+        data: {
+            passwordResetToken: otp,
+            passwordResetTokenExpiration: otpExpiration
+        }
     });
+
+    return otp;
+}
+
+const resetPassword = async (id: string, data: resetPasswordInput) => {
+    const user = await prisma.autoEntrepreneur.findFirst({
+        where: {
+            id,
+        }
+    }) as AutoEntrepreneur;
+    if(!user) throw new AppError("User not found!", 400);
+
+    if(data.password !== data.passwordConfirmation) throw new AppError("Passwords does't match", 400);
+    const hashPass = await passwordHash(data.password);
+
+    const AutoE = await prisma.autoEntrepreneur.update({
+        where: {
+            id
+        },
+        data: {
+            password: hashPass,
+        }
+    }) as AutoEntrepreneur;
+
+    if(!AutoE) throw new Error();
+    return true;
+}
+
+const logout = async (id: string ) => {
+    
+    const user = await prisma.autoEntrepreneur.findUnique({
+        where: {
+            id: id,
+        }
+    }) as AutoEntrepreneur;
+    if(!user) throw new AppError("User not found!", 400);
+
+    return true;
 }
 
 export const authService = {
     createAutoEntrepreneur,
     loginAutoEntrepreneur,
+    forgotPassword,
     resetPassword,
     logout
 }

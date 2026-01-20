@@ -25,3 +25,7 @@ export const isAthenticated = async (req: Request, res: Response, next: NextFunc
 
     next();
 }
+
+export const isOwner = async (req: Request, res: Response, next: NextFunction) => {
+    next();
+}

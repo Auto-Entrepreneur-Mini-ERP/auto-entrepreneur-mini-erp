@@ -20,6 +20,8 @@ export interface AutoEntrepreneur {
     dateCreation: Date;
     dateMiseAJour: Date;
     jwtToken?: string;
+    passwordResetToken?: string
+    passwordResetTokenExpiration?: bigint
 }
 
 export interface AutoEntrepreneurUpdateInput {

@@ -15,3 +15,8 @@ export interface loginSchemaInput {
 // export interface logoutSchemaInput {
 //     id: string
 // }
+
+export  interface resetPasswordInput {
+    password: string,
+    passwordConfirmation: string
+}
