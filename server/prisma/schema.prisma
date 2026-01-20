@@ -21,7 +21,7 @@ enum TypeActivite{
 
 model AutoEntrepreneur{
   id String @id @default(uuid())
-  email String 
+  email String @unique
   password String
   nom String
   prenom String
@@ -33,4 +33,6 @@ model AutoEntrepreneur{
   logo String?
   dateCreation DateTime @default(now())
   dateMiseAJour DateTime @updatedAt
+  passwordResetToken String?
+  passwordResetTokenExpiration BigInt?
 }
