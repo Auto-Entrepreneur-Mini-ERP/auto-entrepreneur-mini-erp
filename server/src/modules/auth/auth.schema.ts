@@ -1,10 +1,13 @@
-import { email, z } from 'zod';
+import { z } from 'zod';
 
 export const registerAutoEntrepreneurSchema = {
     body: z.object({
-        nom: z.string().min(5).nonempty(),
-        prenom: z.string().min(5).nonempty(),
+        firstName: z.string().min(5).nonempty(),
+        lastName: z.string().min(5).nonempty(),
         email: z.email().nonempty(),
+        businessName: z.string().min(3).nonempty(),
+        activityType: z.enum(['COMMERCE', 'SERVICE', 'MIXTE']),
+        ice: z.string().min(5).nonempty(),
         password: z.string().min(6).max(16).nonempty(),
         passwordConfirmation: z.string().min(6).max(16).nonempty(),
     })

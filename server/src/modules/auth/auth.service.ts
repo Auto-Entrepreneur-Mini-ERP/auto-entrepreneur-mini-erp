@@ -1,36 +1,57 @@
 import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/errorHandler.js";
 import { JWT } from "../../utils/jwt.js";
+import otpGenerator from "otp-generator"
 import { passwordHash, passwordMatch } from "../../utils/passwordHash.js";
 import type { loginSchemaInput, registerSchemaInput, resetPasswordInput } from "./auth.types.js";
-import otpGenerator from "otp-generator"
-
 import { env } from "../../config/env.js"
 import type { AutoEntrepreneur } from "../auto-entrepreneur/auto-entrepreneur.types.js";
-import type { AutoEntrepreneurUncheckedUpdateInput } from "../../../generated/prisma/models.js";
+import { ActivityType } from "../../../generated/prisma/enums.js";
 
 const createAutoEntrepreneur = async (data: registerSchemaInput) => {
 
-    const emailExist = await prisma.autoEntrepreneur.findFirst({
+    const emailExist = await prisma.user.findFirst({
         where:{
             email: data.email
         }
     });
-
     if(emailExist) throw new AppError('Email already exist!', 400);
+
+    const iceExist = await prisma.autoEntrepreneur.findFirst({
+        where:{
+            ice: data.ice
+        }
+    });
+    if(iceExist) throw new AppError('ICE already exist!', 400);
 
     if(data.password !== data.passwordConfirmation) throw new AppError("Passwords does't match", 400);
 
     const hashPass = await passwordHash(data.password);
 
-    const AutoE = await prisma.autoEntrepreneur.create({
+    let activity: ActivityType;
+    if(data.activityType === 'COMMERCE') activity = ActivityType.COMMERCE;
+    else if(data.activityType === 'SERVICE') activity = ActivityType.SERVICE;
+    else if(data.activityType === 'MIXTE') activity = ActivityType.MIXTE;
+    else activity = data.activityType as ActivityType;
+
+    const AutoE = await prisma.user.create({
         data: {
-            nom: data.nom,
-            prenom: data.prenom,
+            firstName: data.firstName,
+            lastName: data.lastName,
             email: data.email,
-            password: hashPass,
+            AutoEntrepreneur:{
+                create: {
+                    password: hashPass,
+                    businessName: data.businessName,
+                    activityType: activity,
+                    ice: data.ice,
+                }
+            },
+        },
+        include: {
+            AutoEntrepreneur: true,
         }
-    }) as AutoEntrepreneur;
+    }) as unknown as AutoEntrepreneur;
 
     if(!AutoE) throw new Error();
     delete AutoE.password;
@@ -39,11 +60,11 @@ const createAutoEntrepreneur = async (data: registerSchemaInput) => {
 
 const loginAutoEntrepreneur = async (data: loginSchemaInput) => {
     
-    const user = await prisma.autoEntrepreneur.findFirst({
+    const user = await prisma.user.findFirst({
         where:{
             email: data.email
         }
-    }) as AutoEntrepreneur;
+    }) as AutoEntrepreneur | null;
     if(!user) throw new AppError("Invalid Credentials", 400);
 
     const matchedPass = await passwordMatch(data.password, user.password);
@@ -61,11 +82,11 @@ const loginAutoEntrepreneur = async (data: loginSchemaInput) => {
 
 const forgotPassword = async (email: string) => {
 
-    const user = await prisma.autoEntrepreneur.findFirst({
+    const user = await prisma.user.findFirst({
         where: {
             email,
         }
-    }) as AutoEntrepreneur;
+    }) as AutoEntrepreneur | null;
     if(!user) throw new AppError("User not found!", 400);
 
     // Generate OTP
@@ -82,6 +103,8 @@ const forgotPassword = async (email: string) => {
         }
     });
 
+    // send OTP in email
+
     return otp;
 }
 
@@ -90,7 +113,7 @@ const resetPassword = async (id: string, data: resetPasswordInput) => {
         where: {
             id,
         }
-    }) as AutoEntrepreneur;
+    }) as AutoEntrepreneur | null;
     if(!user) throw new AppError("User not found!", 400);
 
     if(data.password !== data.passwordConfirmation) throw new AppError("Passwords does't match", 400);
@@ -103,7 +126,7 @@ const resetPassword = async (id: string, data: resetPasswordInput) => {
         data: {
             password: hashPass,
         }
-    }) as AutoEntrepreneur;
+    });
 
     if(!AutoE) throw new Error();
     return true;
@@ -115,7 +138,7 @@ const logout = async (id: string ) => {
         where: {
             id: id,
         }
-    }) as AutoEntrepreneur;
+    }) as AutoEntrepreneur | null;
     if(!user) throw new AppError("User not found!", 400);
 
     return true;
