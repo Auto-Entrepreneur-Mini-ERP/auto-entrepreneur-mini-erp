@@ -10,7 +10,6 @@ const getProfile = async (req: Request, res: Response): Promise<Response> => {
 
 const editProfile = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params;
-
     const profileData = req.body;
 
     const updatedAutoEntrepreneur = await autoEntrepreneurService.updateAutoEntrepreneur(

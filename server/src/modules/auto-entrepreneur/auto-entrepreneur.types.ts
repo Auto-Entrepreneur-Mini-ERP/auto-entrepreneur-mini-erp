@@ -1,35 +1,42 @@
 
 export enum TypeActivite {
     COMMERCE = "COMMERCE",
-    PRESTATION_SERVICE = "PRESTATION_SERVICE",
+    PRESTATION_SERVICE = "SERVICE",
     MIXTE = "MIXTE"
 }
 
-export interface AutoEntrepreneur {
-    id: string;
-    nom: string;
-    prenom: string;
-    email: string;
-    password?: string;
-    telephone?: string;
+export interface User {
+    email: string,
+    firstName: string;
+    lastName: string;
+    phone?: string;
     address?: string;
-    typeActivite?: string;
-    tauxImposition?: number;
+    creationDate: Date;
+    updateDate: Date;
+}
+
+export interface AutoEntrepreneur {
+    id: string,
+    password?: string,
+    businessName: string;
+    activityType?: string;
+    taxRate?: number;
     ice?: string;
     logo?: string;
-    dateCreation: Date;
-    dateMiseAJour: Date;
+    creationDate: Date;
+    updateDate: Date;
     jwtToken?: string;
     passwordResetToken?: string
     passwordResetTokenExpiration?: bigint
+    User: User
 }
 
 export interface AutoEntrepreneurUpdateInput {
-    prenom?: string;
-    nom?: string;
-    telephone?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
     address?: string;
-    typeActivite?: string;
+    businessName?: string;
     ice?: string
     logo?: string;
 }
