@@ -9,11 +9,14 @@
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
-    "types": [],
+    // "types": [],
     // For nodejs:
-    // "lib": ["esnext"],
-    // "types": ["node"],
+    "lib": ["esnext"],
+    "types": ["node"],
     // and npm install -D @types/node
+    "moduleResolution": "nodenext",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
 
     // Other Outputs
     "sourceMap": true,
@@ -24,6 +27,7 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     
+
 
     // Style Options
     // "noImplicitReturns": true,
@@ -45,5 +49,8 @@
   "watchOptions": {
     "excludeDirectories": ["prisma"],
     "excludeFiles": ["prisma.config.ts"]
-  }
+  },
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules", "dist", "prisma", "generated"]
+  
 }

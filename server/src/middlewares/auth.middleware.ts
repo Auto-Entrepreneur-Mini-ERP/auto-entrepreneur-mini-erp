@@ -6,7 +6,7 @@ import { prisma } from "../lib/prisma.js";
 import type { JwtPayload } from "jsonwebtoken";
 
 
-export const isAthenticated = async (req: Request, res: Response, next: NextFunction) => {
+export async function authenticate(req: Request, res: Response, next: NextFunction) {
     const token = req.cookies.token;
     if(!token) throw new AppError("Token does not exist!", 401);
 

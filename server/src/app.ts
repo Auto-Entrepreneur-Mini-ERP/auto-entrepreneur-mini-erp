@@ -8,11 +8,12 @@ import cors from 'cors';
 import { errorHandler } from "./utils/errorHandler.js";
 import router from "./routes.js";
 import cookieParser from "cookie-parser";
+import articleRoutes from './routes/articles.routes.js';
 
 const app = express();
 
 app.get('/', async (req: express.Request, res: express.Response) => {
-    const users = await prisma.test.findMany()
+    const users = await prisma.user.findMany()
     res.status(200).json({
         message: 'Hello',
         users
@@ -26,7 +27,9 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 app.use("/api", router);
+app.use("/api", articleRoutes);
 
 app.use(errorHandler);
+
 
 export default app;
