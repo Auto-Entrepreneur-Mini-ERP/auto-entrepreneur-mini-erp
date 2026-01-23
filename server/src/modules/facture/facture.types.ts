@@ -9,7 +9,7 @@ export enum InvoiceStatus {
 
 export interface Invoice {
     id: string,
-    invoiceNumber: string,
+    // invoiceNumber: string,
     issueDate: Date,
     dueDate: Date,
     status: InvoiceStatus,
