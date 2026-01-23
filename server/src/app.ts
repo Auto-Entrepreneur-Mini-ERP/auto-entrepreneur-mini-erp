@@ -1,5 +1,4 @@
 import express from "express";
-import { prisma } from "./lib/prisma.js";
 import helmet from "helmet";
 import morgan from "morgan";
 import bodyParser from "body-parser";
@@ -8,25 +7,13 @@ import cors from 'cors';
 import { errorHandler } from "./utils/errorHandler.js";
 import router from "./routes.js";
 import cookieParser from "cookie-parser";
-import type { AutoEntrepreneur } from "./modules/auto-entrepreneur/auto-entrepreneur.types.js";
 
 const app = express();
 
 app.get('/api', async (req: express.Request, res: express.Response) => {
-    const users = await prisma.autoEntrepreneur.findMany({
-        include: {
-            user: true
-        }
-    }) as unknown as AutoEntrepreneur[];
-
-    users.forEach(u => {
-        delete u.password;
-    });
-
-    res.status(200).json({
+    return res.status(200).json({
         message: 'Hello',
-        users
-    })
+    });
 });
 
 app.use(cors());

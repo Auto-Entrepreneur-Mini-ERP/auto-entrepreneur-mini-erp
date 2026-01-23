@@ -8,6 +8,7 @@ import encaissementRoutes from './modules/encaissement/encaissement.routes.js'
 const router = Router();
 
 router.use(authRoutes);
+
 router.use(autoEntrepreneurRoutes);
 
 router.use(invoiceRoutes);

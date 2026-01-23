@@ -1,11 +1,11 @@
 import { prisma } from '../../../prisma/client.js';
 import { AppError } from '../../utils/errorHandler.js';
-import { paginationIndex } from '../../utils/pagination.js';
+import { pagination } from '../../utils/pagination.js';
 import type { InvoiceOutput } from './invoice.types.js';
 
 const getAllInvoices = async (autoentrepreneurId: string, page: number, limit: number) => {
 
-    const startIndex = paginationIndex(page as number, limit as number)
+    const startIndex = pagination.paginationIndex(page as number, limit as number)
     
     const invoices = await prisma.invoice.findMany({
         skip: startIndex,
