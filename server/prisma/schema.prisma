@@ -41,9 +41,6 @@ enum QuoteStatus {
 enum LineType {
   PRODUCT
   SERVICE
-  DISCOUNT
-  TAX
-  OTHER
 }
 
 enum PaymentMethod {
@@ -212,7 +209,7 @@ model Invoice {
   dueDate         DateTime
   status          InvoiceStatus @default(DRAFT)
   subtotal        Decimal       @default(0)
-  taxAmount       Decimal       @default(0)
+  discount        Decimal?      @default(0)
   totalAmount     Decimal       @default(0)
   paidAmount      Decimal       @default(0)
   remainingAmount Decimal       @default(0)
@@ -263,7 +260,7 @@ model Quote {
 model InvoiceLine {
   id            String    @id @default(uuid())
   lineType      LineType
-  description   String
+  description   String?
   quantity      Decimal   @default(1)
   unitPrice     Decimal   @default(0)
   totalPrice    Decimal   @default(0)

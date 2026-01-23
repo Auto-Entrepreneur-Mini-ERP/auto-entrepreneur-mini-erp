@@ -27,14 +27,14 @@ export const isAthenticated = async (req: Request, res: Response, next: NextFunc
 }
 
 export const isOwner = async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
+    const { autoentrepreneurId } = req.params;
     const token = req.cookies.token;
     if(!token) throw new AppError("Token does not exist!", 401);
 
     const decoded = JWT.verifyToken(token, env.JWT_SECRET as string) as JwtPayload;
     if(!decoded) throw new AppError("Invalid Token!", 401);
 
-    if(decoded.id !== id) throw new AppError("You are not allowed to access this resource!", 403);
+    if(decoded.id !== autoentrepreneurId) throw new AppError("You are not allowed to access this resource!", 403);
     
     next();
 }
