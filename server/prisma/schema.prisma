@@ -4,6 +4,7 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -13,26 +14,404 @@ datasource db {
   provider = "mysql"
 }
 
-enum TypeActivite {
+enum ActivityType {
   COMMERCE
-  PRESTATION_SERVICE
+  SERVICE
   MIXTE
 }
 
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED
+}
+
+enum LineType {
+  PRODUCT
+  SERVICE
+  DISCOUNT
+  TAX
+  OTHER
+}
+
+enum PaymentMethod {
+  CASH
+  CHECK
+  BANK_TRANSFER
+  CREDIT_CARD
+  MOBILE_PAYMENT
+  OTHER
+}
+
+enum DeclarationStatus {
+  DRAFT
+  PENDING
+  SUBMITTED
+  PAID
+  OVERDUE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum NotificationType {
+  INVOICE
+  QUOTE
+  PAYMENT
+  EXPENSE
+  TAX
+  CONTRIBUTION
+  SYSTEM
+  REMINDER
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  firstName     String?
+  lastName      String?
+  phone         String?
+  address       String?
+  creationDate  DateTime  @default(now())
+  updateDate    DateTime  @updatedAt
+  
+  // Polymorphic relationship: User can be either AutoEntrepreneur or Customer
+  AutoEntrepreneur AutoEntrepreneur?
+  customer       Customer?
+  
+  @@map("users")
+}
+
 model AutoEntrepreneur {
-  id                           String        @id @default(uuid())
-  email                        String        @unique
-  password                     String
-  nom                          String
-  prenom                       String
-  telephone                    String?
-  address                      String?
-  typeActivite                 TypeActivite?
-  tauxImposition               Float?
-  ice                          String?
-  logo                         String?
-  dateCreation                 DateTime      @default(now())
-  dateMiseAJour                DateTime      @updatedAt
-  passwordResetToken           String?
+  id              String        @id @default(uuid())
+  userId          String        @unique
+  password        String        // Should be hashed in application
+  businessName    String
+  activityType    ActivityType
+  taxRate         Float         @default(0.0)
+  ice             String        @unique
+  logo            String?       // URL or file path
+  creationDate    DateTime      @default(now())
+  updateDate      DateTime      @updatedAt
+
+  // For password reset
+  passwordResetToken String?
   passwordResetTokenExpiration BigInt?
+  
+  // Relationships
+  user            User          @relation(fields: [userId], references: [id])
+  customers       Customer[]
+  products        Product[]
+  services        Service[]
+  invoices        Invoice[]
+  quotes          Quote[]
+  payments        Payment[]
+  expenses        Expense[]
+  documents       Document[]
+  taxDeclarations TaxDeclaration[]
+  contributions   Contribution[]
+  notifications   Notification[]
+  
+  @@map("auto_entrepreneur")
+}
+
+model Customer {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  ice             String    @unique
+  city            String?
+  country         String?   @default("Morocco")
+  isActive        Boolean   @default(true)
+  AutoEntrepreneurId String
+  creationDate    DateTime  @default(now())
+  updateDate      DateTime  @updatedAt
+  
+  // Relationships
+  user            User      @relation(fields: [userId], references: [id])
+  AutoEntrepreneur  AutoEntrepreneur @relation(fields: [AutoEntrepreneurId], references: [id])
+  invoices        Invoice[]
+  quotes          Quote[]
+  
+  @@map("customers")
+}
+
+model Item {
+  id            String    @id @default(uuid())
+  name          String
+  description   String?
+  unit          String    // kg, piece, hour, etc.
+  category      String?
+  isActive      Boolean   @default(true)
+  creationDate  DateTime  @default(now())
+  updateDate    DateTime  @updatedAt
+  
+  // Polymorphic relationship
+  product       Product?
+  service       Service?
+  
+  @@map("items")
+}
+
+model Product {
+  id              String    @id @default(uuid())
+  itemId          String    @unique
+  unitPrice       Decimal   @default(0)
+  reference       String?   @unique
+  stockQuantity   Int       @default(0)
+  alertThreshold  Int       @default(10)
+  AutoEntrepreneurId String
+  
+  // Relationships
+  item            Item      @relation(fields: [itemId], references: [id])
+  AutoEntrepreneur  AutoEntrepreneur @relation(fields: [AutoEntrepreneurId], references: [id])
+  invoiceLines    InvoiceLine[]
+  quoteLines      QuoteLine[]
+  
+  @@map("products")
+}
+
+model Service {
+  id                String    @id @default(uuid())
+  itemId            String    @unique
+  hourlyRate        Decimal?  @default(0)
+  fixedRate         Decimal?  @default(0)
+  estimatedDuration Int?      // in minutes
+  AutoEntrepreneurId  String
+  
+  // Relationships
+  item              Item      @relation(fields: [itemId], references: [id])
+  AutoEntrepreneur    AutoEntrepreneur @relation(fields: [AutoEntrepreneurId], references: [id])
+  invoiceLines      InvoiceLine[]
+  quoteLines        QuoteLine[]
+  
+  @@map("services")
+}
+
+
+
+model Invoice {
+  id              String        @id @default(uuid())
+  invoiceNumber   String        @unique
+  issueDate       DateTime
+  dueDate         DateTime
+  status          InvoiceStatus @default(DRAFT)
+  subtotal        Decimal       @default(0)
+  taxAmount       Decimal       @default(0)
+  totalAmount     Decimal       @default(0)
+  paidAmount      Decimal       @default(0)
+  remainingAmount Decimal       @default(0)
+  notes           String?
+  pdfUrl          String?
+  AutoEntrepreneurId String
+  customerId      String
+  creationDate    DateTime      @default(now())
+  updateDate      DateTime      @updatedAt
+  
+  // Relationships
+  AutoEntrepreneur  AutoEntrepreneur @relation(fields: [AutoEntrepreneurId], references: [id])
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  invoiceLines    InvoiceLine[]
+  payments        Payment[]
+  quote           Quote?        @relation(fields: [quoteId], references: [id])
+  quoteId         String? @unique
+  
+  @@map("invoices")
+}
+
+model Quote {
+  id              String      @id @default(uuid())
+  quoteNumber     String      @unique
+  issueDate       DateTime
+  validityDate    DateTime
+  status          QuoteStatus @default(DRAFT)
+  subtotal        Decimal     @default(0)
+  taxAmount       Decimal     @default(0)
+  totalAmount     Decimal     @default(0)
+  notes           String?
+  pdfUrl          String?
+  AutoEntrepreneurId String
+  customerId      String
+  creationDate    DateTime    @default(now())
+  updateDate      DateTime    @updatedAt
+  invoiceId       String?     @unique
+  
+  // Relationships
+  AutoEntrepreneur  AutoEntrepreneur @relation(fields: [AutoEntrepreneurId], references: [id])
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  quoteLines      QuoteLine[]
+  invoice         Invoice?
+  
+  @@map("quotes")
+}
+
+model InvoiceLine {
+  id            String    @id @default(uuid())
+  lineType      LineType
+  description   String
+  quantity      Decimal   @default(1)
+  unitPrice     Decimal   @default(0)
+  totalPrice    Decimal   @default(0)
+  order         Int       @default(0)
+  invoiceId     String
+  productId     String?
+  serviceId     String?
+  
+  // Relationships
+  invoice       Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product       Product?  @relation(fields: [productId], references: [id])
+  service       Service?  @relation(fields: [serviceId], references: [id])
+  
+  @@map("invoice_lines")
+}
+
+
+model QuoteLine {
+  id            String    @id @default(uuid())
+  lineType      LineType
+  description   String
+  quantity      Decimal   @default(1)
+  unitPrice     Decimal   @default(0)
+  totalPrice    Decimal   @default(0)
+  order         Int       @default(0)
+  quoteId       String
+  productId     String?
+  serviceId     String?
+  
+  // Relationships
+  quote         Quote     @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product       Product?  @relation(fields: [productId], references: [id])
+  service       Service?  @relation(fields: [serviceId], references: [id])
+  
+  @@map("quote_lines")
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  reference         String        @unique
+  amount            Decimal
+  paymentDate       DateTime
+  paymentMethod     PaymentMethod
+  notes             String?
+  transactionNumber String?
+  isReconciled      Boolean       @default(false)
+  AutoEntrepreneurId  String
+  invoiceId         String
+  creationDate      DateTime      @default(now())
+  
+  // Relationships
+  AutoEntrepreneur    AutoEntrepreneur @relation(fields: [AutoEntrepreneurId], references: [id])
+  invoice           Invoice       @relation(fields: [invoiceId], references: [id])
+  
+  @@map("payments")
+}
+
+model Expense {
+  id              String    @id @default(uuid())
+  category        String
+  description     String?
+  amount          Decimal
+  date            DateTime
+  supplier        String?
+  paymentMethod   String
+  receiptUrl      String?
+  isDeductible    Boolean   @default(true)
+  AutoEntrepreneurId String
+  creationDate    DateTime  @default(now())
+  updateDate      DateTime  @updatedAt
+  
+  // Relationships
+  AutoEntrepreneur  AutoEntrepreneur @relation(fields: [AutoEntrepreneurId], references: [id])
+  
+  @@map("expenses")
+}
+
+model Document {
+  id            String    @id @default(uuid())
+  name          String
+  type          String    // pdf, image, doc, etc.
+  category      String?   // invoice, quote, contract, etc.
+  fileUrl       String
+  fileSize      Int       // in bytes
+  uploadDate    DateTime  @default(now())
+  description   String?
+  AutoEntrepreneurId String
+  
+  // Relationships
+  AutoEntrepreneur AutoEntrepreneur @relation(fields: [AutoEntrepreneurId], references: [id])
+  
+  @@map("documents")
+}
+
+model TaxDeclaration {
+  id            String            @id @default(uuid())
+  period        String            // Monthly, Quarterly, Annual
+  year          Int
+  month         Int?
+  totalRevenue  Decimal           @default(0)
+  taxRate       Float             @default(0.0)
+  taxAmount     Decimal           @default(0)
+  status        DeclarationStatus @default(DRAFT)
+  dueDate       DateTime
+  paymentDate   DateTime?
+  pdfUrl        String?
+  AutoEntrepreneurId String
+  creationDate  DateTime          @default(now())
+  
+  // Relationships
+  AutoEntrepreneur AutoEntrepreneur   @relation(fields: [AutoEntrepreneurId], references: [id])
+  
+  @@map("tax_declarations")
+}
+
+model Contribution {
+  id              String        @id @default(uuid())
+  period          String        // Monthly, Quarterly, Annual
+  year            Int
+  quarter         Int?
+  amount          Decimal
+  dueDate         DateTime
+  paymentDate     DateTime?
+  status          PaymentStatus @default(PENDING)
+  reference       String        @unique
+  AutoEntrepreneurId String
+  creationDate    DateTime      @default(now())
+  
+  // Relationships
+  AutoEntrepreneur  AutoEntrepreneur @relation(fields: [AutoEntrepreneurId], references: [id])
+  
+  @@map("contributions")
+}
+
+model Notification {
+  id                    String            @id @default(uuid())
+  type                  NotificationType
+  title                 String
+  message               String
+  associatedEntityType  String
+  associatedEntityId    String
+  isRead                Boolean           @default(false)
+  priority              String            @default("medium")
+  AutoEntrepreneurId      String
+  creationDate          DateTime          @default(now())
+  
+  // Relationships
+  AutoEntrepreneur        AutoEntrepreneur     @relation(fields: [AutoEntrepreneurId], references: [id])
+  
+  @@map("notifications")
 }

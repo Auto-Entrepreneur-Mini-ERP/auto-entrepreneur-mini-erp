@@ -1,8 +1,12 @@
+import type { ActivityType } from "../../../generated/prisma/enums.js"
 
 export interface registerSchemaInput {
-    nom: string,
-    prenom: string,
+    firstName: string,
+    lastName: string,
     email: string,
+    businessName: string,
+    activityType: ActivityType,
+    ice: string,
     password: string,
     passwordConfirmation: string,
 }
@@ -16,7 +20,7 @@ export interface loginSchemaInput {
 //     id: string
 // }
 
-export  interface resetPasswordInput {
+export interface resetPasswordInput {
     password: string,
     passwordConfirmation: string
 }
