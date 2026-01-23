@@ -13,26 +13,26 @@ datasource db {
   provider = "mysql"
 }
 
-enum TypeActivite{
+enum TypeActivite {
   COMMERCE
   PRESTATION_SERVICE
   MIXTE
 }
 
-model AutoEntrepreneur{
-  id String @id @default(uuid())
-  email String @unique
-  password String
-  nom String
-  prenom String
-  telephone String?
-  address String?
-  typeActivite TypeActivite?
-  tauxImposition Float?
-  ice String?
-  logo String?
-  dateCreation DateTime @default(now())
-  dateMiseAJour DateTime @updatedAt
-  passwordResetToken String?
+model AutoEntrepreneur {
+  id                           String        @id @default(uuid())
+  email                        String        @unique
+  password                     String
+  nom                          String
+  prenom                       String
+  telephone                    String?
+  address                      String?
+  typeActivite                 TypeActivite?
+  tauxImposition               Float?
+  ice                          String?
+  logo                         String?
+  dateCreation                 DateTime      @default(now())
+  dateMiseAJour                DateTime      @updatedAt
+  passwordResetToken           String?
   passwordResetTokenExpiration BigInt?
 }
