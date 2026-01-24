@@ -1,5 +1,6 @@
 import type { Request, Response } from "express"
 import { invoicesService } from "./invoice.service.js";
+import type { InvoiceCreateSchemaInput } from "./invoice.types.js";
 
 const getInvoices = async (req: Request, res: Response) =>{
     const { autoentrepreneurId } = req.params;
@@ -17,7 +18,32 @@ const getOneInvoice = async (req: Request, res: Response) =>{
     return res.status(200).json(invoice);
 };
 
+const createInvoice = async (req: Request, res: Response) => {
+    const { data } = req.body;
+    const { autoentrepreneurId } = req.params;
+
+    const newInvoice = await invoicesService.addInvoice(autoentrepreneurId as string, data as InvoiceCreateSchemaInput);
+    return res.status(200).json(newInvoice);
+};
+
+const cancelInvoice = async (req: Request, res: Response) => {
+    const { autoentrepreneurId, invoiceId } = req.params;
+
+    const newInvoice = await invoicesService.cancelInvoice(autoentrepreneurId as string, invoiceId as string);
+    return res.status(200).json(newInvoice);
+};
+
+const deleteInvoice = async (req: Request, res: Response) => {
+    const { autoentrepreneurId, invoiceId } = req.params;
+
+    const newInvoice = await invoicesService.deleteInvoice(autoentrepreneurId as string, invoiceId as string);
+    return res.status(200).json(newInvoice);
+};
+
 export const invoiceController = {
     getInvoices,
-    getOneInvoice
+    getOneInvoice,
+    createInvoice,
+    cancelInvoice,
+    deleteInvoice,
 };

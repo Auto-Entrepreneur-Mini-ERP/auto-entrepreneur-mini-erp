@@ -23,6 +23,7 @@ enum ActivityType {
 enum InvoiceStatus {
   DRAFT
   SENT
+  UNPAID
   PARTIALLY_PAID
   PAID
   OVERDUE

@@ -1,6 +1,7 @@
 export enum InvoiceStatus {
     DRAFT = "DRAFT",
     SENT = "SENT",
+    UNPAID = "UNPAID",
     PARTIALLY_PAID = "PARTIALLY_PAID",
     PAID = "PAID",
     OVERDUE = "OVERDUE",
@@ -44,13 +45,21 @@ export interface InvoiceLine {
 }
 
 export interface InvoiceCreateSchemaInput {
-    dueDate: Date,
-    status: InvoiceStatus,
-    discount?: number,
-    paidAmount?: number,
-    note?: string,
-    customerId: string,
-    invoiceLine: {
+    invoice:{
+        invoiceNumber?: string,
+        issueDate?: Date,
+        dueDate: Date,
+        status: InvoiceStatus,
+        subtotal?: number,
+        discount?: number,
+        totalAmount?: number,
+        paidAmount?: number,
+        payementMethod?: string,
+        remainingAmount?: number,
+        note?: string,
+        customerId: string,
+    },
+    invoiceLine: [{
         order: number,
         lineType: LineType,
         description?: string,
@@ -58,7 +67,7 @@ export interface InvoiceCreateSchemaInput {
         unitPrice: number,
         productId?: string,
         serviceId?: string,
-    }
+    }]
 }
 
 export interface InvoiceUpdateSchemaInput {

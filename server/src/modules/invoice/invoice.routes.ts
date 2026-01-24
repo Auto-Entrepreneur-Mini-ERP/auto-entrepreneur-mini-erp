@@ -8,4 +8,10 @@ const router = Router();
 router.get('/auto-entrepreneur/:autoentrepreneurId/invoice', isAthenticated, isOwner, invoiceController.getInvoices);
 router.get('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId', isAthenticated, isOwner, invoiceController.getOneInvoice);
 
+router.post('/auto-entrepreneur/:autoentrepreneurId/invoice/', isAthenticated, isOwner, invoiceController.createInvoice);
+
+router.post('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId/cancel', isAthenticated, isOwner, invoiceController.cancelInvoice);
+router.delete('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId', isAthenticated, isOwner, invoiceController.deleteInvoice);
+
+
 export default router;
