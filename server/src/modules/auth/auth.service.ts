@@ -3,6 +3,8 @@ import { AppError } from "../../utils/errorHandler.js";
 import { JWT } from "../../utils/jwt.js";
 import { passwordHash, passwordMatch } from "../../utils/passwordHash.js";
 import type { loginSchemaInput, registerSchemaInput } from "./auth.types.js";
+import crypto from "node:crypto";
+
 
 import { env } from "../../config/env.js"
 
@@ -12,12 +14,18 @@ const createAutoEntrepreneur = async (data: registerSchemaInput) => {
 
     const hashPass = await passwordHash(data.password);
 
-    const AutoE = await prisma.autoentrepreneur.create({
+    const AutoE = await prisma.autoEntrepreneur.create({
         data: {
             nom: data.nom,
             prenom: data.prenom,
             email: data.email,
             password: hashPass,
+
+            telephone: data.telephone ?? "",
+            address: data.address ?? "",
+            typeActivite: data.typeActivite ?? "COMMERCE",
+            tauxImposition: data.tauxImposition ?? 0,
+            ice: data.ice ?? crypto.randomUUID()
         }
     });
 
@@ -27,7 +35,7 @@ const createAutoEntrepreneur = async (data: registerSchemaInput) => {
 
 const loginAutoEntrepreneur = async (data: loginSchemaInput) => {
     
-    const user = await prisma.autoentrepreneur.findUnique({
+    const user = await prisma.autoEntrepreneur.findUnique({
         where:{
             email: data.email
         }
@@ -42,9 +50,8 @@ const loginAutoEntrepreneur = async (data: loginSchemaInput) => {
     const token = JWT.createToken(tokenData, env.JWT_SECRET as string);
     if(!token) throw new Error();
 
-    user.jwtToken = token;
-    delete user['password'];
-    return user;
+    const { password, ...userWithoutPassword } = user;
+    return { ...userWithoutPassword, jwtToken: token };
 }
 
 export const authService = {

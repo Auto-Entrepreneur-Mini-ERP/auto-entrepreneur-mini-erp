@@ -2,31 +2,51 @@ import express from "express";
 import { prisma } from "./lib/prisma.js";
 import helmet from "helmet";
 import morgan from "morgan";
-import bodyParser from "body-parser";
 import cors from 'cors';
 
-import { errorHandler } from "./utils/errorHandler.js";
-import router from "./routes.js";
 import cookieParser from "cookie-parser";
+import session from 'express-session';
+import routes from './routes.js';
 
 const app = express();
 
-app.get('/', async (req: express.Request, res: express.Response) => {
-    const users = await prisma.test.findMany()
-    res.status(200).json({
-        message: 'Hello',
-        users
-    })
-});
-
-app.use(cors());
+// Security middlewares
 app.use(helmet());
-app.use(morgan('common'));
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true  // IMPORTANT for cookies
+}));
+app.use(morgan('dev'));
+
+// Data parsing middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(bodyParser.json());
 
-app.use("/api", router);
+// Session configuration
+app.use(session({
+  name: 'auto_entrepreneur_session',
+  secret: process.env.SESSION_SECRET || 'your_very_long_and_complex_session_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax'
+  }
+}));
 
-app.use(errorHandler);
+// Routes
+app.use('/api', routes);
+
+// Error handling
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    error: process.env.NODE_ENV === 'production' ? 'Server error' : err.message
+  });
+});
 
 export default app;

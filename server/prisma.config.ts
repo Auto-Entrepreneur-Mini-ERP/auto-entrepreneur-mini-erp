@@ -8,7 +8,6 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
-  datasource: {
-    url: process.env["DATABASE_URL"] || '',
-  },
+  datasource: 
+  { url: process.env.DATABASE_URL || "mysql://root:root@auto-entrepreneur-mini-erp-mysql-1:3306/auto_entrepreneur_erp_db" },
 });
