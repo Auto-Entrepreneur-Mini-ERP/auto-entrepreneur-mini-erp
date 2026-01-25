@@ -16,24 +16,35 @@ const forgotPassword = async (req: Request, res: Response): Promise<Response> =>
     return res.status(200).json({
         otp: result
     });
-}
+};
+
+const otpVerify = async (req: Request, res: Response): Promise<Response> => {
+    const { email } = req.query;
+    const { otp } = req.body
+
+    const result = await authService.otpVerification(email as string, otp as string);
+    return res.status(200).json({
+        otp: result
+    });
+};
 
 const resetPassword = async (req: Request, res: Response): Promise<Response> => {
-    const { id } = req.params;
+    const { id } = req.query;
     const result = await authService.resetPassword(id as string, req.body);
     return res.status(200).json(result);
-}
+};
 
 const logout = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params;
     const result = await authService.logout(id as string);
     return res.status(200).json(result);
-}
+};
 
 export const authController = {
     register,
     login,
     forgotPassword,
+    otpVerify,
     resetPassword,
     logout,
 }

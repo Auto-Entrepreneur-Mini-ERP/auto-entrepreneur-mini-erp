@@ -7,4 +7,10 @@ export const env = {
 
     // JWT Secret
     JWT_SECRET: process.env.JWT_SECRET,
+
+    // SMTP EMAIL VARS
+    EMAIL_HOST: process.env.EMAIL_HOST,
+    EMAIL_USER: process.env.EMAIL_USER,
+    EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,
+    
 }
