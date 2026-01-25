@@ -1,12 +1,13 @@
 import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/errorHandler.js";
 import { JWT } from "../../utils/jwt.js";
-import otpGenerator from "otp-generator"
 import { passwordHash, passwordMatch } from "../../utils/passwordHash.js";
-import type { loginSchemaInput, registerSchemaInput, resetPasswordInput } from "./auth.types.js";
 import { env } from "../../config/env.js"
-import type { AutoEntrepreneur } from "../auto-entrepreneur/auto-entrepreneur.types.js";
 import { ActivityType } from "../../../generated/prisma/enums.js";
+import type { loginSchemaInput, registerSchemaInput, resetPasswordInput } from "./auth.types.js";
+import type { AutoEntrepreneur } from "../auto-entrepreneur/auto-entrepreneur.types.js";
+import otpGenerator from "otp-generator"
+import { tr } from "zod/locales";
 
 const createAutoEntrepreneur = async (data: registerSchemaInput) => {
 
@@ -38,7 +39,7 @@ const createAutoEntrepreneur = async (data: registerSchemaInput) => {
         data: {
             firstName: data.firstName,
             lastName: data.lastName,
-            email: data.email,
+            email: data.email,  
             AutoEntrepreneur:{
                 create: {
                     password: hashPass,
@@ -63,21 +64,28 @@ const loginAutoEntrepreneur = async (data: loginSchemaInput) => {
     const user = await prisma.user.findFirst({
         where:{
             email: data.email
-        }
-    }) as AutoEntrepreneur | null;
+        },
+    }) ;
     if(!user) throw new AppError("Invalid Credentials", 400);
 
-    const matchedPass = await passwordMatch(data.password, user.password);
+    const autoEntrepreneur = await prisma.autoEntrepreneur.findFirst({
+        where:{
+            userId: user.id
+        },
+    }) as unknown as AutoEntrepreneur;
+    if(!user) throw new AppError("Invalid Credentials", 400);
+
+    const matchedPass = await passwordMatch(data.password, autoEntrepreneur.password);
     if(!matchedPass) throw new AppError("Invalid Credentials", 400);
 
-    const tokenData = { id: user.id }
+    const tokenData = { id: autoEntrepreneur.id }
 
     const token = JWT.createToken(tokenData, env.JWT_SECRET as string);
     if(!token) throw new Error();
 
-    user.jwtToken = token;
-    delete user.password;
-    return user;
+    autoEntrepreneur.jwtToken = token;
+    delete autoEntrepreneur.password;
+    return autoEntrepreneur;
 }
 
 const forgotPassword = async (email: string) => {
@@ -107,6 +115,10 @@ const forgotPassword = async (email: string) => {
 
     return otp;
 }
+
+const otpVerification = async (otp: string) => {
+    
+};
 
 const resetPassword = async (id: string, data: resetPasswordInput) => {
     const user = await prisma.autoEntrepreneur.findFirst({

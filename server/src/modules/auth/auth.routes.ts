@@ -15,6 +15,6 @@ router.post("/auth/login", validate(loginEntrepreneurSchema), authController.log
 router.post("/auth/forgot-password", isAthenticated, isOwner, validate(forgotPasswordSchema), authController.forgotPassword);
 router.post("/auth/reset-password", isAthenticated, isOwner, validate(resetPasswordSchema), authController.resetPassword);
 
-router.get("/auth/logout/:id", isAthenticated, isOwner, authController.logout);
+router.get("/auth/logout/:autoentrepreneurId", isAthenticated, isOwner, authController.logout);
 
 export default router;
