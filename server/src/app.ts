@@ -7,6 +7,8 @@ import cors from 'cors';
 import { errorHandler } from "./utils/errorHandler.js";
 import router from "./routes.js";
 import cookieParser from "cookie-parser";
+import type { AutoEntrepreneur } from "./modules/auto-entrepreneur/auto-entrepreneur.types.js";
+import rateLimit from "express-rate-limit";
 
 const app = express();
 
@@ -18,6 +20,11 @@ app.get('/api', async (req: express.Request, res: express.Response) => {
 
 app.use(cors());
 app.use(helmet());
+app.use(rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+	standardHeaders: 'draft-8'
+}));
 app.use(morgan('common'));
 app.use(bodyParser.json());
 app.use(cookieParser());
