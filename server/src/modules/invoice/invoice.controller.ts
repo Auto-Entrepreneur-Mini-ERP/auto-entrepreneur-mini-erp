@@ -26,6 +26,14 @@ const createInvoice = async (req: Request, res: Response) => {
     return res.status(200).json(newInvoice);
 };
 
+const editInvoice = async (req: Request, res: Response) => {
+    const { autoentrepreneurId, invoiceId } = req.params;
+    const { data } = req.body;
+
+    const updatedInvoice = await invoicesService.updateInvoice(autoentrepreneurId as string, invoiceId as string, data as InvoiceCreateSchemaInput);
+    return res.status(200).json(updatedInvoice);
+};
+
 const cancelInvoice = async (req: Request, res: Response) => {
     const { autoentrepreneurId, invoiceId } = req.params;
 
@@ -44,6 +52,7 @@ export const invoiceController = {
     getInvoices,
     getOneInvoice,
     createInvoice,
+    editInvoice,
     cancelInvoice,
     deleteInvoice,
 };

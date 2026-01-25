@@ -21,7 +21,7 @@ export const isAthenticated = async (req: Request, res: Response, next: NextFunc
             id: decoded.id,
         }
     });
-    if(!user) throw new AppError("Invalid Token!", 401);
+    if(!user) throw new AppError("Invalid Token! u", 401);
 
     next();
 }

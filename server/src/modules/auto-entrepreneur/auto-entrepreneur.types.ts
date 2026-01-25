@@ -32,11 +32,15 @@ export interface AutoEntrepreneur {
 }
 
 export interface AutoEntrepreneurUpdateInput {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    address?: string;
-    businessName?: string;
-    ice?: string
-    logo?: string;
+    autoEntrepreneur?:{
+        businessName?: string;
+        ice?: string
+        logo?: string;
+    },
+    user?:{
+        firstName?: string;
+        lastName?: string;
+        phone?: string;
+        address?: string;
+    }
 }

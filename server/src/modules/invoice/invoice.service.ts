@@ -1,18 +1,25 @@
-import { prisma } from '../../../prisma/client.js';
 import { AppError } from '../../utils/errorHandler.js';
 import { invoiceNumberGenerator } from './utils/invoiceNumberGenerator.js';
 import { pagination } from '../../utils/pagination.js';
-import { InvoiceStatus, type InvoiceCreateSchemaInput, type InvoiceOutput } from './invoice.types.js';
+import { InvoiceStatus, type InvoiceCreateSchemaInput, type InvoiceOutput, type InvoiceUpdateSchemaInput } from './invoice.types.js';
+import { invoiceExists } from './utils/invoiceExists.js';
+import { autoentrepreneurExists } from '../auto-entrepreneur/utils/autoentrepreneurExists.js';
+import { CronJob } from 'cron';
+import { cronJobs } from './utils/cronJobs.js';
+import { prisma } from '../../lib/prisma.js';
+import { Prisma } from '../../../generated/prisma/browser.js';
+import type { InvoiceLineUpdateManyWithWhereWithoutInvoiceInput } from '../../../generated/prisma/models.js';
 
 const getAllInvoices = async (autoentrepreneurId: string, page: number, limit: number) => {
 
+    autoentrepreneurExists(autoentrepreneurId);
     const startIndex = pagination.paginationIndex(page as number, limit as number)
     
     const invoices = await prisma.invoice.findMany({
         skip: startIndex,
         take: 10,
         where: {
-            autoentrepreneurId
+            AutoEntrepreneurId: autoentrepreneurId
         }
     }) as unknown as InvoiceOutput[];
 
@@ -21,13 +28,16 @@ const getAllInvoices = async (autoentrepreneurId: string, page: number, limit: n
 };
 
 const getInvoiceById = async (autoentrepreneurId: string, invoiceId: string) => {
+
+    autoentrepreneurExists(autoentrepreneurId);
+
     const invoice = await prisma.invoice.findUnique({
         where: {
             id: invoiceId,
-            autoentrepreneurId
+            AutoEntrepreneurId: autoentrepreneurId
         },
         include: {
-            InvoiceLine: true
+            invoiceLines: true
         }
     }) as unknown as InvoiceOutput;
 
@@ -37,12 +47,7 @@ const getInvoiceById = async (autoentrepreneurId: string, invoiceId: string) => 
 
 const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaInput) => {
 
-    const userExist = await prisma.autoEntrepreneur.findUnique({
-        where:{
-            id: autoentrepreneurId
-        }
-    });
-    if(!userExist) throw new AppError("Auto Entrepreneur with this id does not exist!", 404);
+    autoentrepreneurExists(autoentrepreneurId);
 
     const customerExist = await prisma.customer.findUnique({
         where:{
@@ -53,9 +58,9 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
 
     const lastInvoice = prisma.invoice.findFirst({
         orderBy:{
-            createdAt: 'desc'
+            creationDate: 'desc'
         }
-    });
+    }) as unknown as InvoiceOutput;
 
     const newInvoiceNumber = invoiceNumberGenerator(lastInvoice.invoiceNumber);
     data.invoice.invoiceNumber = newInvoiceNumber;
@@ -87,52 +92,112 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
         data.invoice.status = InvoiceStatus.UNPAID
     }
 
+    const InvoiceCreateData: Prisma.InvoiceCreateInput = {
+        invoiceNumber : newInvoiceNumber,
+        issueDate : new Date(),
+        dueDate: data.invoice.dueDate,
+        status: data.invoice.status,
+        subtotal: invoiceSubTotal,
+        discount: data.invoice.discount as number,
+        totalAmount: data.invoice.totalAmount,
+        paidAmount: data.invoice.paidAmount as number,
+        remainingAmount: data.invoice.remainingAmount,
+        notes: data.invoice.notes as string,
+        AutoEntrepreneur: {
+            connect:{
+                id: autoentrepreneurId
+            }
+        },
+        customer: {
+            connect:{
+                id: data.invoice.customerId
+            }
+        },
+    }
+
     const newCompleteInvoice = await prisma.invoice.create({
         data: {
-            invoiceNumber: newInvoiceNumber,
-            issueDate: data.invoice.issueDate,
-            dueDate: data.invoice.dueDate,
-            status: data.invoice.status,
-            subtotal: invoiceSubTotal,
-            discount: data.invoice.discount,
-            totalAmount: data.invoice.totalAmount,
-            paidAmount: data.invoice.paidAmount,
-            remainingAmount: data.invoice.remainingAmount,
-            note: data.invoice.note,
-            customerId: data.invoice.customerId,
-            InvoiceLine:{
+            ...InvoiceCreateData,
+            invoiceLines:{
                 create: data.invoiceLine
             }
         },
         include:{
-            InvoiceLine: true,
+            invoiceLines: true,
         }
-        
     }) as unknown as InvoiceOutput;
     if(!newCompleteInvoice) throw new Error();
+
+    // after creation set cron job to change status to OVERDUE after due date reached
+    const setOverdue = new CronJob(newCompleteInvoice.dueDate, cronJobs.setInvoiceStatusAfterOverDue);
+    setOverdue.start();
+    //end
 
     return newCompleteInvoice;
 };
 
-const cancelInvoice = async (autoentrepreneurId: string, invoiceId: string) => {
-    const userExist = await prisma.autoEntrepreneur.findUnique({
-        where:{
-            id: autoentrepreneurId
-        }
-    });
-    if(!userExist) throw new AppError("Auto Entrepreneur with this does not exist!", 404);
+const updateInvoice = async (autoentrepreneurId: string, invoiceId: string, data: InvoiceUpdateSchemaInput) => {
+    autoentrepreneurExists(autoentrepreneurId);
+    invoiceExists(invoiceId);
 
-    const invoiceExist = await prisma.invoice.findUnique({
+    // check if theres payements for this invoice - cant update invoice with a payement
+    const payementExist = await prisma.payment.findMany({
         where:{
-            id: invoiceId
+            invoiceId: invoiceId
         }
     });
-    if(!invoiceExist) throw new AppError("Auto Entrepreneur with this does not exist!", 404);
+    if(payementExist) throw new AppError("You cant't update an Invoice with payement related to it!", 400);
+
+    const InvoiceUpdateData: Prisma.InvoiceUpdateInput = {}
+    if(data.invoice.dueDate) InvoiceUpdateData.dueDate = data.invoice.dueDate;
+    if(data.invoice.status) InvoiceUpdateData.status = data.invoice.status;
+    if(data.invoice.discount) InvoiceUpdateData.discount = data.invoice.discount;
+    if(data.invoice.notes) InvoiceUpdateData.notes = data.invoice.notes;
+
+    let newSubTotal: number = 0;
+    data.invoiceLine.forEach(line => {
+        newSubTotal += line.quantity * line.unitPrice;
+    });
+
+    InvoiceUpdateData.totalAmount = newSubTotal - Number(InvoiceUpdateData.discount);
+
+    await prisma.invoice.update({
+        where: {
+            id: invoiceId
+        },
+        data: InvoiceUpdateData
+    });
+
+    await prisma.invoiceLine.updateMany({
+        where:{
+            invoiceId: invoiceId
+        },
+        data: data.invoiceLine
+    });
+    
+    const updatedInvoice = await prisma.invoice.findUnique({
+        where: {
+            id: invoiceId
+        },
+        include:{
+            invoiceLines: true,
+        }
+    }) as unknown as InvoiceOutput;
+    if(!updatedInvoice) throw new Error();
+
+    return updatedInvoice;
+
+};
+
+const cancelInvoice = async (autoentrepreneurId: string, invoiceId: string) => {
+
+    autoentrepreneurExists(autoentrepreneurId);
+    invoiceExists(invoiceId);
 
     const canceled = await prisma.invoice.update({
         where:{
             id: invoiceId,
-            autoentrepreneurId
+            AutoEntrepreneurId: autoentrepreneurId
         },
         data:{
             status: InvoiceStatus.CANCELLED
@@ -142,34 +207,26 @@ const cancelInvoice = async (autoentrepreneurId: string, invoiceId: string) => {
 };
 
 const deleteInvoice = async (autoentrepreneurId: string, invoiceId: string) => {
-    const userExist = await prisma.autoEntrepreneur.findUnique({
-        where:{
-            id: autoentrepreneurId
-        }
-    });
-    if(!userExist) throw new AppError("Auto Entrepreneur with this does not exist!", 404);
 
-    const invoiceExist = await prisma.invoice.findUnique({
-        where:{
-            id: invoiceId
-        }
-    });
-    if(!invoiceExist) throw new AppError("Auto Entrepreneur with this does not exist!", 404);
+    autoentrepreneurExists(autoentrepreneurId);
+    invoiceExists(invoiceId);
 
     await prisma.invoice.delete({
         where:{
-            autoentrepreneurId,
-            id: invoiceId
+            id: invoiceId,
+            AutoEntrepreneurId: autoentrepreneurId
         }
     }).catch(() => {throw new Error()});
 
     return true;
 };
 
+
 export const invoicesService = {
     getAllInvoices,
     getInvoiceById,
     addInvoice,
+    updateInvoice,
     cancelInvoice,
     deleteInvoice,
 };

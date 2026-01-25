@@ -56,7 +56,7 @@ export interface InvoiceCreateSchemaInput {
         paidAmount?: number,
         payementMethod?: string,
         remainingAmount?: number,
-        note?: string,
+        notes?: string,
         customerId: string,
     },
     invoiceLine: [{
@@ -71,11 +71,13 @@ export interface InvoiceCreateSchemaInput {
 }
 
 export interface InvoiceUpdateSchemaInput {
-    dueDate: Date,
-    status: InvoiceStatus,
-    paidAmount: number,
-    note?: string,
-    invoiceLine: {
+    invoice:{
+        dueDate: Date,
+        status: InvoiceStatus,
+        discount?: number, 
+        notes?: string,
+    }
+    invoiceLine: [{
         order: number,
         lineType: LineType,
         description?: string,
@@ -83,5 +85,5 @@ export interface InvoiceUpdateSchemaInput {
         unitPrice: number,
         productId?: string,
         serviceId?: string,
-    }
+    }]
 }
