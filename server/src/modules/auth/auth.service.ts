@@ -8,6 +8,8 @@ import type { loginSchemaInput, registerSchemaInput, resetPasswordInput } from "
 import type { AutoEntrepreneur } from "../auto-entrepreneur/auto-entrepreneur.types.js";
 import otpGenerator from "otp-generator"
 import { tr } from "zod/locales";
+import { otpEmailTemplate } from "./utils/otpEmailTemplate.js";
+import { emailSender } from "../../utils/emailSender.js";
 
 const createAutoEntrepreneur = async (data: registerSchemaInput) => {
 
@@ -93,17 +95,22 @@ const forgotPassword = async (email: string) => {
     const user = await prisma.user.findFirst({
         where: {
             email,
+        },
+        include:{
+            AutoEntrepreneur: true
         }
-    }) as AutoEntrepreneur | null;
-    if(!user) throw new AppError("User not found!", 400);
+    });
+    if(!user) throw new AppError("This email does not exist!", 400);
 
     // Generate OTP
     const otp = otpGenerator.generate(6, {digits: true, lowerCaseAlphabets : false, upperCaseAlphabets: false, specialChars: false });
     const otpExpiration = Date.now() + 5 * 60 * 1000;
+    console.log(user);
+    
     
     await prisma.autoEntrepreneur.update({
         where: {
-            id: user.id
+            id: user.AutoEntrepreneur?.id as string
         },
         data: {
             passwordResetToken: otp,
@@ -112,12 +119,31 @@ const forgotPassword = async (email: string) => {
     });
 
     // send OTP in email
+    emailSender("System", "no-reply@auto-entrepreneur-erp.com", email, "Forgot Password OTP", otpEmailTemplate(otp));
 
-    return otp;
+    return true;
 }
 
-const otpVerification = async (otp: string) => {
+const otpVerification = async (email: string, otp: string) => {
+    // check if otp is valid and is not expired
+    const user = await prisma.user.findUnique({
+        where:{
+            email
+        },
+        include:{
+            AutoEntrepreneur: true
+        }
+    });
+    if(!user) throw new AppError("This email does not exist!", 400);
+
+    if(user.AutoEntrepreneur?.passwordResetToken !== otp) throw new AppError("Invalid OTP!", 400);
     
+    if(user.AutoEntrepreneur?.passwordResetTokenExpiration){
+        if(user.AutoEntrepreneur.passwordResetTokenExpiration < Date.now()){
+            throw new AppError("OTP expired!", 400);
+        }
+    }
+
 };
 
 const resetPassword = async (id: string, data: resetPasswordInput) => {
@@ -137,8 +163,17 @@ const resetPassword = async (id: string, data: resetPasswordInput) => {
         },
         data: {
             password: hashPass,
+            passwordResetToken: null,
+            passwordResetTokenExpiration: null,
+        },
+        include:{
+            user: true
         }
-    });
+    }) as unknown as AutoEntrepreneur;
+
+    delete AutoE.password;
+    delete AutoE.passwordResetToken;
+    delete AutoE.passwordResetTokenExpiration;
 
     if(!AutoE) throw new Error();
     return true;
@@ -160,6 +195,7 @@ export const authService = {
     createAutoEntrepreneur,
     loginAutoEntrepreneur,
     forgotPassword,
+    otpVerification,
     resetPassword,
     logout
 }

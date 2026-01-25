@@ -26,6 +26,12 @@ export const forgotPasswordSchema = {
     })
 };
 
+export const otpVerificationSchema = {
+    body: z.object({
+        otp: z.number().nonnegative().nonoptional()
+    })
+};
+
 export const resetPasswordSchema = {
     body: z.object({
         password: z.string().nonempty(),
