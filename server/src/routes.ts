@@ -16,7 +16,7 @@ router.use(authRoutes);
 router.use(autoEntrepreneurRoutes);
 
 router.use(encaissementRoutes);
-router.use( customerRoutes);
+router.use(isAthenticated, customerRoutes);
 router.use(factureRoutes);
 router.use(invoiceRoutes);
 router.use(paymentRoutes);
