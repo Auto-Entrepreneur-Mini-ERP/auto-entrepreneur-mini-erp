@@ -8,7 +8,6 @@ import { CronJob } from 'cron';
 import { cronJobs } from './utils/cronJobs.js';
 import { prisma } from '../../lib/prisma.js';
 import { Prisma } from '../../../generated/prisma/browser.js';
-import type { InvoiceLineUpdateManyWithWhereWithoutInvoiceInput } from '../../../generated/prisma/models.js';
 
 const getAllInvoices = async (autoentrepreneurId: string, page: number, limit: number) => {
 

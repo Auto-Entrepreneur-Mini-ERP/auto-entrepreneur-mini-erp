@@ -1,0 +1,24 @@
+import z from "zod";
+
+export const paymentCreateSchemaInput = z.object({
+    body: z.object({
+        reference: z.string().nonempty(),
+        amount: z.number().nonnegative().nonoptional(),
+        paymentDate: z.date().nonoptional(),
+        payementMethod: z.enum(['CASH', 'CHECK', 'BANK_TRANSFER', 'CREDIT_CARD', 'MOBILE_PAYMENT', 'OTHER']).nonoptional(),
+        notes: z.string().min(5).optional(),
+        transactionNumber: z.string().optional(),
+        AutoEntrepreneurId: z.uuid().nonempty(),
+        invoiceId: z.uuid().nonempty(),
+    }),
+});
+
+export const paymentUpdateSchemaInput = z.object({
+    body: z.object({
+        amount: z.number().nonnegative().nonoptional(),
+        paymentDate: z.date().nonoptional(),
+        payementMethod: z.enum(['CASH', 'CHECK', 'BANK_TRANSFER', 'CREDIT_CARD', 'MOBILE_PAYMENT', 'OTHER']).nonoptional(),
+        notes: z.string().min(5).optional(),
+        transactionNumber: z.string().optional(),
+    }),
+});
