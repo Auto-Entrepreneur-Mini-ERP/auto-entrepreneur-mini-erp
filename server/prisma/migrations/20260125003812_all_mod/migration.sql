@@ -1,17 +1,9 @@
-/*
-  Warnings:
-
-  - You are about to drop the `AutoEntrepreneur` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropTable
-DROP TABLE `AutoEntrepreneur`;
-
 -- CreateTable
 CREATE TABLE `users` (
     `id` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
-    `name` VARCHAR(191) NULL,
+    `firstName` VARCHAR(191) NULL,
+    `lastName` VARCHAR(191) NULL,
     `phone` VARCHAR(191) NULL,
     `address` VARCHAR(191) NULL,
     `creationDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -25,15 +17,16 @@ CREATE TABLE `users` (
 CREATE TABLE `auto_entrepreneur` (
     `id` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NOT NULL,
-    `firstName` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `businessName` VARCHAR(191) NOT NULL,
-    `activityType` ENUM('INDUSTRIAL', 'COMMERCIAL', 'SERVICE', 'ARTISANAL', 'AGRICULTURAL', 'LIBERAL_PROFESSION', 'OTHER') NOT NULL,
+    `activityType` ENUM('COMMERCE', 'SERVICE', 'MIXTE') NOT NULL,
     `taxRate` DOUBLE NOT NULL DEFAULT 0.0,
     `ice` VARCHAR(191) NOT NULL,
     `logo` VARCHAR(191) NULL,
     `creationDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updateDate` DATETIME(3) NOT NULL,
+    `passwordResetToken` VARCHAR(191) NULL,
+    `passwordResetTokenExpiration` BIGINT NULL,
 
     UNIQUE INDEX `auto_entrepreneur_userId_key`(`userId`),
     UNIQUE INDEX `auto_entrepreneur_ice_key`(`ice`),
@@ -105,9 +98,9 @@ CREATE TABLE `invoices` (
     `invoiceNumber` VARCHAR(191) NOT NULL,
     `issueDate` DATETIME(3) NOT NULL,
     `dueDate` DATETIME(3) NOT NULL,
-    `status` ENUM('DRAFT', 'SENT', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'CANCELLED') NOT NULL DEFAULT 'DRAFT',
+    `status` ENUM('DRAFT', 'SENT', 'UNPAID', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'CANCELLED') NOT NULL DEFAULT 'DRAFT',
     `subtotal` DECIMAL(65, 30) NOT NULL DEFAULT 0,
-    `taxAmount` DECIMAL(65, 30) NOT NULL DEFAULT 0,
+    `discount` DECIMAL(65, 30) NULL DEFAULT 0,
     `totalAmount` DECIMAL(65, 30) NOT NULL DEFAULT 0,
     `paidAmount` DECIMAL(65, 30) NOT NULL DEFAULT 0,
     `remainingAmount` DECIMAL(65, 30) NOT NULL DEFAULT 0,
@@ -150,8 +143,8 @@ CREATE TABLE `quotes` (
 -- CreateTable
 CREATE TABLE `invoice_lines` (
     `id` VARCHAR(191) NOT NULL,
-    `lineType` ENUM('PRODUCT', 'SERVICE', 'DISCOUNT', 'TAX', 'OTHER') NOT NULL,
-    `description` VARCHAR(191) NOT NULL,
+    `lineType` ENUM('PRODUCT', 'SERVICE') NOT NULL,
+    `description` VARCHAR(191) NULL,
     `quantity` DECIMAL(65, 30) NOT NULL DEFAULT 1,
     `unitPrice` DECIMAL(65, 30) NOT NULL DEFAULT 0,
     `totalPrice` DECIMAL(65, 30) NOT NULL DEFAULT 0,
@@ -166,7 +159,7 @@ CREATE TABLE `invoice_lines` (
 -- CreateTable
 CREATE TABLE `quote_lines` (
     `id` VARCHAR(191) NOT NULL,
-    `lineType` ENUM('PRODUCT', 'SERVICE', 'DISCOUNT', 'TAX', 'OTHER') NOT NULL,
+    `lineType` ENUM('PRODUCT', 'SERVICE') NOT NULL,
     `description` VARCHAR(191) NOT NULL,
     `quantity` DECIMAL(65, 30) NOT NULL DEFAULT 1,
     `unitPrice` DECIMAL(65, 30) NOT NULL DEFAULT 0,
