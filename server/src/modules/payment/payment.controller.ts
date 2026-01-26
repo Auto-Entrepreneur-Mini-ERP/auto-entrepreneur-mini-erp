@@ -1,5 +1,6 @@
 import type { Request, Response } from "express"
 import { paymentService } from "./payment.service.js";
+import type { PaymentCreateInput } from "./payment.types.js";
 
 const getAllPayments = async (req: Request, res: Response) => {
     const { autoentrepreneurId } = req.params;
@@ -17,7 +18,24 @@ const getPaymentById = async (req: Request, res: Response) => {
     return res.status(200).json(payment);
 };
 
+const createPayment = async (req: Request, res: Response) => {
+    const { autoentrepreneurId } = req.params;
+    const { data } = req.body;
+
+    const payment = await paymentService.createPayment(autoentrepreneurId as string, data as PaymentCreateInput);
+    return res.status(200).json(payment);
+};
+
+const deletePayment = async (req: Request, res: Response) => {
+    const { autoentrepreneurId, paymentId } = req.params;
+
+    const payment = await paymentService.deletePayment(autoentrepreneurId as string, paymentId as string);
+    return res.status(200).json(payment);
+};
+
 export const paymentController = {
     getAllPayments,
     getPaymentById,
+    createPayment,
+    deletePayment,
 }
