@@ -28,15 +28,19 @@ export interface AutoEntrepreneur {
     jwtToken?: string;
     passwordResetToken?: string
     passwordResetTokenExpiration?: bigint
-    User: User
+    user: User
 }
 
 export interface AutoEntrepreneurUpdateInput {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    address?: string;
-    businessName?: string;
-    ice?: string
-    logo?: string;
+    autoEntrepreneur?:{
+        businessName?: string;
+        ice?: string
+        logo?: string;
+    },
+    user?:{
+        firstName?: string;
+        lastName?: string;
+        phone?: string;
+        address?: string;
+    }
 }

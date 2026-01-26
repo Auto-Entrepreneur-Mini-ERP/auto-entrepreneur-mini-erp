@@ -6,14 +6,19 @@ import encaissementRoutes from './modules/encaissement/encaissement.routes.js'
 import factureRoutes from './modules/facture/facture.routes.js'
 import customerRoutes from "./modules/customer/customer.routes.js";
 import { isAthenticated } from "./middlewares/auth.middelware.js";
+import invoiceRoutes from './modules/invoice/invoice.routes.js'
+import paymentRoutes from './modules/payment/payment.routes.js'
 
 const router = Router();
 
 router.use(authRoutes);
+
 router.use(autoEntrepreneurRoutes);
 
 router.use(encaissementRoutes);
 router.use( customerRoutes);
 router.use(factureRoutes);
+router.use(invoiceRoutes);
+router.use(paymentRoutes);
 
 export default router;

@@ -1,6 +1,5 @@
 import type { NextFunction } from "express";
-import { error, log } from "node:console";
- import type { Request ,Response } from "express";
+import type { Request, Response } from "express";
 
 
 export class AppError extends Error{

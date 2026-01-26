@@ -1,5 +1,4 @@
 import express from "express";
-import { prisma } from "./lib/prisma.js";
 import helmet from "helmet";
 import morgan from "morgan";
 import bodyParser from "body-parser";
@@ -9,28 +8,23 @@ import { errorHandler } from "./utils/errorHandler.js";
 import router from "./routes.js";
 import cookieParser from "cookie-parser";
 import type { AutoEntrepreneur } from "./modules/auto-entrepreneur/auto-entrepreneur.types.js";
+import rateLimit from "express-rate-limit";
 
 const app = express();
 
 app.get('/api', async (req: express.Request, res: express.Response) => {
-    const users = await prisma.autoEntrepreneur.findMany({
-        include: {
-            user: true
-        }
-    }) as unknown as AutoEntrepreneur[];
-
-    users.forEach(u => {
-        delete u.password;
+    return res.status(200).json({
+        message: 'Hello',
     });
-
-    res.status(200).json({
-        "message": 'Hello',
-        users
-    })
 });
 
 app.use(cors());
 app.use(helmet());
+app.use(rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+	standardHeaders: 'draft-8'
+}));
 app.use(morgan('common'));
 app.use(bodyParser.json());
 app.use(cookieParser());
