@@ -24,7 +24,7 @@ app.get('/api', async (req: express.Request, res: express.Response) => {
     });
 
     res.status(200).json({
-        message: 'Hello',
+        "message": 'Hello',
         users
     })
 });
