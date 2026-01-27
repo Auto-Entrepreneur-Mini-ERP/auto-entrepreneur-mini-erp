@@ -2,7 +2,7 @@ import { Router } from "express";
 import { isAthenticated, isOwner } from "../../middlewares/auth.middelware.js"
 import { paymentController } from "./payment.controller.js";
 import { validate } from "../../middlewares/validation.middleware.js";
-import { paymentCreateSchemaInput } from "./payment.schema.js";
+import { paymentCreateSchemaInput, paymentUpdateSchemaInput } from "./payment.schema.js";
 
 const router = Router();
 
@@ -25,10 +25,23 @@ router.post("/auto-entrepreneur/:autoentrepreneurId/payment/",
     paymentController.createPayment
 );
 
+router.put("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId",
+    isAthenticated,
+    isOwner,
+    validate(paymentUpdateSchemaInput),
+    paymentController.updatePayment
+);
+
 router.delete("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId",
     isAthenticated,
     isOwner,
     paymentController.deletePayment
 );
 
+
+router.get("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId/recu",
+    isAthenticated,
+    isOwner,
+    paymentController.getPaymentById
+);
 export default router;

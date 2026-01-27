@@ -1,6 +1,6 @@
 import type { Request, Response } from "express"
 import { paymentService } from "./payment.service.js";
-import type { PaymentCreateInput } from "./payment.types.js";
+import type { PaymentCreateInput, PaymentUpdateInput } from "./payment.types.js";
 
 const getAllPayments = async (req: Request, res: Response) => {
     const { autoentrepreneurId } = req.params;
@@ -26,6 +26,14 @@ const createPayment = async (req: Request, res: Response) => {
     return res.status(200).json(payment);
 };
 
+const updatePayment = async (req: Request, res: Response) => {
+    const { autoentrepreneurId, paymentId } = req.params;
+    const { data } = req.body;
+
+    const payment = await paymentService.updatePayment(autoentrepreneurId as string, paymentId as string, data as PaymentUpdateInput);
+    return res.status(200).json(payment);
+};
+
 const deletePayment = async (req: Request, res: Response) => {
     const { autoentrepreneurId, paymentId } = req.params;
 
@@ -33,9 +41,17 @@ const deletePayment = async (req: Request, res: Response) => {
     return res.status(200).json(payment);
 };
 
+const paymentsStats = async (req: Request, res: Response) => {
+    const { period, paymenthMetho, isReconciled } = req.query;
+
+    // const payment = await paymentService.deletePayment(period as stirg);
+    return res.status(200).json(true);
+};
+
 export const paymentController = {
     getAllPayments,
     getPaymentById,
     createPayment,
+    updatePayment,
     deletePayment,
 }

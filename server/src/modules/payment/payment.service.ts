@@ -4,8 +4,8 @@ import { AppError } from "../../utils/errorHandler.js";
 import { pagination } from "../../utils/pagination.js";
 import { autoentrepreneurExists } from "../auto-entrepreneur/utils/autoentrepreneurExists.js";
 import { paymentExists } from "./utils/paymentExists.js";
-import type { PaymentCreateInput } from "./payment.types.js";
-import { InvoiceStatus } from "../invoice/invoice.types.js";
+import type { PayementMetod ,PaymentCreateInput, PaymentUpdateInput } from "./payment.types.js";
+import { updateInvoiceAfterCreate, updateInvoiceAfterUpdate } from "./utils/updateInvoicewithPayment.js";
 
 const getAllPayments = async (autoentrepreneurId: string, page: number, limit: number) => {
     autoentrepreneurExists(autoentrepreneurId);
@@ -54,7 +54,7 @@ const createPayment = async (autoentrepreneurId: string, data: PaymentCreateInpu
                 id: data.AutoEntrepreneurId
             }
         },
-        Invoice: {
+        invoice: {
             connect:{
                 id: data.invoiceId
             }
@@ -67,36 +67,35 @@ const createPayment = async (autoentrepreneurId: string, data: PaymentCreateInpu
     if(!payment) throw new Error();
 
     // logic to update invoice status if needed
-    const invoice = await prisma.invoice.findUnique({
-        where: {
-            id: data.invoiceId
-        }
-    });
-    if(Number(invoice?.paidAmount) + Number(payment.amount) === Number(invoice?.totalAmount)) {
-        await prisma.invoice.update({
-            where: {
-                id: data.invoiceId
-            },
-            data:{
-                status: InvoiceStatus.PAID,
-                paidAmount: Number(invoice?.paidAmount) + Number(payment.amount),
-                remainingAmount: 0,
-            }
-        });
-    } else if (Number(invoice?.paidAmount) + Number(payment.amount) < Number(invoice?.totalAmount)) {
-        await prisma.invoice.update({
-            where: {
-                id: data.invoiceId
-            },
-            data:{
-                status: InvoiceStatus.PARTIALLY_PAID,
-                paidAmount: Number(invoice?.paidAmount) + Number(payment.amount),
-                remainingAmount: Number(invoice?.totalAmount) - Number(invoice?.paidAmount) - Number(payment.amount),
-            }
-        });
-    }
+    updateInvoiceAfterCreate(data.invoiceId, data);
     
     return payment;
+};
+
+const updatePayment = async (autoentrepreneurId: string, paymentId: string, data: PaymentUpdateInput) => {
+    autoentrepreneurExists(autoentrepreneurId);
+    paymentExists(paymentId);
+
+    const PaymentUpdateData: Prisma.PaymentUpdateInput = {};
+    PaymentUpdateData.amount = data.amount as number;
+    PaymentUpdateData.paymentDate = data.paymentDate as Date;
+    PaymentUpdateData.paymentMethod = data.paymentMethod as PayementMetod;
+    PaymentUpdateData.notes = data.notes as string;
+    PaymentUpdateData.transactionNumber = data.transactionNumber as string;
+
+    const updatedPayment = await prisma.payment.update({
+        where: {
+            id: paymentId
+        },
+        data: PaymentUpdateData
+    });
+    if(!updatedPayment) throw new Error();
+
+    // login update invoice after updating payement
+    updateInvoiceAfterUpdate(updatedPayment.invoiceId, data);
+
+    return updatedPayment;
+    
 };
 
 const deletePayment = async (autoentrepreneurId: string, paymentId: string) => {
@@ -104,31 +103,7 @@ const deletePayment = async (autoentrepreneurId: string, paymentId: string) => {
     paymentExists(paymentId);
 
     // logic to update invoice paidAmount after delete
-    const paymentToDelete = await prisma.payment.findUnique({
-        where:{
-            id: paymentId
-        }
-    });
-    const invoice = await prisma.invoice.findUnique({
-        where:{
-            id: paymentToDelete?.invoiceId as string
-        }
-    });
-
-    const newPaidAmount = Number(invoice?.paidAmount) - Number(paymentToDelete?.amount);
-    const newRemainingAmount = Number(invoice?.totalAmount) - newPaidAmount;
-    let newStatus = InvoiceStatus.PARTIALLY_PAID;
-
-    await prisma.invoice.update({
-        where:{
-            id: paymentToDelete?.invoiceId as string
-        }, 
-        data:{
-            paidAmount: newPaidAmount,
-            remainingAmount: newRemainingAmount,
-            status: newStatus,
-        }
-    });
+    // updateInvoiceAfterDelete(data)
 
     // delete payment
     const payment = await prisma.payment.delete({
@@ -141,9 +116,12 @@ const deletePayment = async (autoentrepreneurId: string, paymentId: string) => {
     return true;
 };
 
+
+
 export const paymentService = {
     getAllPayments,
     getOnePayment,
     createPayment,
+    updatePayment,
     deletePayment,
 };
