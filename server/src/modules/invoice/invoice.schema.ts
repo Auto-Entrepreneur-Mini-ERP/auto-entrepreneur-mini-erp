@@ -1,10 +1,10 @@
 import z from "zod";
 
-export const createInvoiceSchema = z.object({
-    body:{
+export const createInvoiceSchema = {
+    body: z.object({
         invoice: z.object({
-            customerId: z.uuid().nonempty(),
-            dueDate: z.date().nonoptional(),
+            customerId: z.string().nonempty(),
+            dueDate: z.iso.date().nonoptional(),
             discount: z.number().optional(),
             paidAmount: z.number().optional(),
             payementMethod: z.enum(['CASH', 'CHECK', 'BACK_TRANSFER', 'CREDIT_CARD', 'MOBILE_PAYEMENT', 'OTHER']),
@@ -17,20 +17,19 @@ export const createInvoiceSchema = z.object({
                 description: z.string().min(1).optional(),
                 quantity: z.number().nonnegative().nonoptional(),
                 unitPrice: z.number().nonnegative().nonoptional(),
-                productId: z.uuid().optional(),
-                serviceId: z.uuid().optional(),
+                productId: z.string().optional(),
+                serviceId: z.string().optional(),
             })
         ).nonempty(),
-    }
-});
+    })
+};
 
-export const updateInvoiceSchema = z.object({
-    body:{
+export const updateInvoiceSchema = {
+    body: z.object({
         invoice: z.object({
-            dueDate: z.date().nonoptional(),
-            discount: z.number(),
-            paidAmount: z.number(),
-            note: z.string().optional(),
+            dueDate: z.iso.date().optional(),
+            // discount: z.number().optional(),
+            notes: z.string().optional(),
         }).nonoptional(),
         invoiceLine: z.array(
             z.object({
@@ -42,6 +41,6 @@ export const updateInvoiceSchema = z.object({
                 productId: z.uuid().optional(),
                 serviceId: z.uuid().optional(),
             })
-        ).nonempty(),
-    }
-});
+        ).optional(),
+    })
+};

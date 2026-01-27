@@ -74,10 +74,10 @@ export interface InvoiceUpdateSchemaInput {
     invoice:{
         dueDate: Date,
         status: InvoiceStatus,
-        discount?: number, 
+        // discount?: number, 
         notes?: string,
     }
-    invoiceLine: [{
+    invoiceLine?: [{
         order: number,
         lineType: LineType,
         description?: string,

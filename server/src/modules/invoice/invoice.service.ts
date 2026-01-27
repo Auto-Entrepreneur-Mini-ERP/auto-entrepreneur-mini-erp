@@ -8,7 +8,6 @@ import { CronJob } from 'cron';
 import { cronJobs } from './utils/cronJobs.js';
 import { prisma } from '../../lib/prisma.js';
 import { Prisma } from '../../../generated/prisma/browser.js';
-import type { InvoiceLineUpdateManyWithWhereWithoutInvoiceInput } from '../../../generated/prisma/models.js';
 
 const getAllInvoices = async (autoentrepreneurId: string, page: number, limit: number) => {
 
@@ -46,7 +45,7 @@ const getInvoiceById = async (autoentrepreneurId: string, invoiceId: string) => 
 };
 
 const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaInput) => {
-
+    
     autoentrepreneurExists(autoentrepreneurId);
 
     const customerExist = await prisma.customer.findUnique({
@@ -56,15 +55,18 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
     });
     if(!customerExist) throw new AppError("Customer does not exist!", 404);
 
-    const lastInvoice = prisma.invoice.findFirst({
+    const lastInvoice = await prisma.invoice.findFirst({
+        select:{
+            invoiceNumber: true
+        },
         orderBy:{
             creationDate: 'desc'
         }
-    }) as unknown as InvoiceOutput;
+    });
 
-    const newInvoiceNumber = invoiceNumberGenerator(lastInvoice.invoiceNumber);
+    const newInvoiceNumber = invoiceNumberGenerator(lastInvoice?.invoiceNumber as string);
     data.invoice.invoiceNumber = newInvoiceNumber;
-
+    
     // calculate total from invoice lines
     let invoiceSubTotal = 0;
     data.invoiceLine.forEach((line)=>{
@@ -95,7 +97,7 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
     const InvoiceCreateData: Prisma.InvoiceCreateInput = {
         invoiceNumber : newInvoiceNumber,
         issueDate : new Date(),
-        dueDate: data.invoice.dueDate,
+        dueDate: new Date(data.invoice.dueDate),
         status: data.invoice.status,
         subtotal: invoiceSubTotal,
         discount: data.invoice.discount as number,
@@ -146,20 +148,24 @@ const updateInvoice = async (autoentrepreneurId: string, invoiceId: string, data
             invoiceId: invoiceId
         }
     });
-    if(payementExist) throw new AppError("You cant't update an Invoice with payement related to it!", 400);
+    if(payementExist.length > 0) throw new AppError("You cant't update an Invoice with payement related to it!", 400);
 
     const InvoiceUpdateData: Prisma.InvoiceUpdateInput = {}
-    if(data.invoice.dueDate) InvoiceUpdateData.dueDate = data.invoice.dueDate;
+    if(data.invoice.dueDate) InvoiceUpdateData.dueDate = new Date(data.invoice.dueDate);
     if(data.invoice.status) InvoiceUpdateData.status = data.invoice.status;
-    if(data.invoice.discount) InvoiceUpdateData.discount = data.invoice.discount;
+    // if(data.invoice.discount) InvoiceUpdateData.discount = data.invoice.discount;
     if(data.invoice.notes) InvoiceUpdateData.notes = data.invoice.notes;
 
     let newSubTotal: number = 0;
-    data.invoiceLine.forEach(line => {
-        newSubTotal += line.quantity * line.unitPrice;
-    });
+    if(data.invoiceLine){
+        data.invoiceLine.forEach(line => {
+            newSubTotal += line.quantity * line.unitPrice;
+        });
+        InvoiceUpdateData.totalAmount = newSubTotal - Number(InvoiceUpdateData.discount);
+    }
 
-    InvoiceUpdateData.totalAmount = newSubTotal - Number(InvoiceUpdateData.discount);
+    // modify total and remaining if thers discount
+
 
     await prisma.invoice.update({
         where: {
@@ -168,12 +174,14 @@ const updateInvoice = async (autoentrepreneurId: string, invoiceId: string, data
         data: InvoiceUpdateData
     });
 
-    await prisma.invoiceLine.updateMany({
-        where:{
-            invoiceId: invoiceId
-        },
-        data: data.invoiceLine
-    });
+    if(data.invoiceLine){
+        await prisma.invoiceLine.updateMany({
+            where:{
+                invoiceId: invoiceId
+            },
+            data: data.invoiceLine
+        });
+    }
     
     const updatedInvoice = await prisma.invoice.findUnique({
         where: {

@@ -23,8 +23,6 @@ services:
       - DB_NAME=auto_entrepreneur_erp_db
       - DATABASE_URL=mysql://root:root@mysql:3306/auto_entrepreneur_erp_db
 
-    depends_on:
-      - mysql
     networks:
       - mini-erp-network
 
@@ -37,6 +35,8 @@ services:
       MYSQL_DATABASE: auto_entrepreneur_erp_db
     volumes:
       - mysql_data:/var/lib/mysql   # Persistent DB storage
+    depends_on:
+      - backend
     networks:
       - mini-erp-network
 

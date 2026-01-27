@@ -1,9 +1,11 @@
 import type { Request, Response } from "express"
 import { invoicesService } from "./invoice.service.js";
 import type { InvoiceCreateSchemaInput } from "./invoice.types.js";
+import { log } from "node:console";
 
 const getInvoices = async (req: Request, res: Response) =>{
     const { autoentrepreneurId } = req.params;
+    
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
 
@@ -19,16 +21,16 @@ const getOneInvoice = async (req: Request, res: Response) =>{
 };
 
 const createInvoice = async (req: Request, res: Response) => {
-    const { data } = req.body;
     const { autoentrepreneurId } = req.params;
-
+    const data = req.body;
+    
     const newInvoice = await invoicesService.addInvoice(autoentrepreneurId as string, data as InvoiceCreateSchemaInput);
     return res.status(200).json(newInvoice);
 };
 
 const editInvoice = async (req: Request, res: Response) => {
     const { autoentrepreneurId, invoiceId } = req.params;
-    const { data } = req.body;
+    const data = req.body;
 
     const updatedInvoice = await invoicesService.updateInvoice(autoentrepreneurId as string, invoiceId as string, data as InvoiceCreateSchemaInput);
     return res.status(200).json(updatedInvoice);
