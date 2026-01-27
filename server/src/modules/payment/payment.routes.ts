@@ -18,7 +18,7 @@ router.get("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId",
     paymentController.getPaymentById
 );
 
-router.post("/auto-entrepreneur/:autoentrepreneurId/payment/",
+router.post("/auto-entrepreneur/:autoentrepreneurId/payment",
     isAthenticated,
     isOwner,
     validate(paymentCreateSchemaInput),

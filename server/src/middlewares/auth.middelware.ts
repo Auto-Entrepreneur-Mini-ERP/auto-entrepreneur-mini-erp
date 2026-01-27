@@ -28,6 +28,7 @@ export const isAthenticated = async (req: Request, res: Response, next: NextFunc
 
 export const isOwner = async (req: Request, res: Response, next: NextFunction) => {
     const { autoentrepreneurId } = req.params;
+    
     const token = req.cookies.token;
     if(!token) throw new AppError("Token does not exist!", 401);
 

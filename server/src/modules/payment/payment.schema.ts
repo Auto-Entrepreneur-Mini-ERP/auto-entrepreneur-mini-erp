@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const paymentCreateSchemaInput = z.object({
+export const paymentCreateSchemaInput = {
     body: z.object({
         reference: z.string().nonempty(),
         amount: z.number().nonnegative().nonoptional(),
@@ -11,9 +11,9 @@ export const paymentCreateSchemaInput = z.object({
         AutoEntrepreneurId: z.uuid().nonempty(),
         invoiceId: z.uuid().nonempty(),
     }),
-});
+};
 
-export const paymentUpdateSchemaInput = z.object({
+export const paymentUpdateSchemaInput = {
     body: z.object({
         amount: z.number().nonnegative().nonoptional(),
         paymentDate: z.date().nonoptional(),
@@ -21,4 +21,4 @@ export const paymentUpdateSchemaInput = z.object({
         notes: z.string().min(5).optional(),
         transactionNumber: z.string().optional(),
     }),
-});
+};
