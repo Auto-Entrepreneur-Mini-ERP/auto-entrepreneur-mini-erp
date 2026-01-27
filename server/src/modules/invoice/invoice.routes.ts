@@ -6,6 +6,7 @@ import { createInvoiceSchema, updateInvoiceSchema } from "./invoice.schema.js";
 
 const router = Router();
 
+
 router.get('/auto-entrepreneur/:autoentrepreneurId/invoice',
     isAthenticated,
     isOwner,
