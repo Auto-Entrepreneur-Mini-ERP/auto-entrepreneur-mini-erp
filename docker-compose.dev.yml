@@ -4,9 +4,13 @@ services:
   backend:
     build:
        context: ./server
-    command: npm run dev            # Run app in dev mode with nodemon
+    command: npx tsx watch --inspect=0.0.0.0:9229 src/server.ts # this command is for debuging use the next command for normal runing
+
+    # command: npm run dev            # Run app in dev mode with nodemon
     ports:
-      - "3001:3001"                # Host : Container
+      - "3001:3001" 
+      - "9229:9229" # this port is for debugging 
+                
     volumes:
       - ./server:/app                      # Mount your project folder for live reload
       - server_node_modules:/app/node_modules 
@@ -17,8 +21,8 @@ services:
       - DB_USER=root
       - DB_PASSWORD=root
       - DB_NAME=auto_entrepreneur_erp_db
-    depends_on:
-      - mysql
+      - DATABASE_URL=mysql://root:root@mysql:3306/auto_entrepreneur_erp_db
+
     networks:
       - mini-erp-network
 
@@ -31,22 +35,24 @@ services:
       MYSQL_DATABASE: auto_entrepreneur_erp_db
     volumes:
       - mysql_data:/var/lib/mysql   # Persistent DB storage
+    depends_on:
+      - backend
     networks:
       - mini-erp-network
 
-  client:
-    build: 
-      context: ./client
-    command: npm run dev --host
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./client:/app
-      - client_node_modules:/app/node_modules
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-    networks:
-      - mini-erp-network
+  # client:
+  #   build: 
+  #     context: ./client
+  #   command: npm run dev --host
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./client:/app
+  #     - client_node_modules:/app/node_modules
+  #   environment:
+  #     - CHOKIDAR_USEPOLLING=true
+  #   networks:
+  #     - mini-erp-network
 
 volumes:
     server_node_modules:

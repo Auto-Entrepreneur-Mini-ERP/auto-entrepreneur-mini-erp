@@ -1,6 +1,5 @@
 import type { NextFunction } from "express";
-import { error, log } from "node:console";
- import type { Request ,Response } from "express";
+import type { Request, Response } from "express";
 
 
 export class AppError extends Error{
@@ -13,7 +12,7 @@ export class AppError extends Error{
 }
 
 export const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunction) => {
-    console.log(err.stack);
+    console.log(err.message);
     
     const statusCode = err.statusCode || 500;
     if(statusCode === 500) err.message = "Something Went wrong!";
