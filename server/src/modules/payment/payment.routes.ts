@@ -44,4 +44,10 @@ router.get("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId/recu",
     isOwner,
     paymentController.getPaymentById
 );
+
+router.get("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId/repprocher",
+    isAthenticated,
+    isOwner,
+    paymentController.reconciliatePayment
+);
 export default router;

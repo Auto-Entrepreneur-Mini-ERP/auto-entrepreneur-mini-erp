@@ -48,10 +48,18 @@ const paymentsStats = async (req: Request, res: Response) => {
     return res.status(200).json(true);
 };
 
+const reconciliatePayment = async (req: Request, res: Response) => {
+    const { autoentrepreneurId, paymentId } = req.params;
+
+    const payment = await paymentService.reconciliatePayment(autoentrepreneurId as string, paymentId as string);
+    return res.status(200).json(payment);
+}
+
 export const paymentController = {
     getAllPayments,
     getPaymentById,
     createPayment,
     updatePayment,
     deletePayment,
+    reconciliatePayment,
 }

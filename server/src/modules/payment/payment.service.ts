@@ -4,7 +4,7 @@ import { AppError } from "../../utils/errorHandler.js";
 import { pagination } from "../../utils/pagination.js";
 import { autoentrepreneurExists } from "../auto-entrepreneur/utils/autoentrepreneurExists.js";
 import { paymentExists } from "./utils/paymentExists.js";
-import type { PayementMetod ,PaymentCreateInput, PaymentUpdateInput } from "./payment.types.js";
+import type { PayementMetod ,PaymentCreateInput, PaymentOutput, PaymentUpdateInput } from "./payment.types.js";
 import { updateInvoiceAfterCreate, updateInvoiceAfterUpdate } from "./utils/updateInvoicewithPayment.js";
 
 const getAllPayments = async (autoentrepreneurId: string, page: number, limit: number) => {
@@ -116,7 +116,23 @@ const deletePayment = async (autoentrepreneurId: string, paymentId: string) => {
     return true;
 };
 
+const reconciliatePayment = async (autoentrepreneurId: string, paymentId: string) => {
+    autoentrepreneurExists(autoentrepreneurId);
+    paymentExists(paymentId);
 
+    const payment = await prisma.payment.update({
+        where:{
+            id: paymentId,
+        },
+        data: {
+            isReconciled: true,
+        }
+    }) as unknown as PaymentOutput;
+    if(!payment) throw new Error();
+
+    return payment;
+
+}
 
 export const paymentService = {
     getAllPayments,
@@ -124,4 +140,5 @@ export const paymentService = {
     createPayment,
     updatePayment,
     deletePayment,
+    reconciliatePayment,
 };
