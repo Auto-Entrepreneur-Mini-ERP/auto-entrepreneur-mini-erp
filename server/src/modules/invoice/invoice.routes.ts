@@ -6,6 +6,7 @@ import { createInvoiceSchema, updateInvoiceSchema } from "./invoice.schema.js";
 
 const router = Router();
 
+
 router.get('/auto-entrepreneur/:autoentrepreneurId/invoice',
     isAthenticated,
     isOwner,
@@ -18,14 +19,14 @@ router.get('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId',
     invoiceController.getOneInvoice
 );
 
-router.post('/auto-entrepreneur/:autoentrepreneurId/invoice/',
+router.post('/auto-entrepreneur/:autoentrepreneurId/invoice',
     isAthenticated,
     isOwner,
     validate(createInvoiceSchema),
     invoiceController.createInvoice
 );
 
-router.put('/auto-entrepreneur/:autoentrepreneurId/invoice/"invoiceId',
+router.put('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId',
     isAthenticated,
     isOwner,
     validate(updateInvoiceSchema),
