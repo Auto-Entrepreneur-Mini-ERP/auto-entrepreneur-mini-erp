@@ -32,14 +32,14 @@ export class DevisController {
   }
 
   // Récupérer un devis par ID
-  async getById(req: Request<{id: string}>, res: Response) {
+  async getById(req: Request, res: Response) {
     const { id } = req.params
 
     if (!id) {
       return res.status(400).json({ message: "ID manquant" })
     }
 
-    const devis = await devisService.findById(id)
+    const devis = await devisService.findById(id as string)
 
     if (!devis) {
       return res.status(404).json({ message: "Devis introuvable" })
@@ -49,14 +49,14 @@ export class DevisController {
   }
 
   // Modifier un devis
-  async update(req: Request<{id: string}>, res: Response) {
+  async update(req: Request, res: Response) {
     const { id } = req.params
 
     if (!id) {
       return res.status(400).json({ message: "ID manquant" })
     }
 
-    const devis = await devisService.update(id, {
+    const devis = await devisService.update(id as string, {
       ...req.body,
       validityDate: req.body.validityDate
         ? new Date(req.body.validityDate)
@@ -67,50 +67,50 @@ export class DevisController {
   }
 
   // Supprimer un devis
-  async delete(req: Request<{id: string}>, res: Response) {
+  async delete(req: Request, res: Response) {
     const { id } = req.params
 
     if (!id) {
       return res.status(400).json({ message: "ID manquant" })
     }
 
-    await devisService.delete(id)
+    await devisService.delete(id as string)
     return res.status(204).send()
   }
 
   // Envoyer un devis
-  async envoyer(req: Request<{id: string}>, res: Response) {
+  async envoyer(req: Request, res: Response) {
     const { id } = req.params
 
     if (!id) {
       return res.status(400).json({ message: "ID manquant" })
     }
 
-    const devis = await devisService.changeStatus(id, QuoteStatus.SENT)
+    const devis = await devisService.changeStatus(id as string, QuoteStatus.SENT)
     return res.json(devis)
   }
 
   // Accepter un devis
-  async accepter(req: Request<{id: string}>, res: Response) {
+  async accepter(req: Request, res: Response) {
     const { id } = req.params
 
     if (!id) {
       return res.status(400).json({ message: "ID manquant" })
     }
 
-    const devis = await devisService.changeStatus(id, QuoteStatus.ACCEPTED)
+    const devis = await devisService.changeStatus(id as string, QuoteStatus.ACCEPTED)
     return res.json(devis)
   }
 
   // Refuser un devis
-  async refuser(req: Request<{id: string}>, res: Response) {
+  async refuser(req: Request, res: Response) {
     const { id } = req.params
 
     if (!id) {
       return res.status(400).json({ message: "ID manquant" })
     }
 
-    const devis = await devisService.changeStatus(id, QuoteStatus.REJECTED)
+    const devis = await devisService.changeStatus(id as string, QuoteStatus.REJECTED)
     return res.json(devis)
   }
 }
