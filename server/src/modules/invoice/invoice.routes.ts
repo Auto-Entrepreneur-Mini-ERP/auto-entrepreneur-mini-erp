@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { isAthenticated, isOwner } from "../../middlewares/auth.middelware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { invoiceController } from "./invoice.controller.js";
 import { createInvoiceSchema, updateInvoiceSchema } from "./invoice.schema.js";
@@ -7,59 +6,41 @@ import { createInvoiceSchema, updateInvoiceSchema } from "./invoice.schema.js";
 const router = Router();
 
 
-router.get('/auto-entrepreneur/:autoentrepreneurId/invoice',
-    isAthenticated,
-    isOwner,
+router.get('/invoice',
     invoiceController.getInvoices
 );
 
-router.get('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId',
-    isAthenticated,
-    isOwner,
+router.get('/invoice/:invoiceId',
     invoiceController.getOneInvoice
 );
 
-router.post('/auto-entrepreneur/:autoentrepreneurId/invoice',
-    isAthenticated,
-    isOwner,
+router.post('/invoice',
     validate(createInvoiceSchema),
     invoiceController.createInvoice
 );
 
-router.put('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId',
-    isAthenticated,
-    isOwner,
+router.put('/invoice/:invoiceId',
     validate(updateInvoiceSchema),
     invoiceController.editInvoice
 );
 
-router.get('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId/cancel',
-    isAthenticated,
-    isOwner,
+router.get('/invoice/:invoiceId/cancel',
     invoiceController.cancelInvoice
 );
 
-router.delete('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId',
-    isAthenticated,
-    isOwner,
+router.delete('/invoice/:invoiceId',
     invoiceController.deleteInvoice
 );
 
-router.get('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId/pdf',
-    isAthenticated,
-    isOwner,
+router.get('/invoice/:invoiceId/pdf',
     invoiceController.getOneInvoice
 );
 
-router.get('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId/export-excel',
-    isAthenticated,
-    isOwner,
+router.get('/invoice/:invoiceId/export-excel',
     invoiceController.getOneInvoice
 );
 
-router.get('/auto-entrepreneur/:autoentrepreneurId/invoice/:invoiceId/envoyer',
-    isAthenticated,
-    isOwner,
+router.get('/invoice/:invoiceId/envoyer',
     invoiceController.getOneInvoice
 );
 

@@ -6,7 +6,7 @@ import { registerAutoEntrepreneurSchema,
     forgotPasswordSchema, 
     resetPasswordSchema, 
     otpVerificationSchema} from "./auth.schema.js";
-import { isAthenticated, isOwner } from "../../middlewares/auth.middelware.js";
+import { isAthenticated } from "../../middlewares/auth.middelware.js";
 
 const router = Router();
 
@@ -17,6 +17,6 @@ router.post("/auth/forgot-password", isAthenticated, validate(forgotPasswordSche
 router.post("/auth/otp-verification", isAthenticated, validate(otpVerificationSchema), authController.otpVerify);
 router.post("/auth/reset-password", isAthenticated, validate(resetPasswordSchema), authController.resetPassword);
 
-router.get("/auth/logout/:autoentrepreneurId", isAthenticated, isOwner, authController.logout);
+router.get("/auth/logout/:autoentrepreneurId", isAthenticated, authController.logout);
 
 export default router;

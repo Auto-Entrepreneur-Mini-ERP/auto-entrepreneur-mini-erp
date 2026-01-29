@@ -11,12 +11,12 @@ const router = Router();
 
 router.use(authRoutes);
 
-router.use(autoEntrepreneurRoutes);
+router.use(isAthenticated, autoEntrepreneurRoutes);
 
 router.use(isAthenticated, customerRoutes);
 
-router.use(invoiceRoutes);
+router.use(isAthenticated, invoiceRoutes);
 
-router.use(paymentRoutes);
+router.use(isAthenticated, paymentRoutes);
 
 export default router;

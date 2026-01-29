@@ -11,31 +11,23 @@ export const isAthenticated = async (req: Request, res: Response, next: NextFunc
     if(!token) throw new AppError("Token does not exist!", 401);
 
     const decoded = JWT.verifyToken(token, env.JWT_SECRET as string) as JwtPayload;
+
     if(!decoded) throw new AppError("Invalid Token!", 401);
     if(!decoded.exp) throw new AppError("Invalid Token!", 401);
     
     const dateNow = Math.floor(Date.now() / 1000);
-    if(decoded.exp < dateNow) throw new AppError("Token expired!", 401);
-    const user = await prisma.autoEntrepreneur.findUnique({
-        where:{
-            id: decoded.id,
-        }
+    if (decoded.exp < dateNow) throw new AppError("Token expired!", 401);
+    
+   const autoEntrepreneur = await prisma.autoEntrepreneur.findUnique({
+        where: { id: decoded.id },
+        include: { user: true },
     });
-    if(!user) throw new AppError("Invalid Token! u", 401);
+    console.log(decoded.id);
+    
+    if (!autoEntrepreneur) throw new AppError("Invalid Token!b", 401);
+
+    req.AutoEntrepreneurID = autoEntrepreneur.id;
 
     next();
 }
 
-export const isOwner = async (req: Request, res: Response, next: NextFunction) => {
-    const { autoentrepreneurId } = req.params;
-    
-    const token = req.cookies.token;
-    if(!token) throw new AppError("Token does not exist!", 401);
-
-    const decoded = JWT.verifyToken(token, env.JWT_SECRET as string) as JwtPayload;
-    if(!decoded) throw new AppError("Invalid Token!", 401);
-
-    if(decoded.id !== autoentrepreneurId) throw new AppError("You are not allowed to access this resource!", 403);
-    
-    next();
-}

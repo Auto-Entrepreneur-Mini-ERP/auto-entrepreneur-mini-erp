@@ -1,5 +1,5 @@
 
-enum PayementMetod {
+export enum PayementMetod {
     CASH = 'CASH',
     CHECK = 'CHECK',
     BANK_TRANSFER = 'BANK_TRANSFER',
@@ -36,7 +36,7 @@ export interface PaymentCreateInput{
 export interface PaymentUpdateInput{
     amount?: number,
     paymentDate?: Date,
-    payementMethod?: PayementMetod,
+    paymentMethod?: PayementMetod,
     notes?: string,
     transactionNumber?: string,
 }
