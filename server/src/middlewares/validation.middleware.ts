@@ -5,8 +5,8 @@ export const validate =
     try {
 
       await schema.body.parse(req.body);
-      
       next();
+      
     } catch (error: any) {
       return res.status(400).json({
         message: "Validation error",

@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { autoEntrepreneurController } from "./auto-entrepreneur.controller.js";
-import { isAthenticated, isOwner } from "../../middlewares/auth.middelware.js";
+import { isAthenticated } from "../../middlewares/auth.middelware.js";
 
 const router = Router();
 
 
-router.get("/profile/:autoentrepreneurId", isAthenticated, isOwner, autoEntrepreneurController.getProfile);
-router.put("/profile/:autoentrepreneurId", isAthenticated, isOwner, autoEntrepreneurController.editProfile);
+router.get("/profile", autoEntrepreneurController.getProfile);
+router.put("/profile", autoEntrepreneurController.editProfile);
 
 
 export default router;

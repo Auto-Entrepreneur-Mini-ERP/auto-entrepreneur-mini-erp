@@ -1,53 +1,39 @@
 import { Router } from "express";
-import { isAthenticated, isOwner } from "../../middlewares/auth.middelware.js"
+import { isAthenticated } from "../../middlewares/auth.middelware.js"
 import { paymentController } from "./payment.controller.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { paymentCreateSchemaInput, paymentUpdateSchemaInput } from "./payment.schema.js";
 
 const router = Router();
 
-router.get("/auto-entrepreneur/:autoentrepreneurId/payment",
-    isAthenticated,
-    isOwner,
+router.get("/payment",
     paymentController.getAllPayments
 );
 
-router.get("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId",
-    isAthenticated,
-    isOwner,
+router.get("/payment/:paymentId",
     paymentController.getPaymentById
 );
 
-router.post("/auto-entrepreneur/:autoentrepreneurId/payment",
-    isAthenticated,
-    isOwner,
+router.post("/payment",
     validate(paymentCreateSchemaInput),
     paymentController.createPayment
 );
 
-router.put("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId",
-    isAthenticated,
-    isOwner,
+router.put("/payment/:paymentId",
     validate(paymentUpdateSchemaInput),
     paymentController.updatePayment
 );
 
-router.delete("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId",
-    isAthenticated,
-    isOwner,
+router.delete("/payment/:paymentId",
     paymentController.deletePayment
 );
 
 
-router.get("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId/recu",
-    isAthenticated,
-    isOwner,
+router.get("/payment/:paymentId/recu",
     paymentController.getPaymentById
 );
 
-router.get("/auto-entrepreneur/:autoentrepreneurId/payment/:paymentId/repprocher",
-    isAthenticated,
-    isOwner,
+router.get("/payment/:paymentId/repprocher",
     paymentController.reconciliatePayment
 );
 export default router;

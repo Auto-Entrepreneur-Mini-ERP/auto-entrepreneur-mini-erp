@@ -3,7 +3,7 @@ import { paymentService } from "./payment.service.js";
 import type { PaymentCreateInput, PaymentUpdateInput } from "./payment.types.js";
 
 const getAllPayments = async (req: Request, res: Response) => {
-    const { autoentrepreneurId } = req.params;
+    const autoentrepreneurId = req.AutoEntrepreneurID;
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
 
@@ -12,14 +12,15 @@ const getAllPayments = async (req: Request, res: Response) => {
 };
 
 const getPaymentById = async (req: Request, res: Response) => {
-    const { autoentrepreneurId, paymentId } = req.params;
+    const autoentrepreneurId = req.AutoEntrepreneurID;
+    const { paymentId } = req.params;
 
     const payment = await paymentService.getOnePayment(autoentrepreneurId as string, paymentId as string);
     return res.status(200).json(payment);
 };
 
 const createPayment = async (req: Request, res: Response) => {
-    const { autoentrepreneurId } = req.params;
+    const autoentrepreneurId = req.AutoEntrepreneurID;
     const { data } = req.body;
 
     const payment = await paymentService.createPayment(autoentrepreneurId as string, data as PaymentCreateInput);
@@ -27,7 +28,8 @@ const createPayment = async (req: Request, res: Response) => {
 };
 
 const updatePayment = async (req: Request, res: Response) => {
-    const { autoentrepreneurId, paymentId } = req.params;
+    const autoentrepreneurId = req.AutoEntrepreneurID;
+    const { paymentId } = req.params;
     const { data } = req.body;
 
     const payment = await paymentService.updatePayment(autoentrepreneurId as string, paymentId as string, data as PaymentUpdateInput);
@@ -35,14 +37,15 @@ const updatePayment = async (req: Request, res: Response) => {
 };
 
 const deletePayment = async (req: Request, res: Response) => {
-    const { autoentrepreneurId, paymentId } = req.params;
+    const autoentrepreneurId = req.AutoEntrepreneurID;
+    const { paymentId } = req.params;
 
     const payment = await paymentService.deletePayment(autoentrepreneurId as string, paymentId as string);
     return res.status(200).json(payment);
 };
 
 const paymentsStats = async (req: Request, res: Response) => {
-    const { period, paymenthMetho, isReconciled } = req.query;
+    const { period, paymenthMethod, isReconciled } = req.query;
 
     // const payment = await paymentService.deletePayment(period as stirg);
     return res.status(200).json(true);
