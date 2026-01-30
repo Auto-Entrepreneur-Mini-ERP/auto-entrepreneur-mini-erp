@@ -22,3 +22,12 @@ export const paymentUpdateSchemaInput = {
         transactionNumber: z.string().optional(),
     }),
 };
+
+export const paymentStatsSchemaQuery = {
+    body: z.object({
+        periodFrom: z.iso.date().optional(),
+        periodTo: z.iso.date().optional(),
+        payementMethod: z.enum(['CASH', 'CHECK', 'BANK_TRANSFER', 'CREDIT_CARD', 'MOBILE_PAYMENT', 'OTHER']).optional(),
+        isReconcieled: z.boolean().optional(),
+    }),
+};

@@ -131,8 +131,26 @@ const reconciliatePayment = async (autoentrepreneurId: string, paymentId: string
     if(!payment) throw new Error();
 
     return payment;
-
 }
+
+const paymentStats = async (autoentrepreneurId: string, periodFrom: Date, periodTo: Date, payementMethod: PayementMetod, isReconcieled: boolean) => {
+    autoentrepreneurExists(autoentrepreneurId);
+
+    const payments = await prisma.payment.findMany({
+        where:{
+            AutoEntrepreneurId: autoentrepreneurId,
+            paymentDate: {
+                gte: periodFrom,
+                lte: periodTo
+            },
+            paymentMethod: payementMethod,
+            isReconciled: isReconcieled
+        },
+    })
+    if(!payments) throw new Error();
+
+    return payments;
+};
 
 export const paymentService = {
     getAllPayments,
@@ -141,4 +159,5 @@ export const paymentService = {
     updatePayment,
     deletePayment,
     reconciliatePayment,
+    paymentStats,
 };
