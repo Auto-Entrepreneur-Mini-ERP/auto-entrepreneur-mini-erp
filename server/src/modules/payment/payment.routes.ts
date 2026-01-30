@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { isAthenticated } from "../../middlewares/auth.middelware.js"
 import { paymentController } from "./payment.controller.js";
-import { validate } from "../../middlewares/validation.middleware.js";
-import { paymentCreateSchemaInput, paymentUpdateSchemaInput } from "./payment.schema.js";
+import { validateBody, validateQuery } from "../../middlewares/validation.middleware.js";
+import { paymentCreateSchemaInput, 
+    paymentStatsSchemaQuery, 
+    paymentUpdateSchemaInput } from "./payment.schema.js";
 
 const router = Router();
 
@@ -15,12 +16,12 @@ router.get("/payment/:paymentId",
 );
 
 router.post("/payment",
-    validate(paymentCreateSchemaInput),
+    validateBody(paymentCreateSchemaInput),
     paymentController.createPayment
 );
 
 router.put("/payment/:paymentId",
-    validate(paymentUpdateSchemaInput),
+    validateBody(paymentUpdateSchemaInput),
     paymentController.updatePayment
 );
 
@@ -35,5 +36,10 @@ router.get("/payment/:paymentId/recu",
 
 router.get("/payment/:paymentId/repprocher",
     paymentController.reconciliatePayment
+);
+
+router.get("/payment/stats",
+    validateQuery(paymentStatsSchemaQuery),
+    paymentController.paymentStats
 );
 export default router;

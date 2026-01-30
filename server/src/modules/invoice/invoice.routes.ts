@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { validate } from "../../middlewares/validation.middleware.js";
+import { validateBody } from "../../middlewares/validation.middleware.js";
 import { invoiceController } from "./invoice.controller.js";
 import { createInvoiceSchema, updateInvoiceSchema } from "./invoice.schema.js";
 
@@ -15,12 +15,12 @@ router.get('/invoice/:invoiceId',
 );
 
 router.post('/invoice',
-    validate(createInvoiceSchema),
+    validateBody(createInvoiceSchema),
     invoiceController.createInvoice
 );
 
 router.put('/invoice/:invoiceId',
-    validate(updateInvoiceSchema),
+    validateBody(updateInvoiceSchema),
     invoiceController.editInvoice
 );
 
