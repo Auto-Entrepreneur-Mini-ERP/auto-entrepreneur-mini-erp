@@ -6,6 +6,7 @@ import customerRoutes from "./modules/customer/customer.routes.js";
 import { isAthenticated } from "./middlewares/auth.middelware.js";
 import invoiceRoutes from './modules/invoice/invoice.routes.js'
 import paymentRoutes from './modules/payment/payment.routes.js'
+import devisRoutes from './modules/devis/devis.routes.js'
 
 const router = Router();
 
@@ -14,6 +15,8 @@ router.use(authRoutes);
 router.use(isAthenticated, autoEntrepreneurRoutes);
 
 router.use(isAthenticated, customerRoutes);
+
+router.use(isAthenticated, devisRoutes);
 
 router.use(isAthenticated, invoiceRoutes);
 

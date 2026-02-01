@@ -12,8 +12,8 @@ const controller = new DevisController();
 
 router.use(isAthenticated);
 
-router.post('/', validate(createQuoteSchema), controller.create);
-router.get('/', controller.getAll);
+router.post('/quote', validate(createQuoteSchema), controller.create);
+router.get('/quote', controller.getAll);
 router.get('/:id', controller.getById);
 router.patch('/:id', validate(updateQuoteSchema), controller.update);
 router.delete('/:id', controller.delete);

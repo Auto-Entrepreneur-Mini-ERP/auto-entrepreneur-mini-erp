@@ -1,11 +1,14 @@
 import { PrismaClient} from '@prisma/client/extension';
 import { QuoteStatus } from '../../../generated/prisma/enums.js';;
 import type { CreateQuoteInput, UpdateQuoteInput } from './devis.types.js';
+import { cronJobs } from '../invoice/utils/cronJobs.js';
+import { CronJob } from 'cron/dist/job.js';
 
 const prisma = new PrismaClient();
 
 export class DevisService {
   async create(data: CreateQuoteInput) {
+    
     return prisma.quote.create({
       data: {
         issueDate: data.issueDate,
@@ -18,6 +21,7 @@ export class DevisService {
         },
       },
     });
+
   }
 
   async findAll() {
@@ -53,3 +57,4 @@ export class DevisService {
     });
   }
 }
+
