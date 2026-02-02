@@ -1,6 +1,7 @@
 import type { Request, Response } from "express"
 import { paymentService } from "./payment.service.js";
 import type { PaymentCreateInput, PaymentUpdateInput } from "./payment.types.js";
+import { PayementMetod } from "./payment.types.js";
 
 const getAllPayments = async (req: Request, res: Response) => {
     const autoentrepreneurId = req.AutoEntrepreneurID;
@@ -52,9 +53,18 @@ const paymentsStats = async (req: Request, res: Response) => {
 };
 
 const reconciliatePayment = async (req: Request, res: Response) => {
-    const { autoentrepreneurId, paymentId } = req.params;
+    const { paymentId } = req.params;
+    const autoentrepreneurId = req.AutoEntrepreneurID;
 
     const payment = await paymentService.reconciliatePayment(autoentrepreneurId as string, paymentId as string);
+    return res.status(200).json(payment);
+}
+
+const paymentStats = async (req: Request, res: Response) => {
+    const autoentrepreneurId = req.AutoEntrepreneurID;
+    const { periodFrom, periodTo, payementMethod, isReconcieled } = req.query;
+
+    const payment = await paymentService.paymentStats(autoentrepreneurId as string, new Date(periodFrom as string), new Date(periodTo as string), payementMethod as PayementMetod, Boolean(isReconcieled));
     return res.status(200).json(payment);
 }
 
@@ -65,4 +75,5 @@ export const paymentController = {
     updatePayment,
     deletePayment,
     reconciliatePayment,
+    paymentStats,
 }
