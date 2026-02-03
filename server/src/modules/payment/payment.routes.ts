@@ -38,8 +38,8 @@ router.get("/payment/:paymentId/rapprocher",
     paymentController.reconciliatePayment
 );
 
-router.get("/younes",
+router.get("/payment/stats",
+    validateQuery(paymentStatsSchemaQuery),
     paymentController.paymentStats
 );
-
 export default router;
