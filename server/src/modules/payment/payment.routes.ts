@@ -34,7 +34,7 @@ router.get("/payment/:paymentId/recu",
     paymentController.getPaymentById
 );
 
-router.get("/payment/:paymentId/repprocher",
+router.get("/payment/:paymentId/rapprocher",
     paymentController.reconciliatePayment
 );
 

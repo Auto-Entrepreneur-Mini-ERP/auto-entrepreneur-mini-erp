@@ -8,6 +8,8 @@ import { CronJob } from 'cron';
 import { cronJobs } from './utils/cronJobs.js';
 import { prisma } from '../../lib/prisma.js';
 import { Prisma } from '../../../generated/prisma/browser.js';
+import { paymentService } from '../payment/payment.service.js';
+import type { PaymentCreateInput } from '../payment/payment.types.js';
 
 const getAllInvoices = async (autoentrepreneurId: string, page: number, limit: number) => {
 
@@ -16,7 +18,7 @@ const getAllInvoices = async (autoentrepreneurId: string, page: number, limit: n
     
     const invoices = await prisma.invoice.findMany({
         skip: startIndex,
-        take: 10,
+        take: limit,
         where: {
             AutoEntrepreneurId: autoentrepreneurId
         }
@@ -85,9 +87,7 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
             data.invoice.remainingAmount = 0;
         } else {
             data.invoice.remainingAmount = data.invoice.totalAmount - data.invoice.paidAmount
-            // create new payement from payement service
-    
-            // end
+            data.invoice.status = InvoiceStatus.PARTIALLY_PAID;
         }
     } else{
         data.invoice.remainingAmount = data.invoice.totalAmount
@@ -129,6 +129,17 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
         }
     }) as unknown as InvoiceOutput;
     if(!newCompleteInvoice) throw new Error();
+    
+    //create payment based on status
+    if(newCompleteInvoice.paidAmount){
+        await paymentService.createPayment(autoentrepreneurId, {
+            amount: newCompleteInvoice.paidAmount as number,
+            paymentDate: new Date(),
+            paymentMethod: data.invoice.payementMethod as string,
+            AutoEntrepreneurId: autoentrepreneurId,
+            invoiceId: newCompleteInvoice.id
+        } as PaymentCreateInput);
+    }
 
     // after creation set cron job to change status to OVERDUE after due date reached
     const setOverdue = new CronJob(newCompleteInvoice.dueDate, cronJobs.setInvoiceStatusAfterOverDue);
