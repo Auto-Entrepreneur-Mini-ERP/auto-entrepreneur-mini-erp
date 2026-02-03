@@ -22,7 +22,6 @@ export const isAthenticated = async (req: Request, res: Response, next: NextFunc
         where: { id: decoded.id },
         include: { user: true },
     });
-    console.log(decoded.id);
     
     if (!autoEntrepreneur) throw new AppError("Invalid Token!b", 401);
 
