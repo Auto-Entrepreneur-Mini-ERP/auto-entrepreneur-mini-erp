@@ -17,8 +17,8 @@ const overview = async (autoenretpreneurId: string)=>{
         where:{
             AutoEntrepreneurId: autoenretpreneurId,
             issueDate: {
-                gte: startDate,
-                lte: lastDate
+                gte: new Date(startDate),
+                lte: new Date(lastDate)
             }
         },
         _sum:{
@@ -32,8 +32,8 @@ const overview = async (autoenretpreneurId: string)=>{
         where:{
             AutoEntrepreneurId: autoenretpreneurId,
             issueDate: {
-                gte: startDate,
-                lte: lastDate
+                gte: new Date(startDate),
+                lte: new Date(lastDate)
             },
             status: {
                 in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIALLY_PAID]
@@ -50,8 +50,8 @@ const overview = async (autoenretpreneurId: string)=>{
         where:{
             AutoEntrepreneurId: autoenretpreneurId,
             paymentDate: {
-                gte: startDate,
-                lte: lastDate
+                gte: new Date(startDate),
+                lte: new Date(lastDate)
             }
         },
         _sum:{
@@ -65,8 +65,8 @@ const overview = async (autoenretpreneurId: string)=>{
         where:{
             AutoEntrepreneurId: autoenretpreneurId,
             date: {
-                gte: startDate,
-                lte: lastDate
+                gte: new Date(startDate),
+                lte: new Date(lastDate)
             }
         },
         _sum:{
@@ -75,10 +75,10 @@ const overview = async (autoenretpreneurId: string)=>{
     });
 
     return {
-        CAmois,
-        unpaidInvoices,
-        netRevenues,
-        depenses,
+        CAmois: CAmois[0]?._sum,
+        unpaidInvoices: unpaidInvoices[0]?._count,
+        netRevenues: netRevenues[0]?._sum || {},
+        depenses: depenses[0]?._sum || {},
     }
 };
 
@@ -88,8 +88,8 @@ const monthlyRevenues = async (autoentrepreneurId: string) => {
     for (let index = 1; index <= 12; index++) {
         const rev = await prisma.$queryRaw`
         SELECT sum(amount) 
-        FROM Payment
-        WHERE autoenretpreneurId = ${autoentrepreneurId}
+        FROM auto_entrepreneur_erp_db.payments
+        WHERE AutoentrepreneurId = ${autoentrepreneurId}
         AND MONTH('paymentDate') = ${index}
         GROUP BY MONTH('paymentDate')`;
         
@@ -107,8 +107,8 @@ const monthlyDepenses = async (autoentrepreneurId: string) => {
     for (let index = 1; index <= 12; index++) {
         const exp = await prisma.$queryRaw`
         SELECT sum(amount) 
-        FROM Expenses
-        WHERE autoenretpreneurId = ${autoentrepreneurId}
+        FROM auto_entrepreneur_erp_db.expenses
+        WHERE AutoentrepreneurId = ${autoentrepreneurId}
         AND MONTH('date') = ${index}
         GROUP BY MONTH('date')`;
         
