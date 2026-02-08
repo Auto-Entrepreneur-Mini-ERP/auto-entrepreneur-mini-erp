@@ -13,7 +13,6 @@ export interface DocumentOutput {
 export interface DocumentCreateInput {
     name: string,
     category?: string,
-    fileUrl: string,
     description?: string,
 };
 

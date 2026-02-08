@@ -23,8 +23,9 @@ const getOneDocument = async (req: Request, res: Response) => {
 const createDocument = async (req: Request, res: Response) => {
     const autoEntrepreneurId = req.AutoEntrepreneurID;
     const body = req.body;
+    const file = req.file;
 
-    const newDocument = await documentService.createDocument(autoEntrepreneurId as string, body as DocumentCreateInput);
+    const newDocument = await documentService.createDocument(autoEntrepreneurId as string, body as DocumentCreateInput, file as Express.Multer.File);
     res.status(200).json(newDocument);
 };
 

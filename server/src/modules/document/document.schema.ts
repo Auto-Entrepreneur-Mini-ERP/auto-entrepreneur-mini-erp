@@ -1,10 +1,9 @@
-import z from "zod";
+import z, { mime } from "zod";
 
 export const documentCreateSchemaInput = {
     body: z.object({
         name: z.string().nonempty(),
         category: z.string().nonempty(),
-        fileUrl: z.string().nonempty(),
         description: z.string().optional(),
     })
 };
@@ -15,5 +14,5 @@ export const documentUpdateSchemaInput = {
         category: z.string().nonempty(),
         fileUrl: z.string().nonempty(),
         description: z.string().optional(),
-    })
+    }),
 };

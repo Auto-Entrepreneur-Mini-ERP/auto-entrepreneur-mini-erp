@@ -104,9 +104,7 @@ const forgotPassword = async (email: string) => {
 
     // Generate OTP
     const otp = otpGenerator.generate(6, {digits: true, lowerCaseAlphabets : false, upperCaseAlphabets: false, specialChars: false });
-    const otpExpiration = Date.now() + 5 * 60 * 1000;
-    console.log(user);
-    
+    const otpExpiration = Date.now() + 5 * 60 * 1000;    
     
     await prisma.autoEntrepreneur.update({
         where: {

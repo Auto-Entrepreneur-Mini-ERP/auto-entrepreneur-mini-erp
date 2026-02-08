@@ -24,6 +24,8 @@ const getAllDocuments = async (autoentrepreneurId: string, page: number, limit: 
 const getOneDocument = async (autoentrepreneurId: string, documentId: string) => {
     autoentrepreneurExists(autoentrepreneurId);
 
+    // get file from S3 bucket
+
     const document = await prisma.document.findUnique({
         where:{
             id: documentId,
@@ -34,15 +36,20 @@ const getOneDocument = async (autoentrepreneurId: string, documentId: string) =>
     return document;
 };
 
-const createDocument = async (autoentrepreneurId: string, data: DocumentCreateInput) => {
+const createDocument = async (autoentrepreneurId: string, data: DocumentCreateInput, file: Express.Multer.File) => {
     autoentrepreneurExists(autoentrepreneurId);
+    console.log(file);
+    
+
+    //upload file to  AWS S3 bucket
+    
 
     const DocumentInputData: Prisma.DocumentCreateInput = {
         name: data.name,
-        type: 'pdf',
+        type: file.mimetype,
         category: data.category || null,
-        fileUrl: data.fileUrl,
-        fileSize: 256,
+        fileUrl: 'comes from aws',
+        fileSize: file.size,
         description: data.description || null,
         AutoEntrepreneur: {
             connect: {
@@ -65,7 +72,6 @@ const updateDocument = async (autoentrepreneurId: string, documentId: string,  d
     const DocumentUpdateData: Prisma.DocumentUpdateInput = {
         name: data.name,
         category: data.category || null,
-        fileUrl: data.fileUrl,
         description: data.description || null,
         AutoEntrepreneur:{
             connect:{
