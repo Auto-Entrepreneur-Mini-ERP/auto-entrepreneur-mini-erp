@@ -1,6 +1,7 @@
 import type { Request, Response } from "express"
 import { paymentService } from "./payment.service.js";
 import type { PaymentCreateInput, PaymentUpdateInput } from "./payment.types.js";
+import { PayementMetod } from "./payment.types.js";
 
 const getAllPayments = async (req: Request, res: Response) => {
     const autoentrepreneurId = req.AutoEntrepreneurID;
@@ -21,7 +22,7 @@ const getPaymentById = async (req: Request, res: Response) => {
 
 const createPayment = async (req: Request, res: Response) => {
     const autoentrepreneurId = req.AutoEntrepreneurID;
-    const { data } = req.body;
+    const data = req.body;    
 
     const payment = await paymentService.createPayment(autoentrepreneurId as string, data as PaymentCreateInput);
     return res.status(200).json(payment);
@@ -44,18 +45,21 @@ const deletePayment = async (req: Request, res: Response) => {
     return res.status(200).json(payment);
 };
 
-const paymentsStats = async (req: Request, res: Response) => {
-    const { period, paymenthMethod, isReconciled } = req.query;
-
-    // const payment = await paymentService.deletePayment(period as stirg);
-    return res.status(200).json(true);
-};
-
 const reconciliatePayment = async (req: Request, res: Response) => {
-    const { autoentrepreneurId, paymentId } = req.params;
+    const { paymentId } = req.params;
+    const autoentrepreneurId = req.AutoEntrepreneurID;
 
     const payment = await paymentService.reconciliatePayment(autoentrepreneurId as string, paymentId as string);
     return res.status(200).json(payment);
+}
+
+const paymentStats = async (req: Request, res: Response) => {
+    
+    const autoentrepreneurId = req.AutoEntrepreneurID;
+    const { periodFrom, periodTo, paymentMethod, isReconcieled } = req.query;
+
+    const payments = await paymentService.paymentStats(autoentrepreneurId as string, periodFrom as string, periodTo as string, paymentMethod as PayementMetod, isReconcieled as string);
+    return res.status(200).json(payments);
 }
 
 export const paymentController = {
@@ -65,4 +69,5 @@ export const paymentController = {
     updatePayment,
     deletePayment,
     reconciliatePayment,
+    paymentStats,
 }

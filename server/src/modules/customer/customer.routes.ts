@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { customerController } from "./customer.controller.js";
  import { isAthenticated } from "../../middlewares/auth.middelware.js";
-import { validate } from "../../middlewares/validation.middleware.js";
+import { validateBody } from "../../middlewares/validation.middleware.js";
 
 import {
   createCustomerSchema,
@@ -14,7 +14,7 @@ router.get("/customers",customerController.getAllCustomers);
 
 router.post(
   "/customers",
-  validate(createCustomerSchema),
+  validateBody(createCustomerSchema),
   customerController.createCustomer,
 );
 

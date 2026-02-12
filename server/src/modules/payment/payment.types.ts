@@ -26,7 +26,7 @@ export interface PaymentCreateInput{
     refrence: string,
     amount: number,
     paymentDate: Date,
-    payementMethod: PayementMetod,
+    paymentMethod: PayementMetod,
     notes?: string,
     transactionNumber?: string,
     AutoEntrepreneurId: string,

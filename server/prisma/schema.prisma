@@ -316,7 +316,7 @@ model Payment {
   
   // Relationships
   AutoEntrepreneur    AutoEntrepreneur @relation(fields: [AutoEntrepreneurId], references: [id])
-  invoice           Invoice       @relation(fields: [invoiceId], references: [id])
+  Invoice           Invoice       @relation(fields: [invoiceId], references: [id])
   
   @@map("payments")
 }
