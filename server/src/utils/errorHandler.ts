@@ -19,7 +19,7 @@ export const errorHandler = (err: AppError, req: Request, res: Response, next: N
 
     res.status(200).json({
         message: err.message,
-        statusCode
+        statusCode: statusCode
     });
     next();
 }

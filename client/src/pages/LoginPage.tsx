@@ -24,7 +24,6 @@ export function LoginPage() {
   //custom hook
   const { errors, login } = useAuthenticate();
 
-
   // Check if redirected from password reset
   const passwordReset = location.state?.passwordReset;
 
@@ -74,10 +73,8 @@ export function LoginPage() {
           {/* Login Form */}
           <form onSubmit={handleLogin} className="space-y-6">
             {/* Errors */}
-            {errors && (
-                errors.map((err, key) => (
-                <p key={key} className="text-sm text-red-600">{err}</p>
-                ))
+            {errors && (  
+                <p  className="text-sm text-red-600">{errors}</p>
               )}
             {/* Email Field */}
             <div className="space-y-2">

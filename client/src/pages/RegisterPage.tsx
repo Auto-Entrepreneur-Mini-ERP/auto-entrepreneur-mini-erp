@@ -14,8 +14,8 @@ import type { RegisterFormData } from "../types/auth.types";
 export function RegisterPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<RegisterFormData>({
-    firstname: "",
-    lastname: "",
+    firstName: "",
+    lastName: "",
     email: "",
     businessName: "",
     activityType: "",
@@ -56,9 +56,10 @@ export function RegisterPage() {
 
     setIsLoading(true);
     const result = await register(formData);
+        
+    setIsLoading(false);
     if (result) {
-      setIsLoading(false);
-      navigate("/app/dashboard");
+      navigate("/login");
     }
   };
 
@@ -84,10 +85,8 @@ export function RegisterPage() {
           {/* Register Form */}
           <form onSubmit={handleRegister} className="space-y-5">
             {/* Errors */}
-            {errors && (
-                errors.map((err, key) => (
-                <p key={key} className="text-sm text-red-600">{err}</p>
-                ))
+            {errors && (  
+                <p  className="text-sm text-red-600">{errors}</p>
               )}
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
@@ -99,7 +98,7 @@ export function RegisterPage() {
                     id="firstName"
                     type="text"
                     placeholder="John"
-                    value={formData.firstname}
+                    value={formData.firstName}
                     onChange={(e) => handleChange("firstName", e.target.value)}
                     required
                     className="pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
@@ -115,7 +114,7 @@ export function RegisterPage() {
                     id="lastName"
                     type="text"
                     placeholder="Doe"
-                    value={formData.lastname}
+                    value={formData.lastName}
                     onChange={(e) => handleChange("lastName", e.target.value)}
                     required
                     className="pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
@@ -141,7 +140,24 @@ export function RegisterPage() {
               </div>
             </div>
 
-            {/* Phone Field */}
+            {/* Business Name Field */}
+            <div className="space-y-2">
+              <Label htmlFor="businessName" className="text-gray-700">Nom d' Activité</Label>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  id="businessName"
+                  type="text"
+                  placeholder="Nom de votre organisation"
+                  value={formData.businessName}
+                  onChange={(e) => handleChange("businessName", e.target.value)}
+                  required
+                  className="pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
+                />
+              </div>
+            </div>
+
+            {/* ICE Field */}
             <div className="space-y-2">
               <Label htmlFor="phone" className="text-gray-700">Numéro de ICE</Label>
               <div className="relative">
@@ -158,7 +174,7 @@ export function RegisterPage() {
               </div>
             </div>
 
-            {/* Department Field */}
+            {/* Activity Field */}
             <div className="space-y-2">
               <Label htmlFor="department" className="text-gray-700">Type d'activite</Label>
               <div className="relative">
@@ -209,7 +225,7 @@ export function RegisterPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Ressaisissez votre mot de passe"
                   value={formData.passwordConfirmation}
-                  onChange={(e) => handleChange("confirmPassword", e.target.value)}
+                  onChange={(e) => handleChange("passwordConfirmation", e.target.value)}
                   required
                   className="pl-10 pr-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
                 />
@@ -225,27 +241,6 @@ export function RegisterPage() {
                 <p className="text-sm text-red-600">{passwordError}</p>
               )}
             </div>
-
-            {/* Terms Agreement */}
-            {/* <div className="flex items-start gap-2">
-              <Checkbox
-                id="terms"
-                checked={agreedToTerms}
-                onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-                required
-                className="mt-1 border-gray-300 data-[state=checked]:bg-[#2D3194] data-[state=checked]:border-[#2D3194]"
-              />
-              <Label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer leading-relaxed">
-                I agree to the{" "}
-                <button type="button" className="text-[#2D3194] hover:text-[#F8BC00] font-medium">
-                  Terms of Service
-                </button>{" "}
-                and{" "}
-                <button type="button" className="text-[#2D3194] hover:text-[#F8BC00] font-medium">
-                  Privacy Policy
-                </button>
-              </Label>
-            </div> */}
 
             {/* Submit Button */}
             <Button

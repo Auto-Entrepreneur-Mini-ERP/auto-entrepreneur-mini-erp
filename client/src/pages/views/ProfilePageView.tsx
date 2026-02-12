@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User, Mail, Phone, MapPin, Building2, Camera, X, Save, Briefcase, Calendar } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { useAutoEntrepreneur } from "../../hooks/useAutoEntrepreneur";
 
 export function ProfilePage() {
   const [profileData, setProfileData] = useState({
@@ -19,6 +20,12 @@ export function ProfilePage() {
 
   const [previewData, setPreviewData] = useState({ ...profileData });
   const [hasChanges, setHasChanges] = useState(false);
+
+  const { profile, getAutoentrepreneurProfile } = useAutoEntrepreneur();
+
+  useEffect(()=>{
+    getAutoentrepreneurProfile();
+  },[])
 
   const handleChange = (field: string, value: string) => {
     setProfileData((prev) => ({ ...prev, [field]: value }));
@@ -165,7 +172,7 @@ export function ProfilePage() {
                   </Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-                    <Select value={profileData.city} onValueChange={(value) => handleChange("city", value)}>
+                    <Select value={profileData.city} onValueChange={(value: string) => handleChange("city", value)}>
                       <SelectTrigger className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl">
                         <SelectValue />
                       </SelectTrigger>
@@ -188,7 +195,7 @@ export function ProfilePage() {
                   </Label>
                   <div className="relative">
                     <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-                    <Select value={profileData.department} onValueChange={(value) => handleChange("department", value)}>
+                    <Select value={profileData.department} onValueChange={(value: string) => handleChange("department", value)}>
                       <SelectTrigger className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl">
                         <SelectValue />
                       </SelectTrigger>

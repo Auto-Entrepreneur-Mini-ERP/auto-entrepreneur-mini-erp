@@ -17,6 +17,6 @@ router.post("/auth/forgot-password", isAthenticated, validateBody(forgotPassword
 router.post("/auth/otp-verification", isAthenticated, validateBody(otpVerificationSchema), authController.otpVerify);
 router.post("/auth/reset-password", isAthenticated, validateBody(resetPasswordSchema), authController.resetPassword);
 
-router.get("/auth/logout/:autoentrepreneurId", isAthenticated, authController.logout);
+router.get("/auth/logout", isAthenticated, authController.logout);
 
 export default router;

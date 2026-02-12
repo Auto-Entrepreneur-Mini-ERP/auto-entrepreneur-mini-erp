@@ -56,7 +56,7 @@ const createAutoEntrepreneur = async (data: registerSchemaInput) => {
         }
     }) as unknown as AutoEntrepreneur;
 
-    if(!AutoE) throw new Error();
+    if(!AutoE) throw new AppError("", 500);
     delete AutoE.password;
     return AutoE;
 }
