@@ -59,7 +59,7 @@ const patchTaxDeclaration = async (
     
     const tax = await taxDeclarationService.updateTaxDeclaration(id, {
       ...req.body,
-      satuts: req.body.status,
+      status: req.body.status,
     });
     return res.status(200).json(tax);
   } catch (error: any) {
