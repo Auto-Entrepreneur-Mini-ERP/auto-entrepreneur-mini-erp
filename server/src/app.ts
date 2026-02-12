@@ -9,6 +9,7 @@ import router from "./routes.js";
 import cookieParser from "cookie-parser";
 import type { AutoEntrepreneur } from "./modules/auto-entrepreneur/auto-entrepreneur.types.js";
 import rateLimit from "express-rate-limit";
+import { env } from "./config/env.js";
 
 const app = express();
 
@@ -18,7 +19,10 @@ app.get('/api', async (req: express.Request, res: express.Response) => {
     });
 });
 
-app.use(cors());
+app.use(cors({
+    origin: env.FRONT_END_URL,
+
+}));
 app.use(helmet());
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes

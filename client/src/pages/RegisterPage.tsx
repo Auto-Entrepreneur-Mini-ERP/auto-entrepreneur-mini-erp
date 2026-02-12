@@ -8,22 +8,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import AuthBranding from "../components/auth/AuthBranding";
 import NeedHelpSection from "../components/auth/NeedHelpSection";
 import Logo from "../components/Logo";
+import { useAuthenticate } from "../hooks/useAuthneticate";
+import type { RegisterFormData } from "../types/auth.types";
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+  const [formData, setFormData] = useState<RegisterFormData>({
+    firstname: "",
+    lastname: "",
     email: "",
-    phone: "",
+    businessName: "",
     activityType: "",
+    ice: "",
     password: "",
-    confirmPassword: "",
+    passwordConfirmation: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+
+  const { errors, register } = useAuthenticate();
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -34,11 +39,11 @@ export function RegisterPage() {
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.SubmitEvent) => {
     e.preventDefault();
     
     // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.passwordConfirmation) {
       setPasswordError("Passwords do not match");
       return;
     }
@@ -50,17 +55,11 @@ export function RegisterPage() {
     }
 
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      // Set authentication flag
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userEmail", formData.email);
-      localStorage.setItem("userName", `${formData.firstName} ${formData.lastName}`);
-      
+    const result = await register(formData);
+    if (result) {
       setIsLoading(false);
       navigate("/app/dashboard");
-    }, 1000);
+    }
   };
 
   return (
@@ -84,6 +83,12 @@ export function RegisterPage() {
 
           {/* Register Form */}
           <form onSubmit={handleRegister} className="space-y-5">
+            {/* Errors */}
+            {errors && (
+                errors.map((err, key) => (
+                <p key={key} className="text-sm text-red-600">{err}</p>
+                ))
+              )}
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -94,7 +99,7 @@ export function RegisterPage() {
                     id="firstName"
                     type="text"
                     placeholder="John"
-                    value={formData.firstName}
+                    value={formData.firstname}
                     onChange={(e) => handleChange("firstName", e.target.value)}
                     required
                     className="pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
@@ -110,7 +115,7 @@ export function RegisterPage() {
                     id="lastName"
                     type="text"
                     placeholder="Doe"
-                    value={formData.lastName}
+                    value={formData.lastname}
                     onChange={(e) => handleChange("lastName", e.target.value)}
                     required
                     className="pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
@@ -138,15 +143,15 @@ export function RegisterPage() {
 
             {/* Phone Field */}
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-gray-700">Numéro de téléphone</Label>
+              <Label htmlFor="phone" className="text-gray-700">Numéro de ICE</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  value={formData.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
+                  id="ice"
+                  type="number"
+                  placeholder="123456789"
+                  value={formData.ice}
+                  onChange={(e) => handleChange("ice", e.target.value)}
                   required
                   className="pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
                 />
@@ -203,7 +208,7 @@ export function RegisterPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Ressaisissez votre mot de passe"
-                  value={formData.confirmPassword}
+                  value={formData.passwordConfirmation}
                   onChange={(e) => handleChange("confirmPassword", e.target.value)}
                   required
                   className="pl-10 pr-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"

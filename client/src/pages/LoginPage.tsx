@@ -7,31 +7,39 @@ import { Label } from "../components/ui/label";
 import Logo from "../components/Logo";
 import AuthBranding from "../components/auth/AuthBranding";
 import NeedHelpSection from "../components/auth/NeedHelpSection";
+import { useAuthenticate } from "../hooks/useAuthneticate";
+import { setCookie } from "../utils/setCookies";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
+
+  //custom hook
+  const { errors, login } = useAuthenticate();
+
 
   // Check if redirected from password reset
   const passwordReset = location.state?.passwordReset;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      // Set authentication flag
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userEmail", email);
-      
-      setIsLoading(false);
+    //  API call
+    const result = await login(email, password)
+    
+    setIsLoading(false);
+    if (result) {
+      setCookie('token', result.jwtToken);
       navigate("/app/dashboard");
-    }, 800);
+    }
   };
 
   return (
@@ -65,6 +73,12 @@ export function LoginPage() {
 
           {/* Login Form */}
           <form onSubmit={handleLogin} className="space-y-6">
+            {/* Errors */}
+            {errors && (
+                errors.map((err, key) => (
+                <p key={key} className="text-sm text-red-600">{err}</p>
+                ))
+              )}
             {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-gray-700">Adresse Email</Label>

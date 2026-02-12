@@ -17,8 +17,9 @@ export const errorHandler = (err: AppError, req: Request, res: Response, next: N
     const statusCode = err.statusCode || 500;
     if(statusCode === 500) err.message = "Something Went wrong!";
 
-    res.status(statusCode).json({
+    res.status(200).json({
         message: err.message,
+        statusCode
     });
     next();
 }
