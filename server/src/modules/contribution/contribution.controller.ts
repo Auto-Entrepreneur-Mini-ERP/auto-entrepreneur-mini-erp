@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { contributionService } from "./contribution.service.js";
-import type { ContributionUpdateInput } from "./contribution.types.js";
+import type { ContributionCreateInput, ContributionUpdateStatusInput } from "./contribution.types.js";
+
 
 const getAllContributions = async (req: Request, res: Response) => {
     const autoEntrepreneurId = req.AutoEntrepreneurID;
@@ -20,18 +21,27 @@ const getOneContribution = async (req: Request, res: Response) => {
     res.status(200).json(contribution);
 };
 
+const createContribution = async (req: Request, res: Response) => {
+    const autoEntrepreneurId = req.AutoEntrepreneurID;
+    const data = req.body;
+    
+    const contribution = await contributionService.createContribution(autoEntrepreneurId as string, data as ContributionCreateInput);
+    res.status(200).json(contribution);
+};
+
 
 const modifyContributionStatus = async (req: Request, res: Response) => {
     const autoEntrepreneurId = req.AutoEntrepreneurID;
     const {contributionId} = req.params;
     const body = req.body;
 
-    const contribution = await contributionService.modifyContributionStatus(autoEntrepreneurId as string, contributionId as string, body as ContributionUpdateInput);
+    const contribution = await contributionService.modifyContributionStatus(autoEntrepreneurId as string, contributionId as string, body as ContributionUpdateStatusInput);
     res.status(200).json(contribution);
 };
 
 export const ContributionController = {
     getAllContributions,
     getOneContribution,
+    createContribution,
     modifyContributionStatus,
 };

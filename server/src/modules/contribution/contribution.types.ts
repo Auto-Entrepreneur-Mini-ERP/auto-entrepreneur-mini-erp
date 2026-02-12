@@ -18,6 +18,15 @@ export interface ContributionOutput {
     AutoentrepreneurId: string,
 }
 
-export interface ContributionUpdateInput {
+export interface ContributionCreateInput {
+    period: string,
+    amount: number,
+    dueDate: string,
+    paymentDate: string,
+    status: PaymentStatus,
+    reference: string,
+}
+
+export interface ContributionUpdateStatusInput {
     status: PaymentStatus
 }

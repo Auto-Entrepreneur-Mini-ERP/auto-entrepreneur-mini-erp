@@ -5,6 +5,7 @@ const router = Router();
 
 router.get('/contributions', ContributionController.getAllContributions);
 router.get('/contributions/:id', ContributionController.getOneContribution);
+router.post('/contributions', ContributionController.createContribution);
 router.post('/contributions/:id', ContributionController.modifyContributionStatus);
 
 export default router;
