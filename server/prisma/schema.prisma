@@ -61,6 +61,7 @@ enum DeclarationStatus {
   OVERDUE
 }
 
+
 enum PaymentStatus {
   PENDING
   PAID
@@ -95,6 +96,7 @@ model User {
   
   @@map("users")
 }
+
 
 model AutoEntrepreneur {
   id              String        @id @default(uuid())
@@ -365,7 +367,7 @@ model TaxDeclaration {
   taxRate       Float             @default(0.0)
   taxAmount     Decimal           @default(0)
   status        DeclarationStatus @default(DRAFT)
-  dueDate       DateTime
+  dueDate       DateTime?         
   paymentDate   DateTime?
   pdfUrl        String?
   AutoEntrepreneurId String

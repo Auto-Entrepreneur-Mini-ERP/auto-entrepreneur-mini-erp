@@ -2,8 +2,9 @@ import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/errorHandler.js";
 import type { customer } from "./customer.types.js";
 
-const getAllCustomers = async () => {
+const getAllCustomers = async (id:string) => {
   const customers = await prisma.customer.findMany({
+    where: { AutoEntrepreneurId: id },
     include: {
       user: true,
     },
@@ -108,11 +109,14 @@ const deleteCustomer = async (id: string) => {
 };
 
 
-const getAllInvoices = async (customerId: string) => {
+const getAllInvoices = async (
+  customerId: string,
+  AutoEntrepreneurID: string,
+) => {
   const invoices = await prisma.invoice.findMany({
-    where: { customerId },
+    where: { customerId, AutoEntrepreneurId: AutoEntrepreneurID },
     orderBy: {
-      creationDate: "desc",  
+      creationDate: "desc",
     },
   });
 
@@ -124,11 +128,11 @@ const getAllInvoices = async (customerId: string) => {
 };
 
 
-const getAllQuotes = async (customerId: string) => {
+const getAllQuotes = async (customerId: string, AutoEntrepreneurID:string) => {
   const invoices = await prisma.quote.findMany({
-    where: { customerId },
+    where: { customerId, AutoEntrepreneurId: AutoEntrepreneurID },
     orderBy: {
-      creationDate: "desc",  
+      creationDate: "desc",
     },
   });
 

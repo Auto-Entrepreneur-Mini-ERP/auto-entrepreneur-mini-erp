@@ -6,7 +6,7 @@ INSERT INTO `users` (`id`, `email`, `firstName`, `lastName`, `phone`, `address`,
 ('e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b', 'omar.el.fassi@example.ma', 'Omar', 'El Fassi', '+212656789012', '56 Avenue Ibn Sina, Marrakech', '2024-02-15 16:00:00.000', '2024-02-15 16:00:00.000');
 
 INSERT INTO `auto_entrepreneur` (`id`, `userId`, `password`, `businessName`, `activityType`, `taxRate`, `ice`, `logo`, `creationDate`, `updateDate`, `passwordResetToken`, `passwordResetTokenExpiration`) VALUES
-('f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c', 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d', '$2b$10$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJK', 'Bennani Tech Solutions', 'SERVICE', 0.01, '001234567890001', 'https://storage.example.com/logos/bennani-tech.png', '2024-01-15 10:35:00.000', '2024-01-15 10:35:00.000', NULL, NULL),
+('f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c', 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d', '$2a$10$g21uhgQ7hU2zOxKIteq5puT.AY.u2vwJrZ31hhm5qTGdg4CcOqKwC', 'Bennani Tech Solutions', 'SERVICE', 0.01, '001234567890001', 'https://storage.example.com/logos/bennani-tech.png', '2024-01-15 10:35:00.000', '2024-01-15 10:35:00.000', NULL, NULL),
 ('a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d', 'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '$2b$10$bcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKL', 'Alaoui Import Export', 'COMMERCE', 0.015, '001234567890002', 'https://storage.example.com/logos/alaoui-import.png', '2024-01-20 14:25:00.000', '2024-01-20 14:25:00.000', NULL, NULL),
 ('b8c9d0e1-f2a3-4b4c-5d6e-7f8a9b0c1d2e', 'c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f', '$2b$10$cdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLM', 'Idrissi Consulting', 'MIXTE', 0.02, '001234567890003', NULL, '2024-02-01 09:20:00.000', '2024-02-01 09:20:00.000', NULL, NULL);
 
