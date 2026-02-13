@@ -23,7 +23,7 @@ export const isAthenticated = async (req: Request, res: Response, next: NextFunc
         include: { user: true },
     });
     
-    if (!autoEntrepreneur) throw new AppError("Invalid Token!b", 401);
+    if (!autoEntrepreneur) throw new AppError("Invalid Token!", 401);
 
     req.AutoEntrepreneurID = autoEntrepreneur.id;
 
