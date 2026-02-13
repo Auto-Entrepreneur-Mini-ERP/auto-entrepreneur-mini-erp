@@ -233,7 +233,7 @@ CREATE TABLE `tax_declarations` (
     `taxRate` DOUBLE NOT NULL DEFAULT 0.0,
     `taxAmount` DECIMAL(65, 30) NOT NULL DEFAULT 0,
     `status` ENUM('DRAFT', 'PENDING', 'SUBMITTED', 'PAID', 'OVERDUE') NOT NULL DEFAULT 'DRAFT',
-    `dueDate` DATETIME(3) NOT NULL,
+    `dueDate` DATETIME(3) NULL,
     `paymentDate` DATETIME(3) NULL,
     `pdfUrl` VARCHAR(191) NULL,
     `AutoEntrepreneurId` VARCHAR(191) NOT NULL,

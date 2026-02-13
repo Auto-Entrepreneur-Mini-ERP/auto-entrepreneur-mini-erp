@@ -6,9 +6,9 @@ import { AppError } from "../../utils/errorHandler.js";
 const getAllCustomers = async (req: Request, res: Response) => {
    
   try {
-    const customers = await customerService.getAllCustomers();
-    debugger; // optional
-
+    const id = req.AutoEntrepreneurID;
+    const customers = await customerService.getAllCustomers(id);
+ 
     return res.status(200).json(customers);
   } catch (error: any) {
     console.error("Controller Error:", error);
@@ -91,8 +91,13 @@ const deleteCustomer = async (req: Request, res: Response) => {
 
 const getAllInvoices = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const invoices = await customerService.getAllInvoices(id);
+    const { CustomerId } = req.params;
+    const AutoEntrepreneurID = req.AutoEntrepreneurID;
+
+    const invoices = await customerService.getAllInvoices(
+      CustomerId,
+      AutoEntrepreneurID,
+    );
     return res.status(200).json(invoices);
   } catch (error: any) {
     if (error instanceof AppError) {
@@ -104,8 +109,12 @@ const getAllInvoices = async (req: Request, res: Response) => {
 };
 const getAllQuotes = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const invoices = await customerService.getAllQuotes(id);
+    const { CustomerId } = req.params;
+    const AutoEntrepreneurID = req.AutoEntrepreneurID;
+    const invoices = await customerService.getAllQuotes(
+      CustomerId,
+      AutoEntrepreneurID,
+    );
     return res.status(200).json(invoices);
   } catch (error: any) {
     if (error instanceof AppError) {

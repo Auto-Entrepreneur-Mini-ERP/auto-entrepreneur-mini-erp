@@ -18,11 +18,11 @@ router.post(
   customerController.createCustomer,
 );
 
- router.get(
-  "/customers",
-  validateBody(createCustomerSchema),
-  customerController.createCustomer,
-);
+ router.patch(
+   "/customers",
+   validate(patchCustomerSchema),
+   customerController.updateCustomer,
+ );
  
  router.get(
   "/customers/:id",   
