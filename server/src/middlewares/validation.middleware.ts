@@ -9,9 +9,9 @@ export const validateBody =
       next();
       
     } catch (error: any) {
-      return res.status(400).json({
-        message: "Validation error",
-        errors: error.message,
+      return res.status(200).json({
+        message: "Validation error " + error.message,
+        statusCode: 400,
       });
       
     }

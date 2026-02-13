@@ -1,13 +1,16 @@
 import { createBrowserRouter, Navigate } from "react-router";
+
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { OTPPage } from "./pages/OTPPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
-import { ProfilePage } from "./pages/views/ProfilePageView";
+
 import { DashboardLayout } from "./layouts/DashboardLayout";
+
 import { DashboardView } from "./pages/views/DashboardView";
+import { ProfilePage } from "./pages/views/ProfilePageView";
 import { ArticlesServicesView } from "./pages/views/ArticlesServicesView";
 import { QuotsInvoicesView } from "./pages/views/QuotsInvoicesView";
 import { PaymentsExpensesView } from "./pages/views/PaymentsExpensesView";

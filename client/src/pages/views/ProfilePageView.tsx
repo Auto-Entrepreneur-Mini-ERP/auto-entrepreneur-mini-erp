@@ -1,38 +1,44 @@
-import { useState } from "react";
-import { User, Mail, Phone, MapPin, Building2, Camera, X, Save, Briefcase, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { User, Mail, Phone, MapPin, Building2, Camera, X, Save, Briefcase } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { useAutoEntrepreneur } from "../../hooks/useAutoEntrepreneur";
+import type { autoAntrepreneurProfile } from "../../types/autoentrepreneur.types";
 
 export function ProfilePage() {
-  const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Anderson",
-    email: "john.anderson@icsagroup.com",
-    phone: "+1 (555) 123-4567",
-    department: "Operations",
-    position: "Senior Logistics Manager",
-    city: "New York",
-    joinDate: "January 2020",
-  });
 
-  const [previewData, setPreviewData] = useState({ ...profileData });
+  const { profile, setProfile, getAutoentrepreneurProfile, saveAutoentrepreneurProfile } = useAutoEntrepreneur();
   const [hasChanges, setHasChanges] = useState(false);
-
+  
+  useEffect(()=>{
+    getAutoentrepreneurProfile();
+  },[]);
+  
   const handleChange = (field: string, value: string) => {
-    setProfileData((prev) => ({ ...prev, [field]: value }));
+    setProfile((prev) => {
+      const base: autoAntrepreneurProfile = prev ?? {
+        firstName: '',
+        lastName: '',
+        phone: '',
+        address: '',
+        businessName: '',
+        activityType: '',
+        ice: '',
+        logo: ''
+      };
+      return { ...base, [field]: value };
+    });
     setHasChanges(true);
   };
 
   const handleSave = () => {
-    setPreviewData({ ...profileData });
     setHasChanges(false);
     // Here you would typically save to backend
+    saveAutoentrepreneurProfile(profile as autoAntrepreneurProfile);
   };
 
   const handleCancel = () => {
-    setProfileData({ ...previewData });
     setHasChanges(false);
   };
 
@@ -83,7 +89,7 @@ export function ProfilePage() {
                       <Input
                         id="firstName"
                         type="text"
-                        value={profileData.firstName}
+                        value={profile?.firstName || ''}
                         onChange={(e) => handleChange("firstName", e.target.value)}
                         className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
                       />
@@ -99,7 +105,7 @@ export function ProfilePage() {
                       <Input
                         id="lastName"
                         type="text"
-                        value={profileData.lastName}
+                        value={profile?.lastName || ''}
                         onChange={(e) => handleChange("lastName", e.target.value)}
                         className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
                       />
@@ -107,18 +113,18 @@ export function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Email */}
+                {/* Nom d'activite */}
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-gray-700 font-medium">
-                    Email
+                    Nom d'activite
                   </Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
-                      id="email"
-                      type="email"
-                      value={profileData.email}
-                      onChange={(e) => handleChange("email", e.target.value)}
+                      id="businessName"
+                      type="text"
+                      value={profile?.businessName || ''}
+                      onChange={(e) => handleChange("businessName", e.target.value)}
                       className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
                     />
                   </div>
@@ -134,7 +140,7 @@ export function ProfilePage() {
                     <Input
                       id="phone"
                       type="tel"
-                      value={profileData.phone}
+                      value={profile?.phone || ''}
                       onChange={(e) => handleChange("phone", e.target.value)}
                       className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
                     />
@@ -143,66 +149,55 @@ export function ProfilePage() {
 
                 {/* Position */}
                 <div className="space-y-2">
-                  <Label htmlFor="position" className="text-gray-700 font-medium">
-                    Poste
+                  <Label htmlFor="activityType" className="text-gray-700 font-medium">
+                    Type d'activite
                   </Label>
                   <div className="relative">
                     <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input
-                      id="position"
+                      id="activityType"
                       type="text"
-                      value={profileData.position}
-                      onChange={(e) => handleChange("position", e.target.value)}
+                      value={profile?.activityType || ''}
+                      onChange={(e) => handleChange("activityType", e.target.value)}
                       className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
                     />
                   </div>
                 </div>
 
-                {/* City */}
+                {/* Position */}
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-gray-700 font-medium">
-                    Ville
+                  <Label htmlFor="ice" className="text-gray-700 font-medium">
+                    ICE
                   </Label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-                    <Select value={profileData.city} onValueChange={(value) => handleChange("city", value)}>
-                      <SelectTrigger className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="New York">New York</SelectItem>
-                        <SelectItem value="Los Angeles">Los Angeles</SelectItem>
-                        <SelectItem value="Chicago">Chicago</SelectItem>
-                        <SelectItem value="Houston">Houston</SelectItem>
-                        <SelectItem value="Miami">Miami</SelectItem>
-                        <SelectItem value="Boston">Boston</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="ice"
+                      type="text"
+                      value={profile?.ice || ''}
+                      onChange={(e) => handleChange("ice", e.target.value)}
+                      className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
+                    />
                   </div>
                 </div>
 
-                {/* Department */}
+                {/* Position */}
                 <div className="space-y-2">
-                  <Label htmlFor="department" className="text-gray-700 font-medium">
-                    Département
+                  <Label htmlFor="address" className="text-gray-700 font-medium">
+                    Addresse
                   </Label>
                   <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-                    <Select value={profileData.department} onValueChange={(value) => handleChange("department", value)}>
-                      <SelectTrigger className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Accounts">Accounts</SelectItem>
-                        <SelectItem value="HR">Human Resources</SelectItem>
-                        <SelectItem value="Business Development">Business Development</SelectItem>
-                        <SelectItem value="Operations">Operations</SelectItem>
-                        <SelectItem value="Administration">Administration</SelectItem>
-                        <SelectItem value="IT">IT & Systems</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="address"
+                      type="text"
+                      value={profile?.address || ''}
+                      onChange={(e) => handleChange("address", e.target.value)}
+                      className="pl-10 h-12 border-gray-200 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
+                    />
                   </div>
                 </div>
+
               </div>
 
               {/* Action Buttons */}
@@ -250,9 +245,9 @@ export function ProfilePage() {
                 {/* Name */}
                 <div className="text-center mb-4">
                   <h3 className="text-xl font-bold">
-                    {previewData.firstName} {previewData.lastName}
+                    {profile?.firstName} {profile?.lastName}
                   </h3>
-                  <p className="text-white/80 text-sm mt-1">{previewData.position}</p>
+                  <p className="text-white/80 text-sm mt-1">{profile?.businessName}</p>
                 </div>
 
                 {/* Divider */}
@@ -265,8 +260,8 @@ export function ProfilePage() {
                       <Mail className="w-4 h-4 text-[#F8BC00]" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs text-white/60">Email</p>
-                      <p className="text-sm font-medium truncate">{previewData.email}</p>
+                      <p className="text-xs text-white/60">Nom d'activity</p>
+                      <p className="text-sm font-medium truncate">{profile?.businessName}</p>
                     </div>
                   </div>
 
@@ -276,7 +271,7 @@ export function ProfilePage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-white/60">Téléphone</p>
-                      <p className="text-sm font-medium">{previewData.phone}</p>
+                      <p className="text-sm font-medium">{profile?.phone}</p>
                     </div>
                   </div>
 
@@ -285,8 +280,8 @@ export function ProfilePage() {
                       <Building2 className="w-4 h-4 text-[#F8BC00]" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs text-white/60">Département</p>
-                      <p className="text-sm font-medium">{previewData.department}</p>
+                      <p className="text-xs text-white/60">Type d'activite</p>
+                      <p className="text-sm font-medium">{profile?.activityType}</p>
                     </div>
                   </div>
 
@@ -295,18 +290,8 @@ export function ProfilePage() {
                       <MapPin className="w-4 h-4 text-[#F8BC00]" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs text-white/60">Ville</p>
-                      <p className="text-sm font-medium">{previewData.city}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-[#F8BC00]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Calendar className="w-4 h-4 text-[#F8BC00]" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-white/60">Membre depuis</p>
-                      <p className="text-sm font-medium">{previewData.joinDate}</p>
+                      <p className="text-xs text-white/60">Addresse</p>
+                      <p className="text-sm font-medium">{profile?.address}</p>
                     </div>
                   </div>
                 </div>

@@ -4,12 +4,16 @@ import { Bell, User, Sun, Moon, Calendar, Menu, X } from "lucide-react";
 interface ContentHeaderProps {
   onMenuClick: () => void;
   isSidebarOpen: boolean;
+  autoEData: {
+    firstName: string,
+    lastName: string,
+    businessName: string,
+  }
 }
 
-export function ContentHeader({ onMenuClick, isSidebarOpen }: ContentHeaderProps) {
+export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: ContentHeaderProps) {
   const [isDark, setIsDark] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
 
   // Get current date
   const today = new Date();
@@ -105,20 +109,19 @@ export function ContentHeader({ onMenuClick, isSidebarOpen }: ContentHeaderProps
           {/* User Profile Menu */}
           <div className="relative">
             <button
-              onClick={() => setShowProfile(!showProfile)}
               className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-3 pr-2 sm:pr-4 py-2 rounded-[12px] bg-gray-50 hover:bg-[#2D3194]/5 transition-all duration-300 hover:border hover:border-[#2D3194]"
             >
               <div className="w-8 h-8 rounded-[10px] bg-[#2D3194] flex items-center justify-center">
                 <User className="w-4 h-4 text-white" strokeWidth={2} />
               </div>
               <div className="text-left hidden lg:block">
-                <p className="text-sm text-[#1A1A1A] font-medium">Rajesh Kumar</p>
-                <p className="text-xs text-[#7A7A7A]">Sr. Manager</p>
+                <p className="text-sm text-[#1A1A1A] font-medium">{autoEData.firstName} {autoEData.lastName}</p>
+                <p className="text-xs text-[#7A7A7A]">{autoEData.businessName}</p>
               </div>
             </button>
 
             {/* Profile Dropdown */}
-            {showProfile && (
+            {/* {showProfile && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-[18px] shadow-[0_4px_24px_rgba(0,0,0,0.08)] border border-gray-100 p-4">
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
@@ -148,7 +151,7 @@ export function ContentHeader({ onMenuClick, isSidebarOpen }: ContentHeaderProps
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
