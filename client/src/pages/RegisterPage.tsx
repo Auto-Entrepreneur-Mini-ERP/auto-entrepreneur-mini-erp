@@ -8,22 +8,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import AuthBranding from "../components/auth/AuthBranding";
 import NeedHelpSection from "../components/auth/NeedHelpSection";
 import Logo from "../components/Logo";
+import { useAuthenticate } from "../hooks/useAuthneticate";
+import type { RegisterFormData } from "../types/auth.types";
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    businessName: "",
     activityType: "",
+    ice: "",
     password: "",
-    confirmPassword: "",
+    passwordConfirmation: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+
+  const { errors, register } = useAuthenticate();
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -34,11 +39,11 @@ export function RegisterPage() {
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.SubmitEvent) => {
     e.preventDefault();
     
     // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.passwordConfirmation) {
       setPasswordError("Passwords do not match");
       return;
     }
@@ -50,17 +55,12 @@ export function RegisterPage() {
     }
 
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      // Set authentication flag
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userEmail", formData.email);
-      localStorage.setItem("userName", `${formData.firstName} ${formData.lastName}`);
-      
-      setIsLoading(false);
-      navigate("/app/dashboard");
-    }, 1000);
+    const result = await register(formData);
+        
+    setIsLoading(false);
+    if (result) {
+      navigate("/login");
+    }
   };
 
   return (
@@ -84,6 +84,10 @@ export function RegisterPage() {
 
           {/* Register Form */}
           <form onSubmit={handleRegister} className="space-y-5">
+            {/* Errors */}
+            {errors && (  
+                <p  className="text-sm text-red-600">{errors}</p>
+              )}
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -136,24 +140,41 @@ export function RegisterPage() {
               </div>
             </div>
 
-            {/* Phone Field */}
+            {/* Business Name Field */}
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-gray-700">Numéro de téléphone</Label>
+              <Label htmlFor="businessName" className="text-gray-700">Nom d' Activité</Label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  value={formData.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
+                  id="businessName"
+                  type="text"
+                  placeholder="Nom de votre organisation"
+                  value={formData.businessName}
+                  onChange={(e) => handleChange("businessName", e.target.value)}
                   required
                   className="pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
                 />
               </div>
             </div>
 
-            {/* Department Field */}
+            {/* ICE Field */}
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-gray-700">Numéro de ICE</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  id="ice"
+                  type="number"
+                  placeholder="123456789"
+                  value={formData.ice}
+                  onChange={(e) => handleChange("ice", e.target.value)}
+                  required
+                  className="pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
+                />
+              </div>
+            </div>
+
+            {/* Activity Field */}
             <div className="space-y-2">
               <Label htmlFor="department" className="text-gray-700">Type d'activite</Label>
               <div className="relative">
@@ -203,8 +224,8 @@ export function RegisterPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Ressaisissez votre mot de passe"
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleChange("confirmPassword", e.target.value)}
+                  value={formData.passwordConfirmation}
+                  onChange={(e) => handleChange("passwordConfirmation", e.target.value)}
                   required
                   className="pl-10 pr-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl"
                 />
@@ -220,27 +241,6 @@ export function RegisterPage() {
                 <p className="text-sm text-red-600">{passwordError}</p>
               )}
             </div>
-
-            {/* Terms Agreement */}
-            {/* <div className="flex items-start gap-2">
-              <Checkbox
-                id="terms"
-                checked={agreedToTerms}
-                onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-                required
-                className="mt-1 border-gray-300 data-[state=checked]:bg-[#2D3194] data-[state=checked]:border-[#2D3194]"
-              />
-              <Label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer leading-relaxed">
-                I agree to the{" "}
-                <button type="button" className="text-[#2D3194] hover:text-[#F8BC00] font-medium">
-                  Terms of Service
-                </button>{" "}
-                and{" "}
-                <button type="button" className="text-[#2D3194] hover:text-[#F8BC00] font-medium">
-                  Privacy Policy
-                </button>
-              </Label>
-            </div> */}
 
             {/* Submit Button */}
             <Button

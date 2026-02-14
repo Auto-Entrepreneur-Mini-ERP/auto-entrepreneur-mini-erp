@@ -1,4 +1,5 @@
 import { Prisma } from "../../../generated/prisma/client.js";
+import { aws } from "../../lib/aws.js";
 import { prisma } from "../../lib/prisma.js";
 import { pagination } from "../../utils/pagination.js";
 import { autoentrepreneurExists } from "../auto-entrepreneur/utils/autoentrepreneurExists.js";
@@ -37,18 +38,17 @@ const getOneDocument = async (autoentrepreneurId: string, documentId: string) =>
 };
 
 const createDocument = async (autoentrepreneurId: string, data: DocumentCreateInput, file: Express.Multer.File) => {
-    autoentrepreneurExists(autoentrepreneurId);
-    console.log(file);
-    
+    autoentrepreneurExists(autoentrepreneurId);    
 
     //upload file to  AWS S3 bucket
-    
+    await aws.s3Upload(file);
 
+    const fileUrl: string = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${Date.now()}-${file.originalname}`;
     const DocumentInputData: Prisma.DocumentCreateInput = {
         name: data.name,
         type: file.mimetype,
         category: data.category || null,
-        fileUrl: 'comes from aws',
+        fileUrl: fileUrl,
         fileSize: file.size,
         description: data.description || null,
         AutoEntrepreneur: {

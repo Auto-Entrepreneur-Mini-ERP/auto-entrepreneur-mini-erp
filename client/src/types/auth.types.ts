@@ -5,8 +5,8 @@
 // }
 
 export interface RegisterFormData {
-    firstname: string,
-    lastname: string,
+    firstName: string,
+    lastName: string,
     email: string,
     businessName: string,
     activityType: string,

@@ -11,6 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { useNavigate } from "react-router";
+import Logo from "./Logo";
 
 interface SidebarProps {
   activeSection: string;
@@ -48,8 +49,8 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   return (
     <aside className="h-screen bg-white border-r border-gray-100 flex flex-col overflow-hidden">
       {/* Logo Section */}
-      <div className="px-6 py-8 flex-shrink-0">
-        <div className="flex items-center gap-3">
+      <div className="px-4 py-4 flex-shrink-0">
+        {/* <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-[#2D3194] rounded-2xl flex items-center justify-center shadow-sm">
             <span className="text-white font-bold text-lg">IC</span>
           </div>
@@ -57,7 +58,8 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
             <h2 className="text-[#2D3194]">ICSA ERP</h2>
             <p className="text-[#7A7A7A] text-sm">Plateforme Logistique</p>
           </div>
-        </div>
+        </div> */}
+        <Logo />
       </div>
 
       {/* Navigation Menu */}

@@ -1,20 +1,23 @@
 import { Outlet, useNavigate, useLocation } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar } from "../components/Sidebar";
 import { ContentHeader } from "../components/ContentHeader";
+import { useAutoEntrepreneur } from "../hooks/useAutoEntrepreneur";
 
 export function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const { headerData, getHeaderData } = useAutoEntrepreneur();
   // Route protection disabled for inspection
-  // useEffect(() => {
-  //   const isAuthenticated = localStorage.getItem("isAuthenticated");
-  //   if (!isAuthenticated) {
-  //     navigate("/login");
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    const isAuthenticated = document.cookie;
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+    getHeaderData();    
+  }, [navigate]);
 
   // Map URL paths to sidebar sections
   const pathToSection: Record<string, string> = {
@@ -76,6 +79,7 @@ export function DashboardLayout() {
         <ContentHeader 
           onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
           isSidebarOpen={isSidebarOpen}
+          autoEData={headerData}
         />
         
         {/* Page Content */}
