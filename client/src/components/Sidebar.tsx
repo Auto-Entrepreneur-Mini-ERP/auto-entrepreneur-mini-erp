@@ -1,4 +1,15 @@
-import { LayoutDashboard, Package, FileText, CreditCard, FileCheck, Building, BarChart3, User, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  FileText,
+  CreditCard,
+  FileCheck,
+  Building,
+  BarChart3,
+  User,
+  LogOut,
+  Users,
+} from "lucide-react";
 import { useNavigate } from "react-router";
 
 interface SidebarProps {
@@ -28,6 +39,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
     { name: "Articles & Services", icon: Package },
     { name: "Quots & Invoices", icon: FileText },
     { name: "Payments & Expenses", icon: CreditCard },
+    { name: "Customers", icon: Users },
     { name: "CA Declaration", icon: FileCheck },
     { name: "CNSS Payment", icon: Building },
     { name: "Analytics", icon: BarChart3 },

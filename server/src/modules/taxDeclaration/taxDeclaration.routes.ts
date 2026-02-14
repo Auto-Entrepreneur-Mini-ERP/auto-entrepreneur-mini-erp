@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { taxDeclartaionController } from "./taxDeclaration.controller.js";
- import { validate } from "../../middlewares/validation.middleware.js";
+ import { validateBody } from "../../middlewares/validation.middleware.js";
 
 import {
   createTaxDeclarationRoute,
@@ -12,13 +12,13 @@ router.get("/taxDeclarations", taxDeclartaionController.getAllTaxDeclartion);
 
 router.post(
   "/taxDeclarations",
-  validate(createTaxDeclarationRoute),
+  validateBody(createTaxDeclarationRoute),
   taxDeclartaionController.createTaxDeclaration,
 );
  
 router.patch(
   "/taxDeclarations/:id",
-  validate(updateTaxDeclarationRoute),
+  validateBody(updateTaxDeclarationRoute),
   taxDeclartaionController.patchTaxDeclaration,
 );
 

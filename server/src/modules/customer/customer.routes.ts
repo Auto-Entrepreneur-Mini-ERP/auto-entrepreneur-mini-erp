@@ -20,7 +20,7 @@ router.post(
 
  router.patch(
    "/customers",
-   validate(patchCustomerSchema),
+   validateBody(patchCustomerSchema),
    customerController.updateCustomer,
  );
  
