@@ -1,39 +1,41 @@
-import { TrendingUp, FileText, CreditCard, Package } from "lucide-react";
+import { Landmark, FileText, HandCoins, BanknoteArrowDown } from "lucide-react";
+import type { kpis } from "../../types/dashboard.types";
 
-export function KPICards() {
+type KPICardsProps = {
+  kpisData: kpis;
+}
+
+export function KPICards({ kpisData }: KPICardsProps) {
+  
   const kpis = [
     {
-      icon: TrendingUp,
-      label: "Turnover (This Month)",
-      value: "₹42.5L",
-      trend: "positive",
+      icon: Landmark,
+      label: "Chiffre d'affaire (ce mois)",
+      value:  kpisData.CAmois + " DHs",
       bgColor: "bg-green-50",
       iconColor: "text-green-600",
       valueColor: "text-green-700"
     },
     {
       icon: FileText,
-      label: "Unpaid Invoices",
-      value: "23",
-      trend: "alert",
+      label: "Factures non Payeé",
+      value: kpisData.unpaidInvoices,
       bgColor: "bg-orange-50",
       iconColor: "text-orange-600",
       valueColor: "text-orange-700"
     },
     {
-      icon: CreditCard,
-      label: "Total Payments Received",
-      value: "₹38.2L",
-      trend: "positive",
+      icon: HandCoins,
+      label: "Revenues Nett",
+      value: kpisData.netRevenues + " DHs",
       bgColor: "bg-green-50",
       iconColor: "text-green-600",
       valueColor: "text-green-700"
     },
     {
-      icon: Package,
-      label: "Low Stock Products",
-      value: "8",
-      trend: "alert",
+      icon: BanknoteArrowDown,
+      label: "Depences",
+      value: kpisData.depenses + " DHs",
       bgColor: "bg-red-50",
       iconColor: "text-red-600",
       valueColor: "text-red-700"

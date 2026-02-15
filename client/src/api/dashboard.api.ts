@@ -2,8 +2,6 @@ import { api } from "./axios";
 
 const getKPIs = async () => {
     const kpis = await api.get('/analytics/overview');
-    console.log(kpis);
-    
     return kpis;
 };
 

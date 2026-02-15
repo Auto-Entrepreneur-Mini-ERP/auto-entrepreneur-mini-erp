@@ -1,6 +1,13 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
-const s3 = new S3Client();
+// const s3 = new S3Client();
+const s3 = new S3Client({
+  region: process.env.AWS_REGION || 'global',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
+  }
+});
 
 const s3Upload = async (file: Express.Multer.File) => {
     const param = {

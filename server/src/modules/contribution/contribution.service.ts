@@ -23,7 +23,7 @@ const getOneContribution = async (autoEntrepreneurId: string, contributionId: st
     autoentrepreneurExists(autoEntrepreneurId);
     contributionExists(contributionId);
 
-    const contribution = await prisma.contribution.findMany({
+    const contribution = await prisma.contribution.findUnique({
         where:{
             id: contributionId,
             AutoEntrepreneurId: autoEntrepreneurId,

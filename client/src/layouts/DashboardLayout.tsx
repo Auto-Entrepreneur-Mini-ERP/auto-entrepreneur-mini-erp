@@ -23,10 +23,10 @@ export function DashboardLayout() {
   const pathToSection: Record<string, string> = {
     "/app/dashboard": "Dashboard",
     "/app/articles-services": "Articles & Services",
-    "/app/quots-invoices": "Quots & Invoices",
-    "/app/payments-expenses": "Payments & Expenses",
-    "/app/ca-declaration": "CA Declaration",
-    "/app/cnss-payment": "CNSS Payment",
+    "/app/quots-invoices": "Devis & Factures",
+    "/app/payments-expenses": "Paiments & Dépenses",
+    "/app/ca-declaration": "Déclaration Chiffre d'affaire",
+    "/app/cnss-payment": "Paiment CNSS",
     "/app/analytics": "Analytics",
     "/app/profile": "Profile",
   };
@@ -37,10 +37,10 @@ export function DashboardLayout() {
     const sectionToPath: Record<string, string> = {
       "Dashboard": "/app/dashboard",
       "Articles & Services": "/app/articles-services",
-      "Quots & Invoices": "/app/quots-invoices",
-      "Payments & Expenses": "/app/payments-expenses",
-      "CA Declaration": "/app/ca-declaration",
-      "CNSS Payment": "/app/cnss-payment",
+      "Devis & Factures": "/app/quots-invoices",
+      "Paiments & Dépenses": "/app/payments-expenses",
+      "Déclaration Chiffre d'affaire": "/app/ca-declaration",
+      "Paiment CNSS": "/app/cnss-payment",
       "Analytics": "/app/analytics",
     };
     

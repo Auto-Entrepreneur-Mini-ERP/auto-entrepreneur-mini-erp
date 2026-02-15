@@ -20,7 +20,7 @@ app.get('/api', async (req: express.Request, res: express.Response) => {
 });
 
 app.use(cors({
-  "origin": "http://localhost:5173",
+  "origin": env.FRONT_END_URL || "http://localhost:5173",
   "credentials": true
 }));
 app.use(helmet());
