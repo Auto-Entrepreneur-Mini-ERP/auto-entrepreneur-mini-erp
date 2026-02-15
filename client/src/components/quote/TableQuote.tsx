@@ -14,7 +14,7 @@ type DocumentProps = {
 function TableQuote({ documents }: DocumentProps) {
     return (
         <>
-            <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+            <div className="w-full bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>

@@ -1,26 +1,27 @@
-import { FileText, Plus, Search, Eye, Download, Send } from "lucide-react";
+import { FileText, Plus, Search, Eye, Download, Send, ChevronDownIcon } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Modal } from "../../components/ui/modal";
 import { useState } from "react";
 import ModalCreateInvoice from "../../components/invoice/ModalCreateInvoice";
 import TableInvoice from "../../components/invoice/TableInvoice";
 import TableQuote from "../../components/quote/TableQuote";
 import ModalCreateQuote from "../../components/quote/ModalCreateQuote";
 
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../../components/ui/collapsible"
+import { Card, CardContent } from "../../components/ui/card";
+import { useInvoice } from "../../hooks/useInvoice";
+
 export function QuotsInvoicesView() {
+
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
 
-  
-
-  const [invoiceDocuments, setInvoiceDocuments] = useState([
-    { id: "INV-2024-045", type: "Facture", client: "Logistique Pro", date: "12/01/2024", amount: "3,800.00", status: "Payée" },
-    { id: "INV-2024-044", type: "Facture", client: "Distribution SA", date: "08/01/2024", amount: "5,600.00", status: "En attente" },
-    { id: "INV-2024-043", type: "Facture", client: "Express Ltd", date: "05/01/2024", amount: "890.00", status: "Payée" },
-    { id: "INV-2024-043", type: "Facture", client: "Express Ltd", date: "05/01/2024", amount: "890.00", status: "Payée" },
-  ]);
+  const [openQuote, setOpenQuote] = useState(true);
+  const [openInvoice, setOpenInvoice] = useState(true);
 
   const [quoteDocuments, setQuoteDocuments] = useState([
     { id: "QT-2024-001", type: "Devis", client: "Société XYZ", date: "15/01/2024", amount: "2,450.00", status: "En attente" },
@@ -89,16 +90,43 @@ export function QuotsInvoicesView() {
       </div> */}
 
       {/* Table Quote */}
-      <TableQuote documents={quoteDocuments} />
+      <Card className="mx-auto w-full max-w-sm mt-4">
+        <CardContent>
+          <Collapsible open={openQuote} onOpenChange={setOpenQuote} className="data-[state=open]:bg-muted rounded-md w-full">
+            <CollapsibleTrigger className="my-2" asChild>
+              <Button variant="ghost" className="group w-full text-md hover:bg-none">
+                Devis
+                <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180" />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="flex flex-col items-center gap-2 p-2.5 pt-0 mt-2 w-full">
+              <TableQuote documents={quoteDocuments} />
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
+      </Card>
 
       {/* Table Invoice */}
-      <TableInvoice documents={invoiceDocuments}/>
-      
+      <Card className="mx-auto w-full max-w-sm mt-4">
+        <CardContent>
+          <Collapsible open={openInvoice} onOpenChange={setOpenInvoice} className="data-[state=open]:bg-muted rounded-md w-full">
+            <CollapsibleTrigger className="my-2" asChild>
+              <Button variant="ghost" className="group w-full text-md">
+                Factures
+                <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180" />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="flex flex-col items-center gap-2 p-2.5 pt-0 mt-2 w-full">
+              <TableInvoice />
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
+      </Card>
 
       {/* Quote Modal */}
       <ModalCreateQuote isQuoteModalOpen={isQuoteModalOpen} setIsQuoteModalOpen={setIsQuoteModalOpen} />
 
-      {/* Invoice Modal */}     
+      {/* Invoice Modal */}
       <ModalCreateInvoice isInvoiceModalOpen={isInvoiceModalOpen} setIsInvoiceModalOpen={setIsInvoiceModalOpen} />
     </div>
   );
