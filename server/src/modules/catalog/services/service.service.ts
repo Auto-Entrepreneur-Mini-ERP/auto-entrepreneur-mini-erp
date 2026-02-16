@@ -1,6 +1,8 @@
-import { PrismaClient } from '../../generated/prisma/client.js';// import { Prisma } from "@prisma/client";
-import { prisma } from "../../lib/prisma.js";
-import type { Prisma } from "../../../generated/prisma/browser.js";
+// import { PrismaClient } from '@prisma/client';
+// import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+import type { Prisma } from '@prisma/client';
 
 import type { 
   CreateServiceInput, 
@@ -17,11 +19,11 @@ export class ServiceService {
       throw new Error('At least one rate (hourly or fixed) is required');
     }
 
-    return prisma.$transaction(async (tx: PrismaClient) => {
+    return prisma.$transaction(async (tx) => {
       const item = await tx.item.create({
         data: {
           name: data.name,
-          description: data.description,
+          description: data.description ?? null,
           unit: data.unit,
           category: data.category,
           isActive: true
@@ -35,8 +37,7 @@ export class ServiceService {
           hourlyRate: data.hourlyRate,
           fixedRate: data.fixedRate,
           estimatedDuration: data.estimatedDuration,
-          autoEntrepreneurId: data.autoEntrepreneurId
-        }
+          AutoEntrepreneurId: data.autoEntrepreneurId       }
       });
 
       return {
@@ -50,7 +51,8 @@ export class ServiceService {
     const whereClause: Prisma.ItemWhereInput = {
       isActive: true,
       service: {
-        autoEntrepreneurId
+          AutoEntrepreneurId: autoEntrepreneurId
+
       }
     };
 
@@ -60,8 +62,7 @@ export class ServiceService {
     
     if (filters?.name) {
       whereClause.name = {
-        contains: filters.name,
-        mode: 'insensitive' as Prisma.QueryMode
+        contains: filters.name ?? null,
       };
     }
 
@@ -79,12 +80,8 @@ export class ServiceService {
 
     const services = await prisma.item.findMany({
       where: whereClause,
-      include: {
-        service: true
-      },
-      orderBy: {
-        creationDate: 'desc'
-      }
+     include: { service: true },
+    orderBy: { creationDate: 'desc' }
     });
 
     return services as ServiceWithItem[];
@@ -96,7 +93,7 @@ export class ServiceService {
         id,
         isActive: true,
         service: {
-          autoEntrepreneurId
+        AutoEntrepreneurId: autoEntrepreneurId
         }
       },
       include: {
@@ -116,7 +113,7 @@ export class ServiceService {
       throw new Error('At least one rate (hourly or fixed) must be provided');
     }
 
-    return prisma.$transaction(async (tx: PrismaClient) => {
+    return prisma.$transaction(async (tx) => {
       const itemUpdateData: Prisma.ItemUpdateInput = {};
       if (data.name !== undefined) itemUpdateData.name = data.name;
       if (data.description !== undefined) itemUpdateData.description = data.description;
@@ -139,7 +136,7 @@ export class ServiceService {
         await tx.service.update({
           where: { 
             id,
-            autoEntrepreneurId
+            AutoEntrepreneurId: autoEntrepreneurId
           },
           data: serviceUpdateData
         });

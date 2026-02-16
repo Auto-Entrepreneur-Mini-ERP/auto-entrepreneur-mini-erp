@@ -1,4 +1,4 @@
-import type { ActivityType } from "../../../generated/prisma/enums.js";
+import type { ActivityType } from "@prisma/client";
 
 export interface User {
   email: string;

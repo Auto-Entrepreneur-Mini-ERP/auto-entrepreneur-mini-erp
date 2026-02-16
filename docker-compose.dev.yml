@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   backend:
@@ -10,6 +9,7 @@ services:
     ports:
       - "3001:3001" 
       - "9229:9229" # this port is for debugging 
+      - "51212:51212" # this port is for prisma studio
     depends_on:
       - mysql           
     volumes:

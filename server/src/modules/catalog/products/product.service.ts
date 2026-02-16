@@ -1,145 +1,264 @@
-// src/modules/catalog/products/product.service.ts
-import { PrismaClient } from "@prisma/client";
-import type { Prisma } from "../../../generated/prisma/browser.js";
+import { prisma } from "../../../lib/prisma.js";
+// import type { Prisma } from "../../../../generated/prisma/browser.js";
+import { PrismaClient } from '@prisma/client';
+import type { Prisma } from "@prisma/client";
 
 import type {
   CreateProductInput,
   UpdateProductInput,
-  UpdateStockInput,
   ProductFilters,
   ProductWithItem,
 } from "./product.types.js";
 
-const prisma = new PrismaClient();
-
 export class ProductService {
-  async createProduct(data: CreateProductInput & { autoEntrepreneurId: string }): Promise<ProductWithItem> {
-    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+
+  async createProduct(
+    data: CreateProductInput & { autoEntrepreneurId: string }
+  ): Promise<ProductWithItem> {
+
+    return prisma.$transaction(async (tx) => {
       const item = await tx.item.create({
         data: {
           name: data.name,
           description: data.description ?? null,
           unit: data.unit,
           category: data.category ?? null,
-          isActive: true,
-        },
+          isActive: true
+        }
       });
 
       const product = await tx.product.create({
         data: {
           id: item.id,
           itemId: item.id,
-          unitPrice: typeof data.unitPrice === "string" ? parseFloat(data.unitPrice) : data.unitPrice,
+          unitPrice: typeof data.unitPrice === "string"
+            ? parseFloat(data.unitPrice)
+            : data.unitPrice,
           reference: data.reference ?? null,
           stockQuantity: data.stockQuantity ?? 0,
           alertThreshold: data.alertThreshold ?? 0,
-          autoEntrepreneurId: data.autoEntrepreneurId,
-        },
+          AutoEntrepreneurId: data.autoEntrepreneurId
+        }
       });
 
-      return { ...item, product };
+      return {
+        ...item,
+        product: {
+          ...product,
+          autoEntrepreneurId: product.AutoEntrepreneurId,
+          unitPrice: Number(product.unitPrice)
+        }
+      };
     });
   }
 
-  // GET PRODUCTS WITH FILTERS
-  async getProducts(autoEntrepreneurId: string, filters?: ProductFilters): Promise<ProductWithItem[]> {
+
+  async getProducts(
+    autoEntrepreneurId: string,
+    filters?: ProductFilters
+  ): Promise<ProductWithItem[]> {
+
     const whereClause: Prisma.ItemWhereInput = {
       isActive: true,
-      product: { autoEntrepreneurId },
+      product: {
+        AutoEntrepreneurId: autoEntrepreneurId
+      }
     };
 
-    if (filters?.category) whereClause.category = filters.category;
-    if (filters?.name)
-      whereClause.name = { contains: filters.name, mode: "insensitive" };
-
-    if (filters?.minPrice || filters?.maxPrice) {
-      whereClause.product = {
-        ...whereClause.product,
-        unitPrice: {},
-      };
-      if (filters.minPrice !== undefined) (whereClause.product.unitPrice as Prisma.DecimalFilter).gte = filters.minPrice;
-      if (filters.maxPrice !== undefined) (whereClause.product.unitPrice as Prisma.DecimalFilter).lte = filters.maxPrice;
+    if (filters?.category) {
+      whereClause.category = filters.category;
     }
 
-    if (filters?.lowStock) {
+    if (filters?.name) {
+      whereClause.name = {
+        contains: filters.name
+      };
+    }
+
+    if (filters?.minPrice !== undefined || filters?.maxPrice !== undefined) {
+      const priceFilter: Prisma.DecimalFilter = {};
+      if (filters?.minPrice !== undefined) priceFilter.gte = filters.minPrice;
+      if (filters?.maxPrice !== undefined) priceFilter.lte = filters.maxPrice;
+      
       whereClause.product = {
         ...whereClause.product,
-        stockQuantity: { lte: 5 }, // default alert threshold, can adjust
-      };
+        unitPrice: priceFilter
+      } as Prisma.ProductWhereInput;
     }
 
     const products = await prisma.item.findMany({
       where: whereClause,
-      include: { product: true },
-      orderBy: { creationDate: "desc" },
+      include: {
+        product: true
+      },
+      orderBy: {
+        creationDate: "desc"
+      }
     });
 
-    return products as ProductWithItem[];
+    // Filter for lowStock if requested - compares stockQuantity to alertThreshold
+    // This requires post-query filtering since Prisma doesn't support field-to-field comparisons
+    let filteredProducts = products;
+    if (filters?.lowStock) {
+      filteredProducts = products.filter(item => 
+        item.product && item.product.stockQuantity <= item.product.alertThreshold
+      );
+    }
+
+    return filteredProducts.map(item => ({
+      ...item,
+      product: item.product ? {
+        ...item.product,
+        autoEntrepreneurId: item.product.AutoEntrepreneurId,
+        unitPrice: Number(item.product.unitPrice)
+      } : null
+    })) as ProductWithItem[];
   }
 
-  // GET SINGLE PRODUCT
-  async getProductById(id: string, autoEntrepreneurId: string): Promise<ProductWithItem | null> {
+
+  async getProductById(
+    id: string,
+    autoEntrepreneurId: string
+  ): Promise<ProductWithItem | null> {
+
     const product = await prisma.item.findFirst({
-      where: { id, isActive: true, product: { autoEntrepreneurId } },
-      include: { product: true },
+      where: {
+        id,
+        isActive: true,
+        product: {
+          AutoEntrepreneurId: autoEntrepreneurId
+        }
+      },
+      include: {
+        product: true
+      }
     });
 
-    return product as ProductWithItem | null;
+    if (!product) return null;
+
+    return {
+      ...product,
+      product: product.product ? {
+        ...product.product,
+        autoEntrepreneurId: product.product.AutoEntrepreneurId,
+        unitPrice: Number(product.product.unitPrice)
+      } : null
+    } as ProductWithItem;
   }
 
-  // UPDATE PRODUCT
-  async updateProduct(id: string, autoEntrepreneurId: string, data: UpdateProductInput): Promise<ProductWithItem | null> {
-    return prisma.$transaction(async (tx: { item: { update: (arg0: { where: { id: string; }; data: Prisma.ItemUpdateInput; }) => any; }; product: { update: (arg0: { where: { id: string; autoEntrepreneurId: string; }; data: Prisma.ProductUpdateInput; }) => any; }; }) => {
-      const itemUpdate: Prisma.ItemUpdateInput = {};
-      if (data.name !== undefined) itemUpdate.name = data.name;
-      if (data.description !== undefined) itemUpdate.description = data.description;
-      if (data.unit !== undefined) itemUpdate.unit = data.unit;
-      if (data.category !== undefined) itemUpdate.category = data.category;
-      if (data.isActive !== undefined) itemUpdate.isActive = data.isActive;
 
-      if (Object.keys(itemUpdate).length > 0) {
-        await tx.item.update({ where: { id }, data: itemUpdate });
+  async updateProduct(
+    id: string,
+    autoEntrepreneurId: string,
+    data: UpdateProductInput
+  ): Promise<ProductWithItem | null> {
+
+    return prisma.$transaction(async (tx) => {
+
+      const itemUpdateData: Prisma.ItemUpdateInput = {};
+
+      if (data.name !== undefined) itemUpdateData.name = data.name;
+      if (data.description !== undefined) itemUpdateData.description = data.description;
+      if (data.unit !== undefined) itemUpdateData.unit = data.unit;
+      if (data.category !== undefined) itemUpdateData.category = data.category;
+      if (data.isActive !== undefined) itemUpdateData.isActive = data.isActive;
+
+      if (Object.keys(itemUpdateData).length > 0) {
+        await tx.item.update({
+          where: { id },
+          data: itemUpdateData
+        });
       }
 
-      const productUpdate: Prisma.ProductUpdateInput = {};
-      if (data.unitPrice !== undefined)
-        productUpdate.unitPrice = typeof data.unitPrice === "string" ? parseFloat(data.unitPrice) : data.unitPrice;
-      if (data.reference !== undefined) productUpdate.reference = data.reference;
-      if (data.stockQuantity !== undefined) productUpdate.stockQuantity = data.stockQuantity;
-      if (data.alertThreshold !== undefined) productUpdate.alertThreshold = data.alertThreshold;
+      const productUpdateData: Prisma.ProductUpdateInput = {};
 
-      if (Object.keys(productUpdate).length > 0) {
-        await tx.product.update({ where: { id, autoEntrepreneurId }, data: productUpdate });
+      if (data.unitPrice !== undefined) {
+        productUpdateData.unitPrice =
+          typeof data.unitPrice === "string"
+            ? parseFloat(data.unitPrice)
+            : data.unitPrice;
       }
 
-      return this.getProductById(id, autoEntrepreneurId);
+      if (data.reference !== undefined)
+        productUpdateData.reference = data.reference;
+
+      if (data.stockQuantity !== undefined)
+        productUpdateData.stockQuantity = data.stockQuantity;
+
+      if (data.alertThreshold !== undefined)
+        productUpdateData.alertThreshold = data.alertThreshold;
+
+      if (Object.keys(productUpdateData).length > 0) {
+        await tx.product.update({
+          where: {
+            id,
+            AutoEntrepreneurId: autoEntrepreneurId
+          },
+          data: productUpdateData
+        });
+      }
+
+      const result = await this.getProductById(id, autoEntrepreneurId);
+      return result;
     });
   }
 
-  // UPDATE STOCK
-  async updateStock(id: string, autoEntrepreneurId: string, quantity: number): Promise<ProductWithItem | null> {
+
+  async updateStock(
+    id: string,
+    autoEntrepreneurId: string,
+    quantity: number
+  ): Promise<ProductWithItem | null> {
+
     const product = await prisma.product.update({
-      where: { id, autoEntrepreneurId },
-      data: { stockQuantity: { increment: quantity } },
-      include: { item: true },
+      where: {
+        id,
+        AutoEntrepreneurId: autoEntrepreneurId
+      },
+      data: {
+        stockQuantity: {
+          increment: quantity
+        }
+      },
+      include: {
+        item: true
+      }
     });
 
-    return { ...product.item, product } as ProductWithItem;
+    return {
+      ...product.item,
+      product: {
+        ...product,
+        autoEntrepreneurId: product.AutoEntrepreneurId,
+        unitPrice: Number(product.unitPrice)
+      }
+    } as ProductWithItem;
   }
 
-  // DELETE PRODUCT (soft delete)
-  async deleteProduct(id: string): Promise<void> {
+
+  async deleteProduct(
+    id: string,
+    autoEntrepreneurId: string
+  ): Promise<void> {
+
     await prisma.item.update({
       where: { id },
-      data: { isActive: false },
+      data: {
+        isActive: false
+      }
     });
   }
 
-  // CHECK PRODUCT USAGE
+
   async checkProductUsage(itemId: string): Promise<boolean> {
+
     const [invoiceLines, quoteLines] = await Promise.all([
-      prisma.invoiceLine.count({ where: { productId: itemId } }),
-      prisma.quoteLine.count({ where: { productId: itemId } }),
+      prisma.invoiceLine.count({
+        where: { productId: itemId }
+      }),
+      prisma.quoteLine.count({
+        where: { productId: itemId }
+      })
     ]);
 
     return invoiceLines > 0 || quoteLines > 0;

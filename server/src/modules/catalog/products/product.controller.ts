@@ -11,7 +11,6 @@ import type {
 
 const productService = new ProductService();
 
-// Helper function to extract ID from params
 const getParamId = (id: string | string[] | undefined): string => {
   if (!id) {
     throw new Error("ID parameter is required");
@@ -95,9 +94,7 @@ const convertFiltersToService = (filters: ProductFiltersInput): ServiceFilters =
   return result;
 };
 
-// ============================================
-// GET ALL PRODUCTS
-// ============================================
+
 const getProducts = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user?.id) {
     const response: ProductResponse = {
@@ -121,9 +118,7 @@ const getProducts = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json(response);
 });
 
-// ============================================
-// GET SINGLE PRODUCT
-// ============================================
+
 const getProduct = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user?.id) {
     const response: ProductResponse = {
