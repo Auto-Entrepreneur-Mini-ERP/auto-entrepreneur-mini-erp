@@ -23,11 +23,23 @@ export const useInvoice = () => {
         }
     };
 
+    const getCustomersNames = async (customerName: string) => {
+        const response = await invoiceApi.getAllCustomers(customerName);
+        return response;
+    }
+
+    const getArticlesNames = async (articleName: string) => {
+        const response = await invoiceApi.getAllArticles(articleName);
+        return response;
+    }
+
     return {
         errors,
         invoices,
         invoice,
         fetchInvoices,
-        getOneInvoice
+        getOneInvoice,
+        getCustomersNames,
+        getArticlesNames
     }
 };

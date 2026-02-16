@@ -8,9 +8,18 @@ type InvoiceStatus = {
     CANCELLED : "CANCELLED",
 }
 
-type LineType = {
+export type LineType = {
     PRODUCT : "PRODUCT",
     SERVICE : "SERVICE"
+}
+
+export const PaymentMethod = {
+  CASH : "CASH",
+  CHECK : "CHECK",
+  BANK_TRANSFER : "TRANSFERT BANCAIRE",
+  CREDIT_CARD : "CREDIT CARD",
+  MOBILE_PAYMENT : "MOBILE PAYMENT",
+  OTHER : "OTHER",
 }
 
 export interface Invoice {
@@ -30,16 +39,15 @@ export interface Invoice {
 export interface InvoiceLine {
     order: number,
     lineType: LineType,
-    description?: string,
     quantity: number,
     unitPrice: number,
-    totalPrice: number,
     productId?: string,
     serviceId?: string,
 };
 
 export interface CreateInvoiceData {
     customerId: string,
+    customerName: string,
     dueDate: Date,
     discount?: number,
     paidAmount?: number,
