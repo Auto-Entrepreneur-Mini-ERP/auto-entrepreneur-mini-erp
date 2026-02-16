@@ -37,3 +37,22 @@ export interface InvoiceLine {
     productId?: string,
     serviceId?: string,
 };
+
+export interface CreateInvoiceData {
+    customerId: string,
+    dueDate: Date,
+    discount?: number,
+    paidAmount?: number,
+    payementMethod?: string,
+    notes?: string,
+}
+
+export interface CreateInvoiceLineData{
+    order: number,
+    lineType: LineType,
+    description?: string,
+    quantity: number,
+    unitPrice: number,
+    productId?: string,
+    serviceId?: string,
+}
