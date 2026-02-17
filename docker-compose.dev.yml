@@ -6,7 +6,7 @@ services:
        context: ./server
     command: npx tsx watch --inspect=0.0.0.0:9229 src/server.ts # this command is for debuging use the next command for normal runing
 
-    # command: npm run dev            # Run app in dev mode with nodemon
+    #  command: npm run dev            # Run app in dev mode with nodemon
     ports:
       - "3001:3001" 
       - "9229:9229" # this port is for debugging 
@@ -22,7 +22,8 @@ services:
       - DB_PASSWORD=root
       - DB_NAME=auto_entrepreneur_erp_db
       - DATABASE_URL=mysql://root:root@mysql:3306/auto_entrepreneur_erp_db
-
+    depends_on:
+      - mysql
     networks:
       - mini-erp-network
 
@@ -35,8 +36,7 @@ services:
       MYSQL_DATABASE: auto_entrepreneur_erp_db
     volumes:
       - mysql_data:/var/lib/mysql   # Persistent DB storage
-    depends_on:
-      - backend
+    
     networks:
       - mini-erp-network
 

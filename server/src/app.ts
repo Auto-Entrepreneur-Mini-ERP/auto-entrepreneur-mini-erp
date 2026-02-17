@@ -10,7 +10,7 @@ import cookieParser from "cookie-parser";
 import type { AutoEntrepreneur } from "./modules/auto-entrepreneur/auto-entrepreneur.types.js";
 import rateLimit from "express-rate-limit";
 
-const app = express();
+const app = express()
 
 app.get('/api', async (req: express.Request, res: express.Response) => {
     return res.status(200).json({
