@@ -24,7 +24,7 @@ export const useInvoice = () => {
     };
 
     const getCustomersNames = async (customerName: string) => {
-        const response = await invoiceApi.getAllCustomers(customerName);
+        const response = await invoiceApi.getAllCustomers(customerName);        
         return response;
     }
 

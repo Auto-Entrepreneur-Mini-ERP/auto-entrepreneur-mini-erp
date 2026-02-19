@@ -56,6 +56,7 @@ function ModalCreateInvoice({
     const customerName = invoiceFormData?.customerName;
     // call cusomers api
     const res: { id: string, name: string }[] = await getCustomersNames(customerName as string);
+    
     if(res.length > 0) {
       setCustomerSearch(res);
       setShowCustomerSearch(true);
@@ -120,7 +121,7 @@ function ModalCreateInvoice({
                 <CircleX className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 mt-2" onClick={() => setShowCustomerSearch(false)} />
                 {showCustomerSearch && (
                   <div className="absolute w-[800px] border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-1000 bg-white">
-                    {customerSearch.map((customer) => (
+                    {customerSearch.length > 0 && customerSearch.map((customer) => (
                       <div onClick={handleSelectSuggestedCustomer(customer.id, customer.name)} key={customer.id} className="p-2 hover:bg-gray-100 cursor-pointer">
                         {customer.name}
                       </div>

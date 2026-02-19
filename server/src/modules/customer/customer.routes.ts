@@ -29,6 +29,12 @@ router.post(
    
   customerController.getCustomer,
 );
+
+ router.get(
+  "/customers",   
+  customerController.getCustomerByName,
+);
+
  router.delete("/customers/:id", customerController.deleteCustomer);
  
  router.get(

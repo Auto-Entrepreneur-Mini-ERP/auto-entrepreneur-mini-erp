@@ -6,7 +6,8 @@ import { AppError } from "../../utils/errorHandler.js";
 const getAllCustomers = async (req: Request, res: Response) => {
    
   try {
-    const customers = await customerService.getAllCustomers();
+    const autoentrepreneurId = req.AutoEntrepreneurID;
+    const customers = await customerService.getAllCustomers(autoentrepreneurId as string);
     debugger; // optional
 
     return res.status(200).json(customers);
@@ -73,6 +74,23 @@ const getCustomer = async (
   }
 };
 
+const getCustomerByName = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const { customerName } = req.params;
+    const customer = await customerService.getCustomerByName(customerName as string);
+    return res.status(200).json(customer);
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 
 const deleteCustomer = async (req: Request, res: Response) => {
   try {
@@ -123,6 +141,7 @@ export const customerController = {
   createCustomer,
   updateCustomer,
   getCustomer,
+  getCustomerByName,
   deleteCustomer,
   getAllInvoices,
   getAllQuotes,
