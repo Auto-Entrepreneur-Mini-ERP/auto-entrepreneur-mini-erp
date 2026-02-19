@@ -24,6 +24,17 @@ type ModalInvoiceProps = {
   setIsInvoiceModalOpen: (isOpen: boolean) => void;
 };
 
+type ArticleSearch = {
+  id: string,
+  type: string,
+  name: string,
+  category?: string,
+  product: {
+    unitPrice: number,
+    reference: string,
+  }
+};
+
 function ModalCreateInvoice({
   isInvoiceModalOpen,
   setIsInvoiceModalOpen,
@@ -36,7 +47,7 @@ function ModalCreateInvoice({
   const [invoiceLineFormData, setInvoiceLineFormData] = useState<CreateInvoiceLineData[]>([]);
 
   const [article, setArticle] = useState<string>("");
-  const [articleSearch, setArticleSearch] = useState<{ id: string, type: string, name: string, description: string, unitPrice: number }[]>([]);
+  const [articleSearch, setArticleSearch] = useState<ArticleSearch[]>([]);
   const [showArticleSearch, setShowArticleSearch] = useState(false);
 
   const [customerSearch, setCustomerSearch] = useState<{ id: string, name: string }[]>([]);
@@ -44,11 +55,9 @@ function ModalCreateInvoice({
 
   const handleInvoiceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Invoice:", invoiceFormData, "InvoiceLine:", invoiceLineFormData);
-
     // api all create invoice and invoice lines
     const result = await createInvoice(invoiceFormData as CreateInvoiceData, invoiceLineFormData);
-    if(result.data.statusCode && result.data.statusCode === 200){
+    if (result.data.statusCode && result.data.statusCode === 200) {
       navigate("/quots-invoices");
       setIsInvoiceModalOpen(false);
       setInvoiceFormData(undefined);
@@ -64,8 +73,8 @@ function ModalCreateInvoice({
     const customerName = invoiceFormData?.customerName;
     // call cusomers api
     const res: { id: string, name: string }[] = await getCustomersNames(customerName as string);
-    
-    if(res.length > 0) {
+
+    if (res.length > 0) {
       setCustomerSearch(res);
       setShowCustomerSearch(true);
     }
@@ -85,20 +94,19 @@ function ModalCreateInvoice({
     const searchTerm = article;
     // call articles api
     const res = await getArticlesNames(searchTerm as string);
-    
-    if(res.length > 0) {
+
+    if (res.length > 0) {
       setArticleSearch(res);
       setShowArticleSearch(true);
     }
   };
 
-  const handleSelectSuggestedArticle = (articleId: string, articleType: string, articleName: string, description: string, unitPrice: number) => () => {
+  const handleSelectSuggestedArticle = (articleId: string, articleType: string, unitPrice: number) => () => {
     setInvoiceLineFormData([
       ...invoiceLineFormData,
       {
         order: invoiceLineFormData.length + 1,
         lineType: articleType as unknown as LineType,
-        description: description,
         quantity: 1,
         unitPrice: unitPrice,
         productId: articleType === "PRODUCT" ? articleId : undefined,
@@ -191,6 +199,21 @@ function ModalCreateInvoice({
                 </Select>
               </div>
               <div>
+                <Label htmlFor="number">Réduction</Label>
+                <Input
+                  type="number"
+                  id="discount"
+                  value={invoiceFormData?.discount || ""}
+                  onChange={(e) =>
+                    setInvoiceFormData({
+                      ...invoiceFormData,
+                      discount: parseFloat(e.target.value),
+                    } as CreateInvoiceData)
+                  }
+                  className="h-10 mt-1 border-gray-200 rounded-xl"
+                />
+              </div>
+              <div>
                 <Label htmlFor="notes">Notes</Label>
                 <Input
                   type="text"
@@ -233,8 +256,8 @@ function ModalCreateInvoice({
                 {showArticleSearch && (
                   <div className="absolute w-full border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-10 bg-white">
                     {articleSearch.map((article) => (
-                      <div onClick={handleSelectSuggestedArticle(article.id, article.type, article.name, article.description, article.unitPrice)} key={article.id} className="p-2 hover:bg-gray-100 cursor-pointer">
-                        {article.name} - {article.type} - ${article.unitPrice}
+                      <div onClick={handleSelectSuggestedArticle(article.id, article.type, article.product.unitPrice)} key={article.id} className="p-2 hover:bg-gray-100 cursor-pointer">
+                        {article.name} - {article.type} - {article.category} - ${article.product.unitPrice}
                       </div>
                     ))}
                   </div>
@@ -247,11 +270,12 @@ function ModalCreateInvoice({
               <TableRow>
                 <TableHead className="w-[100px]">Order</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Referance Article/Service</TableHead>
+                <TableHead>Nom Article/Service</TableHead>
                 <TableHead>Designation</TableHead>
-                <TableHead>quantity</TableHead>
+                <TableHead>Quantite</TableHead>
                 <TableHead className="text-right">Prix unitaire</TableHead>
                 <TableHead className="text-right">Total</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -286,7 +310,7 @@ function ModalCreateInvoice({
             {invoiceLineFormData.length > 0 && (
               <TableFooter>
                 <TableRow className="text-md font-bold">
-                  <TableCell  colSpan={5}>Total</TableCell>
+                  <TableCell colSpan={5}>Total</TableCell>
                   <TableCell className="text-right">{invoiceLineFormData.reduce((total, line) => total + (line.quantity * line.unitPrice), 0)}</TableCell>
                 </TableRow>
               </TableFooter>

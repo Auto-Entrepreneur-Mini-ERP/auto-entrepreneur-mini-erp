@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Modal } from "../ui/modal";
-import type { CreateInvoiceData, CreateInvoiceLineData, Invoice, InvoiceLine, LineType } from "../../types/invoice.types";
+import type { Invoice, LineType, UpdateInvoiceData, UpdateInvoiceLineData } from "../../types/invoice.types";
 import {
   Table,
   TableBody,
@@ -14,112 +14,72 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { CircleArrowDown, CircleArrowUp, CircleX, HandCoins, Search } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { PaymentMethod } from "../../types/invoice.types";
+import { CircleArrowDown, CircleArrowUp, CircleX, Search } from "lucide-react";
 import { useInvoice } from "../../hooks/useInvoice";
 
 type ModalInvoiceProps = {
   isInvoiceModalOpen: boolean;
   setIsInvoiceModalOpen: (isOpen: boolean) => void;
-  invoiceId: string;
+  invoice: Invoice;
 };
 
 function ModalEditInvoice({
   isInvoiceModalOpen,
   setIsInvoiceModalOpen,
-  invoiceId
+  invoice
 }: ModalInvoiceProps) {
 
-  const { errors, invoice, getCustomersNames, getArticlesNames, getOneInvoice } = useInvoice();
+  const { errors, getArticlesNames, updateInvoice } = useInvoice();
 
-  const [invoiceFormData, setInvoiceFormData] = useState<CreateInvoiceData>();
-  const [invoiceLineFormData, setInvoiceLineFormData] = useState<CreateInvoiceLineData[]>([]);
+  const [invoiceFormData, setInvoiceFormData] = useState<UpdateInvoiceData>(invoice);
+  const [invoiceLineFormData, setInvoiceLineFormData] = useState<UpdateInvoiceLineData[]>(invoice?.invoiceLines);
 
-  const [article, setArticle] = useState<string>("");
   const [articleSearch, setArticleSearch] = useState<{ id: string, type: string, name: string, description: string, unitPrice: number }[]>([]);
-  const [showArticleSearch, setShowArticleSearch] = useState(false);
+  const [showArticleSearch, setShowArticleSearch] = useState(false);  
 
-  const [customerSearch, setCustomerSearch] = useState<{ id: string, name: string }[]>([]);
-  const [showCustomerSearch, setShowCustomerSearch] = useState(false);
+  useEffect(()=>{
+    setInvoiceFormData({
+      dueDate: invoice?.dueDate,
+      notes: invoice?.note
+    })
+    setInvoiceLineFormData(invoice?.invoiceLines)
+  }, [invoice])  
 
-  useEffect(() => {
-    if(invoiceId) {
-      // fetch invoice data and set it to form data
-      (
-        async () => {
-          await getOneInvoice(invoiceId);
-          setInvoiceFormData({
-            customerId: invoice?.customerId as string,
-            dueDate: ne,
-            paidAmount: invoice?.paidAmount,
-            payementMethod: invoice?.payementMethod as PaymentMethod,
-            notes: invoice?.note,
-          });
-          setInvoiceLineFormData(invoice?.InvoiceLine as InvoiceLine[]);
-        }
-      )();
-      
-    }
-  }, []);
-
-  const handleInvoiceSubmit = (e: React.FormEvent) => {
+  const handleInvoiceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Invoice:", invoiceFormData, "InvoiceLine:", invoiceLineFormData);
+    console.log(invoiceLineFormData);
 
     // api all create invoice and invoice lines
-    setIsInvoiceModalOpen(false);
-    setInvoiceFormData(undefined);
-    setInvoiceLineFormData([]);
-  };
-
-  const handleCustomerNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInvoiceFormData({
-      ...invoiceFormData,
-      customerName: e.target.value,
-    } as CreateInvoiceData);
-    const customerName = invoiceFormData?.customerName;
-    // call cusomers api
-    const res: { id: string, name: string }[] = await getCustomersNames(customerName as string);
-    
-    if(res.length > 0) {
-      setCustomerSearch(res);
-      setShowCustomerSearch(true);
+    await updateInvoice(invoice.id, invoiceFormData, invoiceLineFormData)
+    if(!errors){
+      setIsInvoiceModalOpen(false);
+      setInvoiceFormData({});
+      setInvoiceLineFormData([]);
     }
-  };
-
-  const handleSelectSuggestedCustomer = (customerId: string, customerName: string) => () => {
-    setInvoiceFormData({
-      ...invoiceFormData,
-      customerId,
-      customerName,
-    } as CreateInvoiceData);
-    setShowCustomerSearch(false);
   };
 
   const handleArticleNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setArticle(e.target.value);
-    const searchTerm = article;
+    const searchTerm = e.target.value;
     // call articles api
     const res = await getArticlesNames(searchTerm as string);
-    
-    if(res.length > 0) {
+
+    if (res?.length > 0) {
       setArticleSearch(res);
       setShowArticleSearch(true);
     }
   };
 
-  const handleSelectSuggestedArticle = (articleId: string, articleType: string, articleName: string, description: string, unitPrice: number) => () => {
+  const handleSelectSuggestedArticle = (articleId: string, articleType: string, description: string, unitPrice: number) => () => {
     setInvoiceLineFormData([
       ...invoiceLineFormData,
       {
         order: invoiceLineFormData.length + 1,
         lineType: articleType as unknown as LineType,
-        description: description,
+        description: description as string,
         quantity: 1,
-        unitPrice: unitPrice,
+        unitPrice: unitPrice as number,
         productId: articleType === "PRODUCT" ? articleId : undefined,
-        serviceId: articleType === "SERVICE" ? articleId : undefined,
+        serviceId: articleType === "PRODUCT" ? undefined : articleId,
       }
     ]);
     setShowArticleSearch(false);
@@ -139,40 +99,46 @@ function ModalEditInvoice({
           <form onSubmit={handleInvoiceSubmit}>
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
-                <Label htmlFor="client">Nom du client</Label>
+                <Label htmlFor="client">Numero du facture</Label>
                 <Input
+                  disabled
                   type="text"
                   id="client"
-                  value={invoiceFormData?.customerName || ""}
-                  onChange={(e) => handleCustomerNameChange(e)}
+                  value={invoice?.invoiceNumber}
                   className="h-10 mt-1 border-gray-200 rounded-xl"
                 />
-                <CircleX className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 mt-2" onClick={() => setShowCustomerSearch(false)} />
-                {showCustomerSearch && (
-                  <div className="absolute w-[800px] border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-1000 bg-white">
-                    {customerSearch.length > 0 && customerSearch.map((customer) => (
-                      <div onClick={handleSelectSuggestedCustomer(customer.id, customer.name)} key={customer.id} className="p-2 hover:bg-gray-100 cursor-pointer">
-                        {customer.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
+              </div>
+              <div className="relative">
+                <Label htmlFor="client">Nom du client</Label>
+                <Input
+                  disabled
+                  type="text"
+                  id="client"
+                  value={invoice?.customer.user.firstName + " " + invoice?.customer.user.lastName}
+                  className="h-10 mt-1 border-gray-200 rounded-xl"
+                />
+              </div>
+              <div>
+                <Label htmlFor="date">Date du facture</Label>
+                <Input
+                  disabled
+                  type="date"
+                  id="date"
+                  value={invoice?.issueDate.toString().split("T")[0]}
+                  className="h-10 mt-1 border-gray-200 rounded-xl"
+                />
               </div>
               <div>
                 <Label htmlFor="date">Date d'echeance</Label>
                 <Input
                   type="date"
                   id="date"
-                  value={
-                    new Date(invoiceFormData?.dueDate || new Date())
-                      .toISOString()
-                      .split("T")[0] || ""
-                  }
+                  value={invoiceFormData?.dueDate?.toString().split("T")[0]}
                   onChange={(e) =>
                     setInvoiceFormData({
                       ...invoiceFormData,
-                      dueDate: new Date(e.target.value),
-                    } as CreateInvoiceData)
+                      dueDate: new Date(e.target.value.toString().split("T")[0]),
+                    } as UpdateInvoiceData)
                   }
                   className="h-10 mt-1 border-gray-200 rounded-xl"
                 />
@@ -180,44 +146,58 @@ function ModalEditInvoice({
               <div>
                 <Label htmlFor="items">Montant payee</Label>
                 <Input
+                  disabled
                   type="number"
                   id="items"
-                  value={invoiceFormData?.paidAmount}
-                  onChange={(e) =>
-                    setInvoiceFormData({
-                      ...invoiceFormData,
-                      paidAmount: parseFloat(e.target.value) || 0,
-                    } as CreateInvoiceData)
-                  }
+                  value={invoice?.paidAmount}
                   className="h-10 mt-1 border-gray-200 rounded-xl"
                 />
               </div>
 
-              <div className="relative">
-                <Label htmlFor="items">Methode de paiement</Label>
-                <HandCoins className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 mt-2" />
-                <Select value={invoiceFormData?.payementMethod} onValueChange={(value: string) => setInvoiceFormData({ ...invoiceFormData, payementMethod: value } as CreateInvoiceData)} required>
-                  <SelectTrigger className=" mt-1 pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl">
-                    <SelectValue placeholder="Selectionnez la methode de paiement" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PaymentMethod && Object.values(PaymentMethod).map((method) => (
-                      <SelectItem key={method} value={method}>{method}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div>
+                <Label htmlFor="items">Montant Restant</Label>
+                <Input
+                  disabled
+                  type="number"
+                  id="items"
+                  value={invoice?.remainingAmount}
+                  className="h-10 mt-1 border-gray-200 rounded-xl"
+                />
               </div>
+
+              <div>
+                <Label htmlFor="items">Total Facture</Label>
+                <Input
+                  disabled
+                  type="number"
+                  id="items"
+                  value={invoice?.totalAmount}
+                  className="h-10 mt-1 border-gray-200 rounded-xl"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="items">Reduction</Label>
+                <Input
+                  disabled
+                  type="number"
+                  id="items"
+                  value={invoice?.discount}
+                  className="h-10 mt-1 border-gray-200 rounded-xl"
+                />
+              </div>
+
               <div>
                 <Label htmlFor="notes">Notes</Label>
                 <Input
                   type="text"
                   id="notes"
-                  value={invoiceFormData?.notes || ""}
+                  value={invoice?.note}
                   onChange={(e) =>
                     setInvoiceFormData({
                       ...invoiceFormData,
                       notes: e.target.value,
-                    } as CreateInvoiceData)
+                    } as UpdateInvoiceData)
                   }
                   className="h-10 mt-1 border-gray-200 rounded-xl"
                 />
@@ -228,7 +208,7 @@ function ModalEditInvoice({
                 type="submit"
                 className="bg-[#2D3194] hover:bg-[#1f2266] text-white h-10 px-6 rounded-xl"
               >
-                Créer Facture
+                Modifier Facture
               </Button>
             </div>
           </form>
@@ -250,7 +230,7 @@ function ModalEditInvoice({
                 {showArticleSearch && (
                   <div className="absolute w-full border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-10 bg-white">
                     {articleSearch.map((article) => (
-                      <div onClick={handleSelectSuggestedArticle(article.id, article.type, article.name, article.description, article.unitPrice)} key={article.id} className="p-2 hover:bg-gray-100 cursor-pointer">
+                      <div onClick={handleSelectSuggestedArticle(article.id, article.type, article.name, article.unitPrice)} key={article.id} className="p-2 hover:bg-gray-100 cursor-pointer">
                         {article.name} - {article.type} - ${article.unitPrice}
                       </div>
                     ))}
@@ -264,11 +244,13 @@ function ModalEditInvoice({
               <TableRow>
                 <TableHead className="w-[100px]">Order</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Referance Article/Service</TableHead>
+                <TableHead>Nom Article/Service</TableHead>
                 <TableHead>Designation</TableHead>
-                <TableHead>quantity</TableHead>
+                <TableHead>Quantite</TableHead>
                 <TableHead className="text-right">Prix unitaire</TableHead>
                 <TableHead className="text-right">Total</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -278,14 +260,12 @@ function ModalEditInvoice({
                     {invoice.order}
                   </TableCell>
                   <TableCell>{invoice.lineType.toString()}</TableCell>
+                  <TableCell>{invoice.product?.reference}</TableCell>
+                  <TableCell>{invoice.product?.item.name}</TableCell>
                   <TableCell>{invoice.description}</TableCell>
-                  <TableCell>{invoice.quantity}</TableCell>
-                  <TableCell className="text-right">
-                    {invoice.unitPrice}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {invoice.quantity * invoice.unitPrice}
-                  </TableCell>
+                  <TableCell className="text-center">{invoice.quantity}</TableCell>
+                  <TableCell className="text-right">{invoice.unitPrice} DHs</TableCell>
+                  <TableCell className="text-right">{invoice.quantity * invoice.unitPrice} DHs</TableCell>
                   <TableCell>
                     <Button variant="ghost" size="icon" onClick={() => setInvoiceLineFormData(invoiceLineFormData.filter((line) => line.quantity++))}>
                       <CircleArrowUp className="w-4 h-4" />
@@ -300,16 +280,16 @@ function ModalEditInvoice({
                 </TableRow>
               ))}
             </TableBody>
-            {invoiceLineFormData.length > 0 && (
+            {invoiceLineFormData?.length > 0 && (
               <TableFooter>
                 <TableRow className="text-md font-bold">
-                  <TableCell  colSpan={5}>Total</TableCell>
-                  <TableCell className="text-right">{invoiceLineFormData.reduce((total, line) => total + (line.quantity * line.unitPrice), 0)}</TableCell>
+                  <TableCell colSpan={7}>Total</TableCell>
+                  <TableCell className="text-right">{invoiceLineFormData.reduce((total, line) => total + (line.quantity * line.unitPrice), 0)} DHs</TableCell>
                 </TableRow>
               </TableFooter>
             )}
           </Table>
-          {invoiceLineFormData.length === 0 && (
+          {invoiceLineFormData?.length === 0 && (
             <p className="text-muted-foreground mt-4 text-sm text-center">Ajouter des articles ou des services.</p>
           )}
         </div>

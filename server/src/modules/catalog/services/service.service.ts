@@ -63,7 +63,6 @@ export class ServiceService {
     if (filters?.name) {
       whereClause.name = {
         contains: filters.name,
-        mode: 'insensitive' as Prisma.QueryMode
       };
     }
 
@@ -98,7 +97,7 @@ export class ServiceService {
         id,
         isActive: true,
         service: {
-          autoEntrepreneurId: autoEntrepreneurId
+          AutoEntrepreneurId: autoEntrepreneurId
         }
       },
       include: {
@@ -141,7 +140,7 @@ export class ServiceService {
         await tx.service.update({
           where: { 
             id,
-            autoEntrepreneurId: autoEntrepreneurId
+            AutoEntrepreneurId: autoEntrepreneurId
           },
           data: serviceUpdateData
         });

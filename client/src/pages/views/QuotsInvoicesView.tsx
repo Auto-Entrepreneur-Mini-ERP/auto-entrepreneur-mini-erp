@@ -98,7 +98,7 @@ export function QuotsInvoicesView() {
                 <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180" />
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="flex flex-col items-center gap-2 p-2.5 pt-0 mt-2 w-full">
+            <CollapsibleContent className="flex flex-col items-center gap-2 mb-2 mt-2 w-full">
               <TableQuote documents={quoteDocuments} />
             </CollapsibleContent>
           </Collapsible>
@@ -115,7 +115,7 @@ export function QuotsInvoicesView() {
                 <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180" />
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="flex flex-col items-center gap-2 p-2.5 pt-0 mt-2 w-full">
+            <CollapsibleContent className="flex flex-col items-center gap-2 pt-0 mb-2 mt-2 w-full">
               <TableInvoice />
             </CollapsibleContent>
           </Collapsible>

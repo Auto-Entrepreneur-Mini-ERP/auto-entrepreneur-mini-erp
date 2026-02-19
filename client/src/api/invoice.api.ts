@@ -1,4 +1,4 @@
-import type { CreateInvoiceData, CreateInvoiceLineData } from "../types/invoice.types";
+import type { CreateInvoiceData, CreateInvoiceLineData, UpdateInvoiceData, UpdateInvoiceLineData } from "../types/invoice.types";
 import { api } from "./axios";
 
 const getAllInvoices = async (page: number, limit: number) => {
@@ -27,7 +27,7 @@ const createInvoice = async (invoiceData: CreateInvoiceData, invoiceLinesData: C
         return response.data;
 };
 
-const updateInvoice = async (invoiceId: string, invoiceData: CreateInvoiceData, invoiceLinesData: CreateInvoiceLineData[]) => {
+const updateInvoice = async (invoiceId: string, invoiceData: UpdateInvoiceData, invoiceLinesData: UpdateInvoiceLineData[]) => {
     const response = await api.put("/invoice/"+invoiceId, { invoice: invoiceData, invoiceLine: invoiceLinesData });
     return response.data;
 }

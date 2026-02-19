@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Modal } from "../ui/modal";
@@ -11,29 +10,19 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { useInvoice } from "../../hooks/useInvoice";
-import { X } from "lucide-react";
+import type { Invoice } from "../../types/invoice.types";
 
 type ModalInvoiceProps = {
   isInvoiceModalOpen: boolean;
   setIsInvoiceModalOpen: (isOpen: boolean) => void;
-  invoiceId: string;
+  invoice: Invoice;
 };
 
 function ModalViewInvoice({
   isInvoiceModalOpen,
   setIsInvoiceModalOpen,
-  invoiceId,
+  invoice,
 }: ModalInvoiceProps) {
-
-  const { invoice, getOneInvoice } = useInvoice();
-
-
-  useEffect(() => {
-    (async ()=> {
-      getOneInvoice(invoiceId)
-    })();
-  }, []);  
 
   return (
     <>
@@ -45,84 +34,92 @@ function ModalViewInvoice({
         onClose={() => setIsInvoiceModalOpen(false)}
       >
         <div className="p-6">
-          <div className="absolute top-4 right-4">
-            <X onClick={() => setIsInvoiceModalOpen(false)} className="w-5 h-5 cursor-pointer text-gray-500 hover:text-red-700" />
-          </div>
-          
-            <div className="grid grid-cols-2 gap-4">
-              <div className="relative">
-                <Label htmlFor="client">Numero du facture</Label>
-                <Input
-                  disabled
-                  type="text"
-                  id="client"
-                  value={invoice?.invoiceNumber}
-                  className="h-10 mt-1 border-gray-200 rounded-xl"
-                />
-              </div>
-              <div className="relative">
-                <Label htmlFor="client">Nom du client</Label>
-                <Input
-                  disabled
-                  type="text"
-                  id="client"
-                  value={invoice?.customerId}
-                  className="h-10 mt-1 border-gray-200 rounded-xl"
-                />
-              </div>
-              <div>
-                <Label htmlFor="date">Date du facture</Label>
-                <Input
-                  disabled
-                  type="date"
-                  id="date"
-                  value={new Date(invoice?.issueDate as Date).toString().split("T")[0] || ""}
-                  className="h-10 mt-1 border-gray-200 rounded-xl"
-                />
-              </div>
-              <div>
-                <Label htmlFor="date">Date d'echeance</Label>
-                <Input
-                  disabled
-                  type="date"
-                  id="date"
-                  value={new Date(invoice?.dueDate as Date).toString().split("T")[0] || ""}
-                  className="h-10 mt-1 border-gray-200 rounded-xl"
-                />
-              </div>
-              <div>
-                <Label htmlFor="items">Montant payee</Label>
-                <Input
-                  disabled
-                  type="number"
-                  id="items"
-                  value={invoice?.paidAmount}
-                  className="h-10 mt-1 border-gray-200 rounded-xl"
-                />
-              </div>
 
-              <div>
-                <Label htmlFor="items">Montant restant</Label>
-                <Input
-                  disabled
-                  type="number"
-                  id="items"
-                  value={invoice?.remainingAmount}
-                  className="h-10 mt-1 border-gray-200 rounded-xl"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="notes">Notes</Label>
-                <Input
-                  disabled
-                  type="text"
-                  id="notes"
-                  value={invoice?.note}
-                  className="h-10 mt-1 border-gray-200 rounded-xl"
-                />
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative">
+              <Label htmlFor="client">Numero du facture</Label>
+              <Input
+                disabled
+                type="text"
+                id="client"
+                value={invoice?.invoiceNumber}
+                className="h-10 mt-1 border-gray-200 rounded-xl"
+              />
             </div>
+            <div className="relative">
+              <Label htmlFor="client">Nom du client</Label>
+              <Input
+                disabled
+                type="text"
+                id="client"
+                value={invoice?.customer.user.firstName + " " + invoice?.customer.user.lastName}
+                className="h-10 mt-1 border-gray-200 rounded-xl"
+              />
+            </div>
+            <div>
+              <Label htmlFor="date">Date du facture</Label>
+              <Input
+                disabled
+                type="date"
+                id="date"
+                value={invoice?.issueDate.toString().split("T")[0]}
+                className="h-10 mt-1 border-gray-200 rounded-xl"
+              />
+            </div>
+            <div>
+              <Label htmlFor="date">Date d'echeance</Label>
+              <Input
+                disabled
+                type="date"
+                id="date"
+                value={invoice?.dueDate.toString().split("T")[0]}
+                className="h-10 mt-1 border-gray-200 rounded-xl"
+              />
+            </div>
+            <div>
+              <Label htmlFor="items">Montant payee</Label>
+              <Input
+                disabled
+                type="number"
+                id="items"
+                value={invoice?.paidAmount}
+                className="h-10 mt-1 border-gray-200 rounded-xl"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="items">Total du Facture</Label>
+              <Input
+                disabled
+                type="number"
+                id="items"
+                value={invoice?.totalAmount}
+                className="h-10 mt-1 border-gray-200 rounded-xl"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="items">Montant restant</Label>
+              <Input
+                disabled
+                type="number"
+                id="items"
+                value={invoice?.remainingAmount}
+                className="h-10 mt-1 border-gray-200 rounded-xl"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="notes">Notes</Label>
+              <Input
+                disabled
+                type="text"
+                id="notes"
+                value={invoice?.note || ""}
+                className="h-10 mt-1 border-gray-200 rounded-xl"
+              />
+            </div>
+          </div>
         </div>
         <hr />
 
@@ -132,35 +129,33 @@ function ModalViewInvoice({
               <TableRow>
                 <TableHead className="w-[100px]">Order</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Referance Article/Service</TableHead>
+                <TableHead>Nom Article/Service</TableHead>
                 <TableHead>Designation</TableHead>
-                <TableHead>quantity</TableHead>
+                <TableHead>Quantite</TableHead>
                 <TableHead className="text-right">Prix unitaire</TableHead>
                 <TableHead className="text-right">Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoice?.InvoiceLine && invoice?.InvoiceLine.map((invoice) => (
+              {invoice?.invoiceLines && invoice?.invoiceLines?.map((invoice) => (
                 <TableRow key={invoice.order}>
-                  <TableCell className="font-medium">
-                    {invoice.order}
-                  </TableCell>
+                  <TableCell className="font-medium">{invoice.order}</TableCell>
                   <TableCell>{invoice.lineType.toString()}</TableCell>
-                  <TableCell>{invoice.lineType.toString()}</TableCell>
+                  <TableCell>{invoice.product?.reference}</TableCell>
+                  <TableCell>{invoice.product?.item.name}</TableCell>
+                  <TableCell>{invoice.description}</TableCell>
                   <TableCell>{invoice.quantity}</TableCell>
-                  <TableCell className="text-right">
-                    {invoice.unitPrice}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {invoice.quantity * invoice.unitPrice}
-                  </TableCell>
+                  <TableCell className="text-right">{invoice.product?.unitPrice} DHs</TableCell>
+                  <TableCell className="text-right">{invoice.quantity * (invoice.product?.unitPrice as number)} DHs</TableCell>
                 </TableRow>
               ))}
             </TableBody>
-            {invoice?.InvoiceLine && invoice.InvoiceLine.length > 0 && (
+            {invoice?.invoiceLines && invoice.invoiceLines?.length > 0 && (
               <TableFooter>
                 <TableRow className="text-md font-bold">
-                  <TableCell  colSpan={5}>Total</TableCell>
-                  <TableCell className="text-right">{invoice.InvoiceLine.reduce((total, line) => total + (line.quantity * line.unitPrice), 0)}</TableCell>
+                  <TableCell colSpan={7}>Total</TableCell>
+                  <TableCell className="text-right">{invoice.invoiceLines?.reduce((total, line) => total + (line.quantity * (line?.product?.unitPrice as number)), 0)} DHs</TableCell>
                 </TableRow>
               </TableFooter>
             )}

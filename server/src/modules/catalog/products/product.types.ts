@@ -45,6 +45,7 @@ export type UnitMeasure =
 export interface ProductWithItem {
   id: string;
   name: string;
+  type?: string,
   description?: string | null;
   unit: string;
   category?: string | null;

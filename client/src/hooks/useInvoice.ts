@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CreateInvoiceData, CreateInvoiceLineData, Invoice } from "../types/invoice.types";
+import type { CreateInvoiceData, CreateInvoiceLineData, Invoice, UpdateInvoiceData, UpdateInvoiceLineData } from "../types/invoice.types";
 import { invoiceApi } from "../api/invoice.api";
 
 export const useInvoice = () => {
@@ -42,10 +42,13 @@ export const useInvoice = () => {
         return response;
     }
 
-    const updateInvoice = async (invoiceId: string, invoiceData: CreateInvoiceData, invoiceLinesData: CreateInvoiceLineData[]) => {
+    const updateInvoice = async (invoiceId: string, invoiceData: UpdateInvoiceData, invoiceLinesData: UpdateInvoiceLineData[]) => {
         const response = await invoiceApi.updateInvoice(invoiceId, invoiceData, invoiceLinesData);
-        if(response.data.statusCode && response.data.statusCode !== 200){
-            return setErrors(response.data.message || "Une erreur s’est produite lors de la mise à jour de la facture.");
+        console.log(response);
+        
+        if(response.statusCode && response.statusCode !== 200){
+            setErrors(response.message || "Une erreur s’est produite lors de la mise à jour de la facture.");
+            return;
         }
         return response;
     }
