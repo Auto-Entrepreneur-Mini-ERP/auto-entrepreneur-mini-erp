@@ -17,6 +17,7 @@ import { CircleArrowDown, CircleArrowUp, CircleX, HandCoins, Search } from "luci
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { PaymentMethod } from "../../types/invoice.types";
 import { useInvoice } from "../../hooks/useInvoice";
+import { useNavigate } from "react-router";
 
 type ModalInvoiceProps = {
   isInvoiceModalOpen: boolean;
@@ -27,25 +28,32 @@ function ModalCreateInvoice({
   isInvoiceModalOpen,
   setIsInvoiceModalOpen,
 }: ModalInvoiceProps) {
+  const navigate = useNavigate();
 
-  const { getCustomersNames, getArticlesNames } = useInvoice();
+  const { errors, getCustomersNames, getArticlesNames, createInvoice } = useInvoice();
 
   const [invoiceFormData, setInvoiceFormData] = useState<CreateInvoiceData>();
   const [invoiceLineFormData, setInvoiceLineFormData] = useState<CreateInvoiceLineData[]>([]);
 
   const [article, setArticle] = useState<string>("");
-  const [articleSearch, setArticleSearch] = useState<{ id: string, type: string, name: string, unitPrice: number }[]>([]);
+  const [articleSearch, setArticleSearch] = useState<{ id: string, type: string, name: string, description: string, unitPrice: number }[]>([]);
   const [showArticleSearch, setShowArticleSearch] = useState(false);
 
   const [customerSearch, setCustomerSearch] = useState<{ id: string, name: string }[]>([]);
   const [showCustomerSearch, setShowCustomerSearch] = useState(false);
 
-  const handleInvoiceSubmit = (e: React.FormEvent) => {
+  const handleInvoiceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Invoice data:", invoiceFormData);
-    setIsInvoiceModalOpen(false);
-    setInvoiceFormData(undefined);
-    setInvoiceLineFormData([]);
+    console.log("Invoice:", invoiceFormData, "InvoiceLine:", invoiceLineFormData);
+
+    // api all create invoice and invoice lines
+    const result = await createInvoice(invoiceFormData as CreateInvoiceData, invoiceLineFormData);
+    if(result.data.statusCode && result.data.statusCode === 200){
+      navigate("/quots-invoices");
+      setIsInvoiceModalOpen(false);
+      setInvoiceFormData(undefined);
+      setInvoiceLineFormData([]);
+    }
   };
 
   const handleCustomerNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,17 +85,20 @@ function ModalCreateInvoice({
     const searchTerm = article;
     // call articles api
     const res = await getArticlesNames(searchTerm as string);
-    setArticleSearch(res);
-    setShowArticleSearch(true);
+    
+    if(res.length > 0) {
+      setArticleSearch(res);
+      setShowArticleSearch(true);
+    }
   };
 
-  const handleSelectSuggestedArticle = (articleId: string, articleType: string, articleName: string, unitPrice: number) => () => {
+  const handleSelectSuggestedArticle = (articleId: string, articleType: string, articleName: string, description: string, unitPrice: number) => () => {
     setInvoiceLineFormData([
       ...invoiceLineFormData,
       {
         order: invoiceLineFormData.length + 1,
         lineType: articleType as unknown as LineType,
-        description: articleName,
+        description: description,
         quantity: 1,
         unitPrice: unitPrice,
         productId: articleType === "PRODUCT" ? articleId : undefined,
@@ -107,6 +118,7 @@ function ModalCreateInvoice({
         onClose={() => setIsInvoiceModalOpen(false)}
       >
         <div className="p-6">
+          {errors && <p className="text-red-500 mb-4">{errors}</p>}
           <form onSubmit={handleInvoiceSubmit}>
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
@@ -169,7 +181,7 @@ function ModalCreateInvoice({
                 <HandCoins className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 mt-2" />
                 <Select value={invoiceFormData?.payementMethod} onValueChange={(value: string) => setInvoiceFormData({ ...invoiceFormData, payementMethod: value } as CreateInvoiceData)} required>
                   <SelectTrigger className=" mt-1 pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl">
-                    <SelectValue placeholder="Selectionnez le type de votre activite" />
+                    <SelectValue placeholder="Selectionnez la methode de paiement" />
                   </SelectTrigger>
                   <SelectContent>
                     {PaymentMethod && Object.values(PaymentMethod).map((method) => (
@@ -221,7 +233,7 @@ function ModalCreateInvoice({
                 {showArticleSearch && (
                   <div className="absolute w-full border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-10 bg-white">
                     {articleSearch.map((article) => (
-                      <div onClick={handleSelectSuggestedArticle(article.id, article.type, article.name, article.unitPrice)} key={article.id} className="p-2 hover:bg-gray-100 cursor-pointer">
+                      <div onClick={handleSelectSuggestedArticle(article.id, article.type, article.name, article.description, article.unitPrice)} key={article.id} className="p-2 hover:bg-gray-100 cursor-pointer">
                         {article.name} - {article.type} - ${article.unitPrice}
                       </div>
                     ))}
@@ -275,7 +287,7 @@ function ModalCreateInvoice({
               <TableFooter>
                 <TableRow className="text-md font-bold">
                   <TableCell  colSpan={5}>Total</TableCell>
-                  <TableCell className="text-right">$2,500.00</TableCell>
+                  <TableCell className="text-right">{invoiceLineFormData.reduce((total, line) => total + (line.quantity * line.unitPrice), 0)}</TableCell>
                 </TableRow>
               </TableFooter>
             )}

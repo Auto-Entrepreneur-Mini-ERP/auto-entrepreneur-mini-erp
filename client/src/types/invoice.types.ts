@@ -23,6 +23,7 @@ export const PaymentMethod = {
 }
 
 export interface Invoice {
+    invoiceId: string,
     invoiceNumber: string,
     issueDate: Date,
     dueDate: Date,
@@ -34,6 +35,7 @@ export interface Invoice {
     note?: string,
     pdfUrl?: string,
     customerId: string,
+    InvoiceLine: InvoiceLine[],
 };
 
 export interface InvoiceLine {

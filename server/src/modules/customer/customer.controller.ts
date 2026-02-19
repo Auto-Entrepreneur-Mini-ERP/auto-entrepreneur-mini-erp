@@ -63,7 +63,7 @@ const getCustomer = async (
 ) => {
   try {
     const { id } = req.params;
-    const customer = await customerService.getCustomer(id);
+    const customer = await customerService.getCustomer(id as string);
     return res.status(200).json(customer);
   } catch (error: any) {
     if (error instanceof AppError) {
@@ -95,7 +95,7 @@ const getCustomerByName = async (
 const deleteCustomer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await customerService.deleteCustomer(id);
+    await customerService.deleteCustomer(id as string);
     return res.status(204).send();
   } catch (error: any) {
     if (error instanceof AppError) {
@@ -109,8 +109,13 @@ const deleteCustomer = async (req: Request, res: Response) => {
 
 const getAllInvoices = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const invoices = await customerService.getAllInvoices(id);
+    const { CustomerId } = req.params;
+    const AutoEntrepreneurID = req.AutoEntrepreneurID;
+
+    const invoices = await customerService.getAllInvoices(
+      CustomerId as string,
+      AutoEntrepreneurID as string,
+    );
     return res.status(200).json(invoices);
   } catch (error: any) {
     if (error instanceof AppError) {
@@ -122,8 +127,12 @@ const getAllInvoices = async (req: Request, res: Response) => {
 };
 const getAllQuotes = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const invoices = await customerService.getAllQuotes(id);
+    const { CustomerId } = req.params;
+    const AutoEntrepreneurID = req.AutoEntrepreneurID;
+    const invoices = await customerService.getAllQuotes(
+      CustomerId as string,
+      AutoEntrepreneurID as string,
+    );
     return res.status(200).json(invoices);
   } catch (error: any) {
     if (error instanceof AppError) {

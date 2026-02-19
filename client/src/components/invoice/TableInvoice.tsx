@@ -1,6 +1,8 @@
 import { Download, Eye, Pen } from "lucide-react";
 import { useInvoice } from "../../hooks/useInvoice";
 import { useEffect, useState } from "react";
+import ModalViewInvoice from "./ModalViewInvoice";
+import ModalEditInvoice from "./ModalEditeInvoice";
 
 // ${doc.status === "Payée"
 //                       ? "bg-green-100 text-green-700"
@@ -15,9 +17,28 @@ function TableInvoice() {
   const { invoices, fetchInvoices } = useInvoice();
   const [page, setPage] = useState<number>(1);
 
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>("");
+  const [isViewInvoiceModalOpen, setIsViewInvoiceModalOpen] = useState(false);
+  const [isEditInvoiceModalOpen, setIsEditInvoiceModalOpen] = useState(false);
+
+  // const handlePageChange = (newPage: number) => {
+  //   setPage(newPage);
+  //   fetchInvoices(newPage, 5);
+  // }
+
   useEffect(() => {
     fetchInvoices(page, 5);
   }, []);
+
+  const handleViewInvoice = (invoiceId: string) => {
+    setSelectedInvoiceId(invoiceId);
+    setIsViewInvoiceModalOpen(true);
+  }
+
+  const handleEditInvoice = (invoiceId: string) => {
+    setSelectedInvoiceId(invoiceId);
+    setIsEditInvoiceModalOpen(true);
+  }
 
   return (
     <>
@@ -39,7 +60,7 @@ function TableInvoice() {
             
             <tbody>
               {invoices.map((doc) => (
-                <tr key={doc.invoiceNumber} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <tr key={doc.invoiceId} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <span className="font-semibold text-[#2D3194]">{doc.invoiceNumber}</span>
                   </td>
@@ -58,11 +79,11 @@ function TableInvoice() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Voir">
+                      <button onClick={() => handleViewInvoice(doc.invoiceId)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Voir">
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
                       <button className="p-2 hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
-                        <Pen className="w-4 h-4 text-blue-600" />
+                        <Pen onClick={() => handleEditInvoice(doc.invoiceId)} className="w-4 h-4 text-blue-600" />
                       </button>
                       <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Télécharger">
                         <Download className="w-4 h-4 text-gray-600" />
@@ -80,6 +101,8 @@ function TableInvoice() {
           )}
         </div>
       </div>
+      <ModalViewInvoice isInvoiceModalOpen={isViewInvoiceModalOpen} invoiceId={selectedInvoiceId} setIsInvoiceModalOpen={setIsViewInvoiceModalOpen} />
+      <ModalEditInvoice isInvoiceModalOpen={isEditInvoiceModalOpen} invoiceId={selectedInvoiceId} setIsInvoiceModalOpen={setIsEditInvoiceModalOpen} />
     </>
   )
 }
