@@ -1,9 +1,18 @@
-import { CreditCard, Search, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { CreditCard, Search, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Modal } from "../../components/ui/modal";
 import { useState } from "react";
+
+import { Card, CardContent } from "../../components/ui/card";
+import { ChevronDownIcon } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../../components/ui/collapsible"
+import TablePayment from "../../components/payment/TablePayment";
 
 export function PaymentsExpensesView() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -25,6 +34,9 @@ export function PaymentsExpensesView() {
     notes: "",
   });
 
+  const [openPayments, setOpenPayments] = useState(true);
+  // const [openDepences, setOpenDepences] = useState(true);
+
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Payment data:", paymentFormData);
@@ -39,14 +51,6 @@ export function PaymentsExpensesView() {
     setExpenseFormData({ description: "", amount: "", date: "", category: "Transport", vendor: "", notes: "" });
   };
 
-  const transactions = [
-    { id: 1, type: "Paiement", description: "Client - Société XYZ", date: "15/01/2024", amount: "+2,450.00", category: "Vente", status: "Confirmé" },
-    { id: 2, type: "Dépense", description: "Carburant véhicules", date: "14/01/2024", amount: "-680.00", category: "Transport", status: "Payé" },
-    { id: 3, type: "Paiement", description: "Client - Logistique Pro", date: "12/01/2024", amount: "+3,800.00", category: "Vente", status: "Confirmé" },
-    { id: 4, type: "Dépense", description: "Location entrepôt", date: "10/01/2024", amount: "-5,200.00", category: "Immobilier", status: "Payé" },
-    { id: 5, type: "Dépense", description: "Fournitures bureau", date: "08/01/2024", amount: "-245.00", category: "Administratif", status: "En attente" },
-    { id: 6, type: "Paiement", description: "Client - Express Ltd", date: "05/01/2024", amount: "+890.00", category: "Vente", status: "Confirmé" },
-  ];
 
   return (
     <div className="py-8">
@@ -86,7 +90,7 @@ export function PaymentsExpensesView() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <p className="text-gray-600 text-sm">Paiements reçus</p>
@@ -127,78 +131,41 @@ export function PaymentsExpensesView() {
           <p className="text-3xl font-bold text-orange-600">42K€</p>
           <p className="text-gray-600 text-sm mt-2">8 transactions</p>
         </div>
-      </div>
+      </div> */}
 
-      {/* Table */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Type</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Description</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Catégorie</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Date</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Montant (€)</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((transaction) => (
-                <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                        transaction.type === "Paiement" 
-                          ? "bg-green-100" 
-                          : "bg-red-100"
-                      }`}>
-                        {transaction.type === "Paiement" ? (
-                          <ArrowDownRight className="w-5 h-5 text-green-600" />
-                        ) : (
-                          <ArrowUpRight className="w-5 h-5 text-red-600" />
-                        )}
-                      </div>
-                      <span className={`font-semibold ${
-                        transaction.type === "Paiement" 
-                          ? "text-green-700" 
-                          : "text-red-700"
-                      }`}>
-                        {transaction.type}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-900">{transaction.description}</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
-                      {transaction.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{transaction.date}</td>
-                  <td className="px-6 py-4">
-                    <span className={`font-bold ${
-                      transaction.amount.startsWith("+") 
-                        ? "text-green-600" 
-                        : "text-red-600"
-                    }`}>
-                      {transaction.amount}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
-                      transaction.status === "Confirmé" || transaction.status === "Payé"
-                        ? "bg-green-100 text-green-700" 
-                        : "bg-orange-100 text-orange-700"
-                    }`}>
-                      {transaction.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Table Payments */}
+      <Card className="mx-auto w-full max-w-sm mt-4">
+        <CardContent>
+          <Collapsible open={openPayments} onOpenChange={setOpenPayments} className="data-[state=open]:bg-muted rounded-md w-full">
+            <CollapsibleTrigger className="my-2" asChild>
+              <Button variant="ghost" className="group w-full text-md hover:bg-none">
+                Paiements
+                <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180" />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="flex flex-col items-center gap-2 mb-2 mt-2 w-full">
+              <TablePayment  />
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
+      </Card>
+
+      {/* Table Depense */}
+      <Card className="mx-auto w-full max-w-sm mt-4">
+        <CardContent>
+          <Collapsible open={openPayments} onOpenChange={setOpenPayments} className="data-[state=open]:bg-muted rounded-md w-full">
+            <CollapsibleTrigger className="my-2" asChild>
+              <Button variant="ghost" className="group w-full text-md hover:bg-none">
+                Depenses
+                <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180" />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="flex flex-col items-center gap-2 mb-2 mt-2 w-full">
+              Depenses table
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
+      </Card>
 
       {/* Payment Modal */}
       <Modal title="" isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)}>

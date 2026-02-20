@@ -99,18 +99,11 @@ const convertFiltersToService = (filters: ProductFiltersInput): ServiceFilters =
 // GET ALL PRODUCTS
 // ============================================
 const getProducts = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.user?.id) {
-    const response: ProductResponse = {
-      success: false,
-      error: "User not authenticated"
-    };
-    return res.status(401).json(response);
-  }
-
+  
   const filtersInput = parseProductFilters(req.query);
   const serviceFilters = convertFiltersToService(filtersInput);
 
-  const products = await productService.getProducts(req.user.id, serviceFilters);
+  const products = await productService.getProducts(req.AutoEntrepreneurID as string , serviceFilters);
 
   const response: ProductResponse = {
     success: true,
@@ -125,7 +118,38 @@ const getProducts = asyncHandler(async (req: Request, res: Response) => {
 // GET SINGLE PRODUCT
 // ============================================
 const getProduct = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.user?.id) {
+
+  try {
+    const id = getParamId(req.params.id);
+
+    const product = await productService.getProductById(id, req.AutoEntrepreneurID as string);
+
+    if (!product) {
+      const response: ProductResponse = {
+        success: false,
+        error: "Product not found"
+      };
+      return res.status(404).json(response);
+    }
+
+    const response: ProductResponse = {
+      success: true,
+      data: product
+    };
+    
+    res.status(200).json(response);
+  } catch (error: any) {
+    const response: ProductResponse = {
+      success: false,
+      error: error.message || "Invalid ID parameter"
+    };
+    res.status(400).json(response);
+  }
+});
+
+const getProductByName = asyncHandler(async (req: Request, res: Response) => {
+
+  if (!req.AutoEntrepreneurID) {
     const response: ProductResponse = {
       success: false,
       error: "User not authenticated"
@@ -134,9 +158,9 @@ const getProduct = asyncHandler(async (req: Request, res: Response) => {
   }
 
   try {
-    const id = getParamId(req.params.id);
+    const articleName = req.query.articleName as string | undefined;
 
-    const product = await productService.getProductById(id, req.user.id);
+    const product = await productService.getProductByName(articleName as string, req.AutoEntrepreneurID as string);
 
     if (!product) {
       const response: ProductResponse = {
@@ -163,13 +187,6 @@ const getProduct = asyncHandler(async (req: Request, res: Response) => {
 
 
 const createProduct = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.user?.id) {
-    const response: ProductResponse = {
-      success: false,
-      error: "User not authenticated"
-    };
-    return res.status(401).json(response);
-  }
 
   try {
     const body = req.body as CreateProductInput;
@@ -191,7 +208,7 @@ const createProduct = asyncHandler(async (req: Request, res: Response) => {
 
     const product = await productService.createProduct({
       ...parsedData,
-      autoEntrepreneurId: req.user.id
+      autoEntrepreneurId: req.AutoEntrepreneurID as string
     });
 
     const response: ProductResponse = {
@@ -211,13 +228,6 @@ const createProduct = asyncHandler(async (req: Request, res: Response) => {
 
 
 const updateProduct = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.user?.id) {
-    const response: ProductResponse = {
-      success: false,
-      error: "User not authenticated"
-    };
-    return res.status(401).json(response);
-  }
 
   try {
     const id = getParamId(req.params.id);
@@ -232,7 +242,7 @@ const updateProduct = asyncHandler(async (req: Request, res: Response) => {
       parsedData.unitPrice = unitPrice;
     }
 
-    const product = await productService.updateProduct(id, req.user.id, parsedData);
+    const product = await productService.updateProduct(id, req.AutoEntrepreneurID as string, parsedData);
 
     if (!product) {
       const response: ProductResponse = {
@@ -259,19 +269,12 @@ const updateProduct = asyncHandler(async (req: Request, res: Response) => {
 
 
 const updateStock = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.user?.id) {
-    const response: ProductResponse = {
-      success: false,
-      error: "User not authenticated"
-    };
-    return res.status(401).json(response);
-  }
 
   try {
     const id = getParamId(req.params.id);
     const { quantity } = req.body as UpdateStockInput;
 
-    const product = await productService.updateStock(id, req.user.id, quantity);
+    const product = await productService.updateStock(id, req.AutoEntrepreneurID as string, quantity);
 
     if (!product) {
       const response: ProductResponse = {
@@ -298,13 +301,6 @@ const updateStock = asyncHandler(async (req: Request, res: Response) => {
 
 
 const deleteProduct = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.user?.id) {
-    const response: ProductResponse = {
-      success: false,
-      error: "User not authenticated"
-    };
-    return res.status(401).json(response);
-  }
 
   try {
     const id = getParamId(req.params.id);
@@ -319,7 +315,7 @@ const deleteProduct = asyncHandler(async (req: Request, res: Response) => {
       return res.status(400).json(response);
     }
 
-    await productService.deleteProduct(id, req.user.id);
+    await productService.deleteProduct(id, req.AutoEntrepreneurID as string);
     res.status(204).send();
   } catch (error: any) {
     const response: ProductResponse = {
@@ -333,6 +329,7 @@ const deleteProduct = asyncHandler(async (req: Request, res: Response) => {
 export const productController = {
   getProducts,
   getProduct,
+  getProductByName,
   createProduct,
   updateProduct,
   updateStock,

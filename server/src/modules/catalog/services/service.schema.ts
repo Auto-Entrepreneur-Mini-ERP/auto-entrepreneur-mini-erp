@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const unitMeasureSchema = z.enum(['piece', 'kilogram', 'liter', 'meter', 'hour', 'day']);
 
-export const createServiceSchema = z.object({
+export const createServiceSchema = {
   body: z.object({
     name: z.string().min(1).max(100),
     description: z.string().max(500).optional(),
@@ -15,9 +15,9 @@ export const createServiceSchema = z.object({
     message: "At least one rate (hourly or fixed) is required",
     path: ['hourlyRate']
   })
-});
+};
 
-export const updateServiceSchema = z.object({
+export const updateServiceSchema = {
   body: z.object({
     name: z.string().min(1).max(100).optional(),
     description: z.string().max(500).optional(),
@@ -36,18 +36,18 @@ export const updateServiceSchema = z.object({
     message: "At least one rate (hourly or fixed) must be provided",
     path: ['hourlyRate']
   })
-});
+};
 
-export const serviceFiltersSchema = z.object({
+export const serviceFiltersSchema = {
   query: z.object({
     category: z.string().optional(),
     name: z.string().optional(),
     rateType: z.enum(['hourly', 'fixed']).optional()
   })
-});
+};
 
-export const serviceParamsSchema = z.object({
+export const serviceParamsSchema = {
   params: z.object({
-    id: z.string().uuid()
+    id: z.string().nonempty()
   })
-});
+};

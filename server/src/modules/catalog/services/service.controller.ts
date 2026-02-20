@@ -24,17 +24,10 @@ export class ServiceController {
   static createService = [
     validateBody(createServiceSchema),
     asyncHandler(async (req: Request, res: Response) => {
-      if (!req.user?.id) {
-        res.status(401).json({
-          success: false,
-          error: 'User not authenticated'
-        });
-        return;
-      }
 
       const result = await serviceService.createService({
         ...req.body,
-        autoEntrepreneurId: req.user.id
+        autoEntrepreneurId: req.AutoEntrepreneurID as string
       });
 
       res.status(201).json({
@@ -45,18 +38,10 @@ export class ServiceController {
   ];
 
   static getServices = [
-    validateBody(serviceFiltersSchema),
-    asyncHandler(async (req: Request, res: Response) => {
-      if (!req.user?.id) {
-        res.status(401).json({
-          success: false,
-          error: 'User not authenticated'
-        });
-        return;
-      }
+    asyncHandler(async (req: Request, res: Response) => {      
 
-      const services = await serviceService.getServices(req.user.id, req.query);
-      
+      const services = await serviceService.getServices(req.AutoEntrepreneurID as string, req.query);
+
       res.json({
         success: true,
         count: services.length,
@@ -67,18 +52,10 @@ export class ServiceController {
 
   // Get specific service
   static getService = [
-    validateBody(serviceParamsSchema),
     asyncHandler(async (req: Request, res: Response) => {
-      if (!req.user?.id) {
-        res.status(401).json({
-          success: false,
-          error: 'User not authenticated'
-        });
-        return;
-      }
 
       const { id } = req.params;
-      const service = await serviceService.getServiceById(id as string, req.user.id);
+      const service = await serviceService.getServiceById(id as string, req.AutoEntrepreneurID as string);
 
       if (!service) {
         res.status(404).json({
@@ -95,20 +72,16 @@ export class ServiceController {
     })
   ];
 
+
+
+
   static updateService = [
-    validateBody(serviceParamsSchema),
+    // validateBody(serviceParamsSchema),
     validateBody(updateServiceSchema),
     asyncHandler(async (req: Request, res: Response) => {
-      if (!req.user?.id) {
-        res.status(401).json({
-          success: false,
-          error: 'User not authenticated'
-        });
-        return;
-      }
 
       const { id } = req.params;
-      const service = await serviceService.updateService(id as string, req.user.id, req.body);
+      const service = await serviceService.updateService(id as string, req.AutoEntrepreneurID as string, req.body);
 
       if (!service) {
         res.status(404).json({
@@ -128,13 +101,6 @@ export class ServiceController {
   static deleteService = [
     validateBody(serviceParamsSchema),
     asyncHandler(async (req: Request, res: Response) => {
-      if (!req.user?.id) {
-        res.status(401).json({
-          success: false,
-          error: 'User not authenticated'
-        });
-        return;
-      }
 
       const { id } = req.params;
       
@@ -147,7 +113,7 @@ export class ServiceController {
         return;
       }
 
-      await serviceService.deleteService(id as string, req.user.id);
+      await serviceService.deleteService(id as string, req.AutoEntrepreneurID as string);
 
       res.json({
         success: true,

@@ -184,8 +184,8 @@ export function RegisterPage() {
                     <SelectValue placeholder="Selectionnez le type de votre activite" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="SERVICE">Service</SelectItem>
-                    <SelectItem value="ARTICLE">Article</SelectItem>
+                    <SelectItem value="SERVICE">Services</SelectItem>
+                    <SelectItem value="ARTICLE">Commerce</SelectItem>
                     <SelectItem value="MIXTE">Mixte</SelectItem>
                   </SelectContent>
                 </Select>

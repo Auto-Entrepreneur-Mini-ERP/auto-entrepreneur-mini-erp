@@ -34,6 +34,8 @@ const editInvoice = async (req: Request, res: Response) => {
     const autoentrepreneurId = req.AutoEntrepreneurID;
     const { invoiceId } = req.params;
     const data = req.body;
+        console.log(data);
+
 
     const updatedInvoice = await invoicesService.updateInvoice(autoentrepreneurId as string, invoiceId as string, data as InvoiceCreateSchemaInput);
     return res.status(200).json(updatedInvoice);
