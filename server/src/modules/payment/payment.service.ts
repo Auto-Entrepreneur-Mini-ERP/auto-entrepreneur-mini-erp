@@ -20,7 +20,7 @@ const getAllPayments = async (autoentrepreneurId: string, page: number, limit: n
             AutoEntrepreneurId: autoentrepreneurId
         },
         include: {
-            invoice: {
+            Invoice: {
                 include: {
                     customer: {
                         include: {
@@ -44,6 +44,17 @@ const getOnePayment = async (autoentrepreneurId: string, paymentId: string) => {
         where:{
             id: paymentId,
             AutoEntrepreneurId: autoentrepreneurId
+        },
+        include: {
+            Invoice: {
+                include: {
+                    customer: {
+                        include: {
+                            user: true
+                        }
+                    }
+                }
+            }
         }
     });
     if(!payments) throw new AppError("No payments found!", 404);
@@ -78,7 +89,7 @@ const createPayment = async (autoentrepreneurId: string, data: PaymentCreateInpu
                 id: data.AutoEntrepreneurId
             }
         },
-        invoice: {
+        Invoice: {
             connect:{
                 id: data.invoiceId
             }

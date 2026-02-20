@@ -14,12 +14,12 @@ router.use(isAthenticated);
 
 router.post('/quote', validateBody(createQuoteSchema), controller.create);
 router.get('/quote', controller.getAll);
-router.get('/:id', controller.getById);
-router.patch('/:id', validateBody(updateQuoteSchema), controller.update);
-router.delete('/:id', controller.delete);
+router.get('/quote/:id', controller.getById);
+router.patch('/quote/:id', validateBody(updateQuoteSchema), controller.update);
+router.delete('/quote/:id', controller.delete);
 
-router.post('/:id/envoyer', controller.envoyer);
-router.post('/:id/accepter', controller.accepter);
-router.post('/:id/refuser', controller.refuser);
+router.post('/quote/:id/envoyer', controller.envoyer);
+router.post('/quote/:id/accepter', controller.accepter);
+router.post('/quote/:id/refuser', controller.refuser);
 
 export default router;
