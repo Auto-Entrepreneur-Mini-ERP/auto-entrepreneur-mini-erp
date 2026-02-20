@@ -24,14 +24,14 @@ const profileAutoEntrepreneur = async (id: string) => {
 };
 
 const updateAutoEntrepreneur = async (id: string, data: AutoEntrepreneurUpdateInput) => {
-
+    
     autoentrepreneurExists(id);
-
+    
     const AutoEntrepreneurUpdateData: Prisma.AutoEntrepreneurUpdateInput = {}
     if(data.autoEntrepreneur?.businessName) AutoEntrepreneurUpdateData.businessName = data.autoEntrepreneur.businessName
     if(data.autoEntrepreneur?.ice) AutoEntrepreneurUpdateData.ice = data.autoEntrepreneur.ice
     if(data.autoEntrepreneur?.logo) AutoEntrepreneurUpdateData.logo = data.autoEntrepreneur.logo
-
+    
     const UserUpdateData: Prisma.UserUpdateInput = {}
     if(data.user?.firstName) UserUpdateData.firstName = data.user.firstName
     if(data.user?.lastName) UserUpdateData.lastName = data.user.lastName

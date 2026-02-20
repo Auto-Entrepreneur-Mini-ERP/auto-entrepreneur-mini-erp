@@ -6,6 +6,7 @@ import { autoentrepreneurExists } from "../auto-entrepreneur/utils/autoentrepren
 import { paymentExists } from "./utils/paymentExists.js";
 import type { PayementMetod ,PaymentCreateInput, PaymentOutput, PaymentUpdateInput } from "./payment.types.js";
 import { updateInvoiceAfterCreate, updateInvoiceAfterUpdate } from "./utils/updateInvoicewithPayment.js";
+import { paymentNumberGenerator } from "./utils/paymentNumberGenerator.js";
 
 const getAllPayments = async (autoentrepreneurId: string, page: number, limit: number) => {
     autoentrepreneurExists(autoentrepreneurId);
@@ -17,6 +18,17 @@ const getAllPayments = async (autoentrepreneurId: string, page: number, limit: n
         take: limit,
         where:{
             AutoEntrepreneurId: autoentrepreneurId
+        },
+        include: {
+            invoice: {
+                include: {
+                    customer: {
+                        include: {
+                            user: true
+                        }
+                    }
+                }
+            }
         }
     });
     if(!payments) throw new AppError("No payments found!", 404);
@@ -42,10 +54,22 @@ const getOnePayment = async (autoentrepreneurId: string, paymentId: string) => {
 const createPayment = async (autoentrepreneurId: string, data: PaymentCreateInput) => {
     autoentrepreneurExists(autoentrepreneurId);
 
+    const lastPayment = await prisma.payment.findFirst({
+        select:{
+            reference: true
+        },
+        orderBy:{
+            creationDate: 'desc'
+        }
+    });
+
+    const newPaymentNumber = paymentNumberGenerator(lastPayment?.reference as string);
+    data.refrence = newPaymentNumber;
+
     const PaymentData: Prisma.PaymentCreateInput = {
         reference: data.refrence,
-        paymentDate: data.paymentDate,
-        paymentMethod: data.payementMethod,
+        paymentDate: new Date(data.paymentDate),
+        paymentMethod: data.paymentMethod,
         amount: data.amount,
         notes: data.notes as string,
         transactionNumber: data.transactionNumber as string,
@@ -131,8 +155,27 @@ const reconciliatePayment = async (autoentrepreneurId: string, paymentId: string
     if(!payment) throw new Error();
 
     return payment;
-
 }
+
+const paymentStats = async (autoentrepreneurId: string, periodFrom: string, periodTo: string, paymentMethod: PayementMetod, isReconcieled: string) => {
+    autoentrepreneurExists(autoentrepreneurId);        
+    
+    const payments = await prisma.payment.findMany({
+        where:{
+            AutoEntrepreneurId: autoentrepreneurId,
+            paymentDate: {
+                gte: periodFrom,
+                lte: periodTo
+            },
+            isReconciled: isReconcieled === 'true' ? true : false,
+            paymentMethod: paymentMethod,
+        },
+    })
+    if(!payments) throw new Error();
+
+    return payments;
+};
+
 
 export const paymentService = {
     getAllPayments,
@@ -141,4 +184,5 @@ export const paymentService = {
     updatePayment,
     deletePayment,
     reconciliatePayment,
+    paymentStats,
 };
