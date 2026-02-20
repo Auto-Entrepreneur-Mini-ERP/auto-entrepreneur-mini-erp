@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { DevisController } from './devis.controller.js';
-import { validate } from '../../middlewares/validation.middleware.js';
+import { validateBody } from '../../middlewares/validation.middleware.js';
 import {
   createQuoteSchema,
   updateQuoteSchema,
@@ -12,10 +12,10 @@ const controller = new DevisController();
 
 router.use(isAthenticated);
 
-router.post('/quote', validate(createQuoteSchema), controller.create);
+router.post('/quote', validateBody(createQuoteSchema), controller.create);
 router.get('/quote', controller.getAll);
 router.get('/:id', controller.getById);
-router.patch('/:id', validate(updateQuoteSchema), controller.update);
+router.patch('/:id', validateBody(updateQuoteSchema), controller.update);
 router.delete('/:id', controller.delete);
 
 router.post('/:id/envoyer', controller.envoyer);
