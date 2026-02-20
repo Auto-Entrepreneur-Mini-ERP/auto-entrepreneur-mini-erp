@@ -5,8 +5,9 @@ import type { Payment } from "../types/payment.types";
 export const usePayment = () => {
 
     const [payments, setPayments] = useState<Payment[]>();
+    const [payment, setPayment] = useState<Payment>();
 
-    const fetchInvoices = async () => {
+    const fetchPayments = async () => {
         const res = await paymentApi.getAllPayment();
 
         if(res.data){
@@ -14,8 +15,18 @@ export const usePayment = () => {
         }
     }
 
+    const getOnePayment = async (payementId: string) => {
+        const res = await paymentApi.getPaymentById(payementId);
+
+        if(res.data){
+            setPayment(res.data);
+        }
+    };
+
     return {
         payments,
-        fetchInvoices
+        payment,
+        fetchPayments,
+        getOnePayment
     };
 }

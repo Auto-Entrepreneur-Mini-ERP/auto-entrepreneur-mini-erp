@@ -109,7 +109,7 @@ function ModalEditInvoice({
         onClose={() => setIsInvoiceModalOpen(false)}
       >
         <div className="p-6">
-          {errors && <p className="text-red-500 mb-4">{errors}</p>}
+          {errors && <p className="text-red-500 mb-4 text-center">{errors}</p>}
           <form onSubmit={handleInvoiceSubmit}>
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
