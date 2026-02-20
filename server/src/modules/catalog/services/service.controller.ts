@@ -76,7 +76,7 @@ export class ServiceController {
 
 
   static updateService = [
-    validateBody(serviceParamsSchema),
+    // validateBody(serviceParamsSchema),
     validateBody(updateServiceSchema),
     asyncHandler(async (req: Request, res: Response) => {
 

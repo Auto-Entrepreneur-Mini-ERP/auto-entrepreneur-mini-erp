@@ -29,9 +29,13 @@ type ArticleSearch = {
   type: string,
   name: string,
   category?: string,
-  product: {
+  unit: string,
+  product?: {
     unitPrice: number,
     reference: string,
+  },
+  service?: {
+    hourlyRate: number
   }
 };
 
@@ -101,12 +105,13 @@ function ModalCreateInvoice({
     }
   };
 
-  const handleSelectSuggestedArticle = (articleId: string, articleType: string, unitPrice: number) => () => {
+  const handleSelectSuggestedArticle = (articleId: string, articleType: string, name: string, unitPrice: number) => () => {
     setInvoiceLineFormData([
       ...invoiceLineFormData,
       {
         order: invoiceLineFormData.length + 1,
         lineType: articleType as unknown as LineType,
+        name: name,
         quantity: 1,
         unitPrice: unitPrice,
         productId: articleType === "PRODUCT" ? articleId : undefined,
@@ -115,6 +120,9 @@ function ModalCreateInvoice({
     ]);
     setShowArticleSearch(false);
   };
+
+  console.log(invoiceLineFormData);
+
 
   return (
     <>
@@ -256,8 +264,15 @@ function ModalCreateInvoice({
                 {showArticleSearch && (
                   <div className="absolute w-full border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-10 bg-white">
                     {articleSearch.map((article) => (
-                      <div onClick={handleSelectSuggestedArticle(article.id, article.type, article.product.unitPrice)} key={article.id} className="p-2 hover:bg-gray-100 cursor-pointer">
-                        {article.name} - {article.type} - {article.category} - ${article.product.unitPrice}
+                      <div onClick={handleSelectSuggestedArticle(
+                        article.id,
+                        article.service ? "Service" : "Produit",
+                        article.name,
+                        article.product?.unitPrice as number || article.service?.hourlyRate as number
+                      )}
+                        key={article.id}
+                        className="p-2 hover:bg-gray-100 cursor-pointer">
+                        {article.name} - {article.service ? "Service" : "Produit"} - {article.category} - ${article.product?.unitPrice || article.service?.hourlyRate} / {article.unit}
                       </div>
                     ))}
                   </div>
@@ -270,12 +285,11 @@ function ModalCreateInvoice({
               <TableRow>
                 <TableHead className="w-[100px]">Order</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Referance Article/Service</TableHead>
                 <TableHead>Nom Article/Service</TableHead>
-                <TableHead>Designation</TableHead>
                 <TableHead>Quantite</TableHead>
                 <TableHead className="text-right">Prix unitaire</TableHead>
                 <TableHead className="text-right">Total</TableHead>
+                <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -284,20 +298,49 @@ function ModalCreateInvoice({
                   <TableCell className="font-medium">
                     {invoice.order}
                   </TableCell>
-                  <TableCell>{invoice.lineType.toString()}</TableCell>
-                  <TableCell>{invoice.description}</TableCell>
+                  <TableCell>{invoice.lineType?.toString()}</TableCell>
+                  <TableCell>{invoice.name}</TableCell>
                   <TableCell>{invoice.quantity}</TableCell>
                   <TableCell className="text-right">
-                    {invoice.unitPrice}
+                    {invoice.unitPrice} DHs
                   </TableCell>
                   <TableCell className="text-right">
-                    {invoice.quantity * invoice.unitPrice}
+                    {invoice.quantity * invoice.unitPrice} DHs
                   </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" onClick={() => setInvoiceLineFormData(invoiceLineFormData.filter((line) => line.quantity++))}>
+                  <TableCell className="text-center">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        setInvoiceLineFormData(prev =>
+                          prev.map(line =>
+                            line.order === invoice.order
+                              ? { ...line, quantity: line.quantity + 1 }
+                              : line
+                          )
+                        )
+                      }
+                    >
                       <CircleArrowUp className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => setInvoiceLineFormData(invoiceLineFormData.filter((line) => line.quantity--))}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        setInvoiceLineFormData(prev =>
+                          prev.map(line =>
+                            line.order === invoice.order
+                              ? {
+                                ...line,
+                                quantity: line.quantity > 1
+                                  ? line.quantity - 1
+                                  : 1
+                              }
+                              : line
+                          )
+                        )
+                      }
+                    >
                       <CircleArrowDown className="w-4 h-4" />
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => setInvoiceLineFormData(invoiceLineFormData.filter((line) => line.order !== invoice.order))}>
@@ -311,7 +354,7 @@ function ModalCreateInvoice({
               <TableFooter>
                 <TableRow className="text-md font-bold">
                   <TableCell colSpan={5}>Total</TableCell>
-                  <TableCell className="text-right">{invoiceLineFormData.reduce((total, line) => total + (line.quantity * line.unitPrice), 0)}</TableCell>
+                  <TableCell className="text-right">{invoiceLineFormData.reduce((total, line) => total + (line.quantity * line.unitPrice), 0)} DHs</TableCell>
                 </TableRow>
               </TableFooter>
             )}

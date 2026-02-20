@@ -10,7 +10,7 @@ router.post('/', ServiceController.createService);
 router.get('/', ServiceController.getServices);
 
 router.get('/:id', ServiceController.getService);
-router.patch('/:id', ServiceController.updateService); 
+router.put('/:id', ServiceController.updateService); 
 router.delete('/:id', ServiceController.deleteService); 
 
 export default router;

@@ -46,7 +46,6 @@ export const useInvoice = () => {
 
     const updateInvoice = async (invoiceId: string, invoiceData: UpdateInvoiceData, invoiceLinesData: UpdateInvoiceLineData[]) => {
         const response = await invoiceApi.updateInvoice(invoiceId, invoiceData, invoiceLinesData);
-        console.log(response);
         
         if(response.statusCode && response.statusCode !== 200){
             setErrors(response.message || "Une erreur s’est produite lors de la mise à jour de la facture.");

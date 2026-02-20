@@ -89,7 +89,7 @@ export interface CreateInvoiceData {
 export interface CreateInvoiceLineData{
     order: number,
     lineType: LineType,
-    description?: string,
+    name: string,
     quantity: number,
     unitPrice: number,
     productId?: string,
@@ -104,7 +104,7 @@ export interface UpdateInvoiceData {
 export interface UpdateInvoiceLineData{
     order: number,
     lineType: LineType,
-    description?: string,
+    name?: string,
     quantity: number,
     unitPrice: number,
     productId?: string | undefined,

@@ -9,6 +9,7 @@ import type {
   ServiceFilters,
   ServiceWithItem 
 } from './service.types.js';
+import { da } from 'zod/locales';
 
 
 export class ServiceService {
@@ -17,13 +18,14 @@ export class ServiceService {
     if (!data.hourlyRate && !data.fixedRate) {
       throw new Error('At least one rate (hourly or fixed) is required');
     }
-
-    return prisma.$transaction(async (tx: PrismaClient) => {
+    console.log(data.unit);
+    
+    return prisma.$transaction(async (tx) => {
       const item = await tx.item.create({
         data: {
-          name: data.name,
-          description: data.description,
-          unit: data.unit,
+          name: data.name as string,
+          description: data.description as string,
+          unit: data.unit.toString() as string,
           category: data.category,
           isActive: true
         }
@@ -32,10 +34,10 @@ export class ServiceService {
       const service = await tx.service.create({
         data: {
           id: item.id,
-          itemId: item.id,
-          hourlyRate: data.hourlyRate,
-          fixedRate: data.fixedRate,
-          estimatedDuration: data.estimatedDuration,
+          itemId: item.id as string,
+          hourlyRate: data.hourlyRate as number,
+          fixedRate: data.fixedRate as number,
+          estimatedDuration: data.estimatedDuration as number,
           AutoEntrepreneurId: data.autoEntrepreneurId
         }
       });
@@ -117,7 +119,7 @@ export class ServiceService {
       throw new Error('At least one rate (hourly or fixed) must be provided');
     }
 
-    return prisma.$transaction(async (tx: PrismaClient) => {
+    return prisma.$transaction(async (tx) => {
       const itemUpdateData: Prisma.ItemUpdateInput = {};
       if (data.name !== undefined) itemUpdateData.name = data.name;
       if (data.description !== undefined) itemUpdateData.description = data.description;
