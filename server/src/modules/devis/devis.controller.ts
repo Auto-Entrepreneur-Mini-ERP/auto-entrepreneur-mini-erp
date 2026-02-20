@@ -9,7 +9,8 @@ export class DevisController {
   // Créer un devis
   async create(req: Request, res: Response) {
     try {
-      const devis = await devisService.create({
+      const autoentrepreneurId = req.AutoEntrepreneurID;
+      const devis = await devisService.create(autoentrepreneurId as string,{
         ...req.body,
         issueDate: new Date(req.body.issueDate),
         validityDate: new Date(req.body.validityDate),
@@ -24,7 +25,8 @@ export class DevisController {
   // Récupérer tous les devis
   async getAll(req: Request, res: Response) {
     try {
-      const devis = await devisService.findAll()
+      const autoentrepreneurId = req.AutoEntrepreneurID;
+      const devis = await devisService.findAll(autoentrepreneurId as string,)
       return res.json(devis)
     } catch (error) {
       return res.status(500).json({ message: "Erreur lors de la récupération des devis" })
