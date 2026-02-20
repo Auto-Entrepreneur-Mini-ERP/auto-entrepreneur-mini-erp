@@ -34,6 +34,7 @@
     "multer": "^2.0.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.16.0",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.12",
     "otp-generator": "^4.0.1",
     "prisma": "^7.2.0",
