@@ -18,6 +18,17 @@ const getAllPayments = async (autoentrepreneurId: string, page: number, limit: n
         take: limit,
         where:{
             AutoEntrepreneurId: autoentrepreneurId
+        },
+        include: {
+            invoice: {
+                include: {
+                    customer: {
+                        include: {
+                            user: true
+                        }
+                    }
+                }
+            }
         }
     });
     if(!payments) throw new AppError("No payments found!", 404);

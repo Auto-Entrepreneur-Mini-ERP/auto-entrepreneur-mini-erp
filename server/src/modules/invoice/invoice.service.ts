@@ -32,7 +32,7 @@ const getAllInvoices = async (autoentrepreneurId: string, page: number, limit: n
     }) as unknown as InvoiceOutput[];
 
     if(!invoices) throw new AppError("No invoices found", 404);
-    return invoices;
+    return {invoices, count: invoices.length};
 };
 
 const getInvoiceById = async (autoentrepreneurId: string, invoiceId: string) => {

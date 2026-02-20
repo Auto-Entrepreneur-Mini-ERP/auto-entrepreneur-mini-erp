@@ -5,19 +5,21 @@ import { invoiceApi } from "../api/invoice.api";
 export const useInvoice = () => {
     const [errors, setErrors] = useState<string>();
     const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [invoicesCount, setInvoicesCount] = useState<number>(0);
     const [invoice, setInvoice] = useState<Invoice>();
 
     const fetchInvoices = async (page: number, limit: number) => {
         const response = await invoiceApi.getAllInvoices(page, limit);
 
         if(response.data) {
-            setInvoices(response.data);
+            setInvoices(response.data.invoices);
+            setInvoicesCount(response.data.count);
         }
     };
 
     const getOneInvoice = async (invoiceId: string) => {
         const response = await invoiceApi.getOneInvoice(invoiceId);
-
+        
         if(response.data) {
             setInvoice(response.data);
         }
@@ -56,6 +58,7 @@ export const useInvoice = () => {
     return {
         errors,
         invoices,
+        invoicesCount,
         invoice,
         fetchInvoices,
         getOneInvoice,
