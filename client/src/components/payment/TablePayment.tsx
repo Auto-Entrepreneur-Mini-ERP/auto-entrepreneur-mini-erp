@@ -6,7 +6,7 @@ import type { Payment } from "../../types/payment.types";
 
 function TablePayment() {
 
-  const { payments, payment, fetchPayments, getOnePayment } = usePayment();
+  const { payments, onePayment, fetchPayments, getOnePayment } = usePayment();
 
   const [isViewPaymentModalOpen, setIsViewPaymentModalOpen] = useState(false);
   const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
@@ -19,8 +19,6 @@ function TablePayment() {
     getOnePayment(id);
     setIsViewPaymentModalOpen(true);
   };
-
-      console.log(payment?.Invoice);
 
 
   const handleEditPayment = (id: string) => {
@@ -128,7 +126,7 @@ function TablePayment() {
         </div>
       </div>
 
-      <ModalViewPayment payment={payment as Payment} isPaymentModalOpen={isViewPaymentModalOpen} setIsPaymentModalOpen={setIsViewPaymentModalOpen}/>
+      <ModalViewPayment payment={onePayment as Payment} isPaymentModalOpen={isViewPaymentModalOpen} setIsPaymentModalOpen={setIsViewPaymentModalOpen}/>
     </>
   );
 }

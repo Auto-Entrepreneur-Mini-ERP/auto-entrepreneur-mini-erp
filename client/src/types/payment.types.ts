@@ -31,12 +31,13 @@ export interface Payment {
 }
 
 export interface PaymentCreateInput{
+    invoiceId: string,
+    invoiceNumber?: string,
     amount: number,
     paymentDate: Date,
-    paymentMethod: PayementMetod,
+    paymentMethod: string,
+    transactionNumber?: string,
     notes?: string,
-    transactionNumber: string,
-    invoiceId: string,
 }
 
 export interface PaymentUpdateInput{

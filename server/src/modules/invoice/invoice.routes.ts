@@ -10,6 +10,10 @@ router.get('/invoice',
     invoiceController.getInvoices
 );
 
+router.get('/invoice/search/:invoiceNumber',
+    invoiceController.getInvoicesByNumber
+);
+
 router.get('/invoice/:invoiceId',
     invoiceController.getOneInvoice
 );
