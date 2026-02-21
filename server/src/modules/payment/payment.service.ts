@@ -20,7 +20,7 @@ const getAllPayments = async (autoentrepreneurId: string, page: number, limit: n
             AutoEntrepreneurId: autoentrepreneurId
         },
         include: {
-            invoice: {
+            Invoice: {
                 include: {
                     customer: {
                         include: {

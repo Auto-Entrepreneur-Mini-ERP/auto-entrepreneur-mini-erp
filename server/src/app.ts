@@ -32,6 +32,12 @@ app.use(rateLimit({
 app.use(morgan('common'));
 app.use(bodyParser.json());
 app.use(cookieParser());
+ // to avoid 304 not modified(cache prblms)
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
 
 app.use("/api", router);
 

@@ -11,7 +11,7 @@ export const createServiceSchema = {
     estimatedDuration: z.number().int().positive().optional(),
     unit: unitMeasureSchema,
     category: z.string().max(50).optional()
-  }).refine((data: { hourlyRate: any; fixedRate: any; }) => data.hourlyRate || data.fixedRate, {
+  }).refine((data: any) => data.hourlyRate || data.fixedRate, {
     message: "At least one rate (hourly or fixed) is required",
     path: ['hourlyRate']
   })
@@ -26,7 +26,7 @@ export const updateServiceSchema = {
     estimatedDuration: z.number().int().positive().optional(),
     unit: unitMeasureSchema.optional(),
     category: z.string().max(50).optional()
-  }).refine((data: { hourlyRate: null; fixedRate: null; }) => {
+  }).refine((data: any) => {
     // If updating rates, at least one should be present
     if (data.hourlyRate === null || data.fixedRate === null) {
       return data.hourlyRate !== null || data.fixedRate !== null;

@@ -98,29 +98,34 @@ export class ServiceController {
     })
   ];
 
+  // ── DELETE: no validateBody — params are in req.params, not req.body ──
   static deleteService = [
-    validateBody(serviceParamsSchema),
     asyncHandler(async (req: Request, res: Response) => {
-
       const { id } = req.params;
-      
+
+      if (!id) {
+        return res.status(400).json({ success: false, error: 'ID is required' });
+      }
+
+      // Check service exists and belongs to this user before deleting
+      const existing = await serviceService.getServiceById(id as string, req.AutoEntrepreneurID as string);
+      if (!existing) {
+        return res.status(404).json({ success: false, error: 'Service not found' });
+      }
+
       const isUsed = await serviceService.checkServiceUsage(id as string);
       if (isUsed) {
-        res.status(400).json({
+        return res.status(400).json({
           success: false,
           error: 'Cannot delete this service as it is used in invoices or quotes'
         });
-        return;
       }
 
       await serviceService.deleteService(id as string, req.AutoEntrepreneurID as string);
-
-      res.json({
-        success: true,
-        message: 'Service deactivated successfully'
-      });
+      res.status(204).send();
     })
   ];
 }
+
 
 export default ServiceController;

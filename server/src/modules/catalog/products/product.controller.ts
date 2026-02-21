@@ -11,318 +11,172 @@ import type {
 
 const productService = new ProductService();
 
-// Helper function to extract ID from params
 const getParamId = (id: string | string[] | undefined): string => {
-  if (!id) {
-    throw new Error("ID parameter is required");
-  }
-  
+  if (!id) throw new Error("ID parameter is required");
   if (Array.isArray(id)) {
     const firstId = id[0];
-    if (!firstId) {
-      throw new Error("ID array is empty");
-    }
+    if (!firstId) throw new Error("ID array is empty");
     return firstId;
   }
-  
   return id;
 };
 
-// Helper to parse query params
 const parseProductFilters = (query: any): ProductFiltersInput => {
   const result: ProductFiltersInput = {};
-  
-  if (query.category !== undefined) {
-    result.category = query.category as string;
-  }
-  
-  if (query.name !== undefined) {
-    result.name = query.name as string;
-  }
-  
-  if (query.minPrice !== undefined) {
-    result.minPrice = query.minPrice as string | number;
-  }
-  
-  if (query.maxPrice !== undefined) {
-    result.maxPrice = query.maxPrice as string | number;
-  }
-  
-  if (query.lowStock !== undefined) {
-    result.lowStock = query.lowStock as boolean | string;
-  }
-  
+  if (query.category !== undefined) result.category = query.category as string;
+  if (query.name !== undefined) result.name = query.name as string;
+  if (query.minPrice !== undefined) result.minPrice = query.minPrice as string | number;
+  if (query.maxPrice !== undefined) result.maxPrice = query.maxPrice as string | number;
+  if (query.lowStock !== undefined) result.lowStock = query.lowStock as boolean | string;
   return result;
 };
+
 interface ServiceFilters {
-  category?: string | undefined;
-  name?: string | undefined;
-  minPrice?: number | undefined;
-  maxPrice?: number | undefined;
-  lowStock?: boolean | undefined;
+  category?: string;
+  name?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  lowStock?: boolean;
 }
 
-// Helper to convert filters input to service filters
 const convertFiltersToService = (filters: ProductFiltersInput): ServiceFilters => {
   const result: ServiceFilters = {};
-  
-  if (filters.category !== undefined) {
-    result.category = filters.category;
-  }
-  
-  if (filters.name !== undefined) {
-    result.name = filters.name;
-  }
-  
+  if (filters.category !== undefined) result.category = filters.category;
+  if (filters.name !== undefined) result.name = filters.name;
   if (filters.minPrice !== undefined) {
     const num = Number(filters.minPrice);
-    if (!isNaN(num)) {
-      result.minPrice = num;
-    }
+    if (!isNaN(num)) result.minPrice = num;
   }
-  
   if (filters.maxPrice !== undefined) {
     const num = Number(filters.maxPrice);
-    if (!isNaN(num)) {
-      result.maxPrice = num;
-    }
+    if (!isNaN(num)) result.maxPrice = num;
   }
-  
   if (filters.lowStock !== undefined) {
     result.lowStock = filters.lowStock === true || filters.lowStock === 'true';
   }
-  
   return result;
 };
 
-// ============================================
-// GET ALL PRODUCTS
-// ============================================
+// GET /products
 const getProducts = asyncHandler(async (req: Request, res: Response) => {
-  
   const filtersInput = parseProductFilters(req.query);
   const serviceFilters = convertFiltersToService(filtersInput);
-
-  const products = await productService.getProducts(req.AutoEntrepreneurID as string , serviceFilters);
-
-  const response: ProductResponse = {
-    success: true,
-    count: products.length,
-    data: products
-  };
-  
-  res.status(200).json(response);
+  const products = await productService.getProducts(req.AutoEntrepreneurID as string, serviceFilters);
+  res.status(200).json({ success: true, count: products.length, data: products });
 });
 
-// ============================================
-// GET SINGLE PRODUCT
-// ============================================
-const getProduct = asyncHandler(async (req: Request, res: Response) => {
-
-  try {
-    const id = getParamId(req.params.id);
-
-    const product = await productService.getProductById(id, req.AutoEntrepreneurID as string);
-
-    if (!product) {
-      const response: ProductResponse = {
-        success: false,
-        error: "Product not found"
-      };
-      return res.status(404).json(response);
-    }
-
-    const response: ProductResponse = {
-      success: true,
-      data: product
-    };
-    
-    res.status(200).json(response);
-  } catch (error: any) {
-    const response: ProductResponse = {
-      success: false,
-      error: error.message || "Invalid ID parameter"
-    };
-    res.status(400).json(response);
-  }
-});
-
+// GET /products/search?articleName=...
 const getProductByName = asyncHandler(async (req: Request, res: Response) => {
-
   if (!req.AutoEntrepreneurID) {
-    const response: ProductResponse = {
-      success: false,
-      error: "User not authenticated"
-    };
-    return res.status(401).json(response);
+    return res.status(401).json({ success: false, error: "User not authenticated" });
   }
-
   try {
     const articleName = req.query.articleName as string | undefined;
-
-    const product = await productService.getProductByName(articleName as string, req.AutoEntrepreneurID as string);
-
-    if (!product) {
-      const response: ProductResponse = {
-        success: false,
-        error: "Product not found"
-      };
-      return res.status(404).json(response);
+    if (!articleName) {
+      return res.status(400).json({ success: false, error: "articleName query param required" });
     }
-
-    const response: ProductResponse = {
-      success: true,
-      data: product
-    };
-    
-    res.status(200).json(response);
+    const product = await productService.getProductByName(articleName, req.AutoEntrepreneurID as string);
+    if (!product) {
+      return res.status(404).json({ success: false, error: "Product not found" });
+    }
+    res.status(200).json({ success: true, data: product });
   } catch (error: any) {
-    const response: ProductResponse = {
-      success: false,
-      error: error.message || "Invalid ID parameter"
-    };
-    res.status(400).json(response);
+    res.status(400).json({ success: false, error: error.message });
   }
 });
 
+// GET /products/:id
+const getProduct = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const id = getParamId(req.params.id);
+    const product = await productService.getProductById(id, req.AutoEntrepreneurID as string);
+    if (!product) {
+      return res.status(404).json({ success: false, error: "Product not found" });
+    }
+    res.status(200).json({ success: true, data: product });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message || "Invalid ID parameter" });
+  }
+});
 
+// POST /products
 const createProduct = asyncHandler(async (req: Request, res: Response) => {
-
   try {
     const body = req.body as CreateProductInput;
-    
     let unitPrice: number;
     if (typeof body.unitPrice === 'string') {
       unitPrice = parseFloat(body.unitPrice);
-      if (isNaN(unitPrice)) {
-        throw new Error("Invalid unitPrice value");
-      }
+      if (isNaN(unitPrice)) throw new Error("Invalid unitPrice value");
     } else {
       unitPrice = body.unitPrice;
     }
-
-    const parsedData: CreateProductInput = {
-      ...body,
-      unitPrice
-    };
-
     const product = await productService.createProduct({
-      ...parsedData,
+      ...body,
+      unitPrice,
       autoEntrepreneurId: req.AutoEntrepreneurID as string
     });
-
-    const response: ProductResponse = {
-      success: true,
-      data: product
-    };
-    
-    res.status(201).json(response);
+    res.status(201).json({ success: true, data: product });
   } catch (error: any) {
-    const response: ProductResponse = {
-      success: false,
-      error: error.message || "Failed to create product"
-    };
-    res.status(400).json(response);
+    res.status(400).json({ success: false, error: error.message || "Failed to create product" });
   }
 });
 
-
+// PUT /products/:id
 const updateProduct = asyncHandler(async (req: Request, res: Response) => {
-
   try {
     const id = getParamId(req.params.id);
     const body = req.body as UpdateProductInput;
-    
     const parsedData: UpdateProductInput = { ...body };
     if (body.unitPrice !== undefined && typeof body.unitPrice === 'string') {
       const unitPrice = parseFloat(body.unitPrice);
-      if (isNaN(unitPrice)) {
-        throw new Error("Invalid unitPrice value");
-      }
+      if (isNaN(unitPrice)) throw new Error("Invalid unitPrice value");
       parsedData.unitPrice = unitPrice;
     }
-
     const product = await productService.updateProduct(id, req.AutoEntrepreneurID as string, parsedData);
-
     if (!product) {
-      const response: ProductResponse = {
-        success: false,
-        error: "Product not found"
-      };
-      return res.status(404).json(response);
+      return res.status(404).json({ success: false, error: "Product not found" });
     }
-
-    const response: ProductResponse = {
-      success: true,
-      data: product
-    };
-    
-    res.status(200).json(response);
+    res.status(200).json({ success: true, data: product });
   } catch (error: any) {
-    const response: ProductResponse = {
-      success: false,
-      error: error.message || "Failed to update product"
-    };
-    res.status(400).json(response);
+    res.status(400).json({ success: false, error: error.message || "Failed to update product" });
   }
 });
 
-
+// PATCH /products/:id/stock
 const updateStock = asyncHandler(async (req: Request, res: Response) => {
-
   try {
     const id = getParamId(req.params.id);
     const { quantity } = req.body as UpdateStockInput;
-
     const product = await productService.updateStock(id, req.AutoEntrepreneurID as string, quantity);
-
     if (!product) {
-      const response: ProductResponse = {
-        success: false,
-        error: "Product not found"
-      };
-      return res.status(404).json(response);
+      return res.status(404).json({ success: false, error: "Product not found" });
     }
-
-    const response: ProductResponse = {
-      success: true,
-      data: product
-    };
-    
-    res.status(200).json(response);
+    res.status(200).json({ success: true, data: product });
   } catch (error: any) {
-    const response: ProductResponse = {
-      success: false,
-      error: error.message || "Failed to update stock"
-    };
-    res.status(400).json(response);
+    res.status(400).json({ success: false, error: error.message || "Failed to update stock" });
   }
 });
 
-
+// DELETE /products/:id
 const deleteProduct = asyncHandler(async (req: Request, res: Response) => {
-
   try {
     const id = getParamId(req.params.id);
 
-    const isUsed = await productService.checkProductUsage(id);
+    // Verify ownership before deleting
+    const existing = await productService.getProductById(id, req.AutoEntrepreneurID as string);
+    if (!existing) {
+      return res.status(404).json({ success: false, error: "Product not found" });
+    }
 
+    const isUsed = await productService.checkProductUsage(id);
     if (isUsed) {
-      const response: ProductResponse = {
-        success: false,
-        error: "Cannot delete this product as it is used in invoices or quotes"
-      };
-      return res.status(400).json(response);
+      return res.status(400).json({ success: false, error: "Cannot delete this product as it is used in invoices or quotes" });
     }
 
     await productService.deleteProduct(id, req.AutoEntrepreneurID as string);
     res.status(204).send();
   } catch (error: any) {
-    const response: ProductResponse = {
-      success: false,
-      error: error.message || "Failed to delete product"
-    };
-    res.status(400).json(response);
+    res.status(400).json({ success: false, error: error.message || "Failed to delete product" });
   }
 });
 
