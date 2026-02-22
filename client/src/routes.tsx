@@ -17,6 +17,7 @@ import { PaymentsView } from "./pages/views/PaymentsView";
 import { ExpensesView } from "./pages/views/ExpensesView";
 import { CADeclarationView } from "./pages/views/CADeclarationView";
 import { CNSSPaymentView } from "./pages/views/CNSSPaymentView";
+import { DocumentsView } from "./pages/views/DocumentsView";
 // import { AnalyticsView } from "./pages/views/AnalyticsView";
 
 export const router = createBrowserRouter([
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { path: "expenses", Component: ExpensesView },
       { path: "ca-declaration", Component: CADeclarationView },
       { path: "cnss-payment", Component: CNSSPaymentView },
+      { path: "documents", Component: DocumentsView },
       // { path: "analytics", Component: AnalyticsView },
       { path: "profile", Component: ProfilePage },
     ],

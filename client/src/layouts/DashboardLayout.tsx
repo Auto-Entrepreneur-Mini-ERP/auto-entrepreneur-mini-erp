@@ -28,7 +28,8 @@ export function DashboardLayout() {
     "/app/expenses": "Dépenses",    
     "/app/ca-declaration": "Déclaration Chiffre d'affaire",
     "/app/cnss-payment": "Paiment CNSS",
-    "/app/analytics": "Analytics",
+    "/app/documents": "Documents",
+    // "/app/analytics": "Analytics",
     "/app/profile": "Profile",
   };
 
@@ -43,7 +44,8 @@ export function DashboardLayout() {
       "Dépenses": "/app/expenses",
       "Déclaration Chiffre d'affaire": "/app/ca-declaration",
       "Paiment CNSS": "/app/cnss-payment",
-      "Analytics": "/app/analytics",
+      "Documents": "/app/documents",
+      // "Analytics": "/app/analytics",
     };
     
     const path = sectionToPath[section];
