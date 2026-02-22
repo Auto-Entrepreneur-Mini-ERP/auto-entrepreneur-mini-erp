@@ -1,3 +1,4 @@
+// src/routes.ts
 import { Router } from "express";
 import { isAthenticated } from "./middlewares/auth.middelware.js";
 
@@ -11,10 +12,13 @@ import devisRoutes from './modules/devis/devis.routes.js'
 import taxDeclartion from "./modules/taxDeclaration/taxDeclaration.routes.js";
 import analyticsRoutes from './modules/analytics/analytics.routes.js'
 import documentRoutes from './modules/document/document.routes.js'
+import expenseRoutes from './modules/expenses/expense.routes.js'
 
 const router = Router();
 
 router.use(authRoutes);
+
+router.use('/expenses', isAthenticated, expenseRoutes);
 
 router.use(isAthenticated, autoEntrepreneurRoutes);
 router.use(isAthenticated, catalogRoutes);
