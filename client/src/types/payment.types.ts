@@ -10,23 +10,34 @@ export type PayementMetod = {
 
 export interface Payment {
     id: string,
-    refrence: string,
+    reference: string,
     amount: number,
     paymentDate: Date,
-    payementMethod: PayementMetod,
+    paymentMethod: string,
     notes: string,
     transactionNumber: string,
     isReconciled: boolean,
-    invoiceId: string,
+    Invoice: {
+        invoiceId: string,
+        invoiceNumber: string,
+        totalAmount: number,
+        customer:{
+            user:{
+                firstName: string,
+                lastName: string,
+            }
+        }
+    },
 }
 
 export interface PaymentCreateInput{
+    invoiceId: string,
+    invoiceNumber?: string,
     amount: number,
     paymentDate: Date,
-    paymentMethod: PayementMetod,
+    paymentMethod: string,
+    transactionNumber?: string,
     notes?: string,
-    transactionNumber: string,
-    invoiceId: string,
 }
 
 export interface PaymentUpdateInput{

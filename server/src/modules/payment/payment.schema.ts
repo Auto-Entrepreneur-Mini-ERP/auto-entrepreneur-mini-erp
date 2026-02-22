@@ -4,11 +4,10 @@ export const paymentCreateSchemaInput = {
     body: z.object({
         // reference: z.string().nonempty(),
         amount: z.number().nonnegative().nonoptional(),
-        paymentDate: z.iso.date().nonoptional(),
+        paymentDate: z.coerce.date().nonoptional(),
         paymentMethod: z.enum(['CASH', 'CHECK', 'BANK_TRANSFER', 'CREDIT_CARD', 'MOBILE_PAYMENT', 'OTHER']).nonoptional(),
-        notes: z.string().min(5).optional(),
+        notes: z.string().min(1).optional(),
         transactionNumber: z.string().optional(),
-        AutoEntrepreneurId: z.uuid().nonempty(),
         invoiceId: z.uuid().nonempty(),
     }),
 };

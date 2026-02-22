@@ -1,4 +1,4 @@
-import { FileText, Plus, Search, ChevronDownIcon } from "lucide-react";
+import { FileText, Plus, Search, ChevronDownIcon, RefreshCw } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { useState } from "react";
@@ -21,6 +21,8 @@ export function QuotsInvoicesView() {
 
   const [openQuote, setOpenQuote] = useState(true);
   const [openInvoice, setOpenInvoice] = useState(true);
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   const quoteDocuments=[
     { id: "QT-2024-001", type: "Devis", client: "Société XYZ", date: "15/01/2024", amount: "2,450.00", status: "En attente" },
@@ -53,6 +55,13 @@ export function QuotsInvoicesView() {
           />
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={() => { window.location.reload(); setLoading(true) }}
+            className="h-12 px-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-600"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline text-sm">Actualiser</span>
+          </button>
           <Button className="bg-white hover:bg-gray-50 text-[#2D3194] border-2 border-[#2D3194] h-12 px-6 rounded-xl" onClick={() => setIsQuoteModalOpen(true)}>
             <Plus className="w-5 h-5 mr-2" />
             Nouveau Devis

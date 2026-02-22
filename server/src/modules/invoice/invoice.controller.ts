@@ -21,6 +21,14 @@ const getOneInvoice = async (req: Request, res: Response) =>{
     return res.status(200).json(invoice);
 };
 
+const getInvoicesByNumber = async (req: Request, res: Response) =>{
+    const autoentrepreneurId = req.AutoEntrepreneurID;
+    const { invoiceNumber } = req.params;
+
+    const invoices = await invoicesService.getInvoiceByNumber(autoentrepreneurId as string, invoiceNumber as string);
+    return res.status(200).json(invoices);
+};
+
 const createInvoice = async (req: Request, res: Response) => {
     const autoentrepreneurId = req.AutoEntrepreneurID;
 
@@ -60,6 +68,7 @@ const deleteInvoice = async (req: Request, res: Response) => {
 export const invoiceController = {
     getInvoices,
     getOneInvoice,
+    getInvoicesByNumber,
     createInvoice,
     editInvoice,
     cancelInvoice,

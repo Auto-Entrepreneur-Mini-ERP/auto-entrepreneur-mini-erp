@@ -60,22 +60,22 @@ export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: C
           {/* Table Content */}
           <div className="flex-1 -mx-6 px-6 overflow-auto">
             <div className="space-y-3">
-              {activeTab === "invoices" && (recents.recentInvoices.length > 0 ?
-                recents.recentInvoices.map((invoice, index) => (
+              {activeTab === "invoices" && (recents.recentInvoices?.invoices?.length > 0 ?
+                recents.recentInvoices.invoices.map((invoice, index) => (
                   <div key={index} className="p-3 bg-gray-50 rounded-[12px] hover:bg-gray-100 transition-all">
                     <div className="flex items-start justify-between mb-1">
-                      <p className="text-[#2D3194] font-medium text-sm">{invoice.id}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${invoice.status === "Paid"
+                      <p className="text-[#2D3194] font-medium text-sm">{invoice.invoiceNumber}</p>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${invoice.status === "PAID"
                         ? "bg-green-100 text-green-700"
                         : "bg-orange-100 text-orange-700"
                         }`}>
                         {invoice.status}
                       </span>
                     </div>
-                    <p className="text-[#1A1A1A] text-sm mb-1">{invoice.client}</p>
+                    <p className="text-[#1A1A1A] text-sm mb-1">{invoice.customer.user.firstName} {invoice.customer.user.lastName}</p>
                     <div className="flex items-center justify-between">
-                      <p className="text-[#1A1A1A] font-medium text-sm">{invoice.amount}</p>
-                      <p className="text-[#7A7A7A] text-xs">{invoice.date}</p>
+                      <p className="text-[#1A1A1A] font-medium text-sm">{invoice.totalAmount}</p>
+                      <p className="text-[#7A7A7A] text-xs">{invoice.dueDate.toString().split("T")[0]}</p>
                     </div>
                   </div>
                 )) : <p className="text-[#1A1A1A] text-center font-medium text-md">No invoices</p>)}
@@ -83,15 +83,15 @@ export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: C
               {activeTab === "payments" && (recents.recentPayments.length > 0 ? recents.recentPayments.map((payment, index) => (
                 <div key={index} className="p-3 bg-gray-50 rounded-[12px] hover:bg-gray-100 transition-all">
                   <div className="flex items-start justify-between mb-1">
-                    <p className="text-[#2D3194] font-medium text-sm">{payment.id}</p>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-[#1A1A1A]">
-                      {payment.method}
+                    <p className="text-[#2D3194] font-medium text-sm">{payment.reference}</p>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-[#1A1A1A]">
+                      {payment.paymentMethod}
                     </span>
                   </div>
-                  <p className="text-[#1A1A1A] text-sm mb-1">{payment.client}</p>
+                  <p className="text-[#1A1A1A] text-sm mb-1">{payment.Invoice.customer.user.firstName} {payment.Invoice.customer.user.lastName}</p>
                   <div className="flex items-center justify-between">
-                    <p className="text-green-700 font-medium text-sm">{payment.amount}</p>
-                    <p className="text-[#7A7A7A] text-xs">{payment.date}</p>
+                    <p className="text-green-700 font-medium text-sm">{payment.amount} DHs</p>
+                    <p className="text-[#7A7A7A] text-xs">{payment.creationDate}</p>
                   </div>
                 </div>
               )) : <p className="text-[#1A1A1A] text-center font-medium text-md">No payments</p>)}
@@ -99,15 +99,14 @@ export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: C
               {activeTab === "unpaid" && (recents.unpaidInvoices.length > 0 ? recents.unpaidInvoices.map((invoice, index) => (
                 <div key={index} className="p-3 bg-gray-50 rounded-[12px] hover:bg-gray-100 transition-all">
                   <div className="flex items-start justify-between mb-1">
-                    <p className="text-[#2D3194] font-medium text-sm">{invoice.id}</p>
+                    <p className="text-[#2D3194] font-medium text-sm">{invoice.invoiceNumber}</p>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">
-                      {invoice.daysOverdue}d
+                      {invoice.dueDate.toString().split("T")[0]}
                     </span>
                   </div>
-                  <p className="text-[#1A1A1A] text-sm mb-1">{invoice.client}</p>
+                  <p className="text-[#1A1A1A] text-sm mb-1">Total Facture: {invoice.totalAmount} DHs</p>
                   <div className="flex items-center justify-between">
-                    <p className="text-red-700 font-medium text-sm">{invoice.amount}</p>
-                    <p className="text-[#7A7A7A] text-xs">{invoice.date}</p>
+                    <p className="text-red-700 font-medium text-sm">Reste: {invoice.remainingAmount} DHs</p>
                   </div>
                 </div>
               )): <p className="text-[#1A1A1A] text-center font-medium text-md">No Unpaid Invoices</p>)}

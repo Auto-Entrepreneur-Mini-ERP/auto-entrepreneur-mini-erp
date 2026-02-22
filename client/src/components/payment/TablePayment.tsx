@@ -1,17 +1,39 @@
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import { useEffect } from "react";
+import { Download, Eye, Handshake } from "lucide-react";
+import { useState } from "react";
+import { usePayment } from "../../hooks/usePayment";
+import ModalViewPayment from "./ModalViewPayment";
+import type { Payment } from "../../types/payment.types";
 
-function TablePayment() {
+type TablePaymentProps = {
+  payments: Payment[]
+}
 
-    useEffect(()=>{
+function TablePayment({
+  payments,
+}: TablePaymentProps) {
 
-    }, []);
+  const { errors, onePayment, getOnePayment, reconsiliatePayment } = usePayment();
 
-    const transactions = [
-    { id: 1, type: "Paiement", description: "Client - Société XYZ", date: "15/01/2024", amount: "+2,450.00", category: "Vente", status: "Confirmé" },
-    { id: 2, type: "Paiement", description: "Client - Logistique Pro", date: "12/01/2024", amount: "+3,800.00", category: "Vente", status: "Confirmé" },
-    { id: 3, type: "Paiement", description: "Client - Express Ltd", date: "05/01/2024", amount: "+890.00", category: "Vente", status: "Confirmé" },
-  ];
+  const [isViewPaymentModalOpen, setIsViewPaymentModalOpen] = useState(false);
+  // const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
+
+  const handleViewPayment = (id: string) => {
+    getOnePayment(id);
+    setIsViewPaymentModalOpen(true);
+  };
+
+  const handleReconsiliate = (paymentId: string) => {
+    reconsiliatePayment(paymentId);
+    if(!errors){
+      window.location.reload();
+    }
+  };
+
+
+  // const handleEditPayment = (id: string) => {
+  //   getOnePayment(id);
+  //   setIsEditPaymentModalOpen(true)
+  // };
 
   return (
     <>
@@ -28,9 +50,6 @@ function TablePayment() {
                   N° Facture
                 </th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
-                  Nom du Client
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
                   Date de Paiement
                 </th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
@@ -42,76 +61,79 @@ function TablePayment() {
                 <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
                   Statut
                 </th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
+                <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody>
-              {transactions.map((transaction) => (
+              {payments && payments?.map((transaction: Payment) => (
                 <tr
                   key={transaction.id}
                   className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                 >
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          transaction.type === "Paiement"
-                            ? "bg-green-100"
-                            : "bg-red-100"
-                        }`}
-                      >
-                        {transaction.type === "Paiement" ? (
-                          <ArrowDownRight className="w-5 h-5 text-green-600" />
-                        ) : (
-                          <ArrowUpRight className="w-5 h-5 text-red-600" />
-                        )}
-                      </div>
-                      <span
-                        className={`font-semibold ${
-                          transaction.type === "Paiement"
-                            ? "text-green-700"
-                            : "text-red-700"
-                        }`}
-                      >
-                        {transaction.type}
-                      </span>
-                    </div>
+                    <span className="font-semibold text-[#2D3194]">
+                      {transaction.reference}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-gray-900">
-                    {transaction.description}
+                    {transaction.Invoice.invoiceNumber}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
-                      {transaction.category}
+                    {transaction.paymentDate.toString().split("T")[0]}
+                  </td>
+                  <td className="px-6 py-4 text-gray-600 text-center">
+                    <span className="font-semibold text-green-700">
+                      {transaction.paymentMethod}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {transaction.date}
+                  <td className="px-6 py-4 text-right">
+                    {transaction.amount} DHs
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`font-bold ${
-                        transaction.amount.startsWith("+")
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {transaction.amount}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
-                        transaction.status === "Confirmé" ||
-                        transaction.status === "Payé"
+                      className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold 
+                        ${transaction.isReconciled
                           ? "bg-green-100 text-green-700"
                           : "bg-orange-100 text-orange-700"
-                      }`}
+                        }`}
                     >
-                      {transaction.status}
+                      {transaction.isReconciled ? "Reconsilliee" : "Non Reconsilliee"}
                     </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => handleViewPayment(transaction.id)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Voir"
+                      >
+                        <Eye className="w-4 h-4 text-gray-600" />
+                      </button>
+                      {/* <button
+                        className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Modifier"
+                      >
+                        <Pen
+                          onClick={() => handleEditPayment(transaction.id)}
+                          className="w-4 h-4 text-blue-600"
+                        />
+                      </button> */}
+                      <button
+                      onClick={() => handleReconsiliate(transaction.id)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Rapprocher"
+                      >
+                        <Handshake className="w-4 h-4 text-gray-600" />
+                      </button>
+                      <button
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Télécharger"
+                      >
+                        <Download className="w-4 h-4 text-gray-600" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -119,6 +141,8 @@ function TablePayment() {
           </table>
         </div>
       </div>
+
+      <ModalViewPayment payment={onePayment as Payment} isPaymentModalOpen={isViewPaymentModalOpen} setIsPaymentModalOpen={setIsViewPaymentModalOpen}/>
     </>
   );
 }

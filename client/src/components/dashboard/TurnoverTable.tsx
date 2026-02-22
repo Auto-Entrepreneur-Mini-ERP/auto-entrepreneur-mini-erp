@@ -38,7 +38,7 @@ function TurnoverTable({ monthlyRevenues, monthlyDepences }: TurnoverTableProps)
                                                     className="absolute left-0 top-0 h-full bg-[#2D3194] rounded-lg transition-all duration-500 flex items-center justify-end pr-2"
                                                     style={{ width: `${(data.revenues / maxRevenue) * 100}%` }}
                                                 >
-                                                    <span className="text-xs font-semibold text-white">{data.revenues}</span>
+                                                    <span className="text-xs font-semibold text-white">{data.revenues} DHs</span>
                                                 </div>
                                             </div>
                                             {/* Expenses Bar */}
@@ -47,7 +47,7 @@ function TurnoverTable({ monthlyRevenues, monthlyDepences }: TurnoverTableProps)
                                                     className="absolute left-0 top-0 h-full bg-red-400 rounded-lg transition-all duration-500 flex items-center justify-end pr-2"
                                                     style={{ width: `${(data.expenses / maxExpense) * 100}%` }}
                                                 >
-                                                    <span className="text-xs font-semibold text-white">{data.expenses}</span>
+                                                    <span className="text-xs font-semibold text-white">{data.expenses} DHs</span>
                                                 </div>
                                             </div>
                                         </div>

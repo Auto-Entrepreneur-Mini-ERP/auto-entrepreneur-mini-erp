@@ -7,6 +7,7 @@ import {
   Eye,
   FileDown,
   RefreshCw,
+  Search,
   Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -304,7 +305,7 @@ export default function TableExpense() {
   return (
     <div className="w-full space-y-6 mt-4">
       {/* ── Stats ── */}
-      {stats && (
+      {/* {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Total dépenses", value: fmtMAD(stats.totalAmount), color: "text-[#2D3194]" },
@@ -318,17 +319,18 @@ export default function TableExpense() {
             </div>
           ))}
         </div>
-      )}
+      )} */}
 
       {/* ── Toolbar ── */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+          {/* <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span> */}
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher une dépense..."
-            className="pl-8 h-11 border-gray-200 rounded-xl"
+            className="pl-10 h-11 border-gray-200 rounded-xl"
           />
         </div>
 

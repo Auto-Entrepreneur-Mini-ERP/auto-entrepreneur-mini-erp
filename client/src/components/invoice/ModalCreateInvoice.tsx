@@ -121,9 +121,6 @@ function ModalCreateInvoice({
     setShowArticleSearch(false);
   };
 
-  console.log(invoiceLineFormData);
-
-
   return (
     <>
       {/* Invoice Modal */}

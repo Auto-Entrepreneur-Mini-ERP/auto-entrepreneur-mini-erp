@@ -6,7 +6,41 @@ export interface kpis {
 };
 
 export interface recentsTypes {
-  recentInvoices: Array<{ id: string; client: string; amount: string; date: string; status: string }>;
-  recentPayments: Array<{ id: string; client: string; amount: string; date: string; method: string }>;
-  unpaidInvoices: Array<{ id: string; client: string; amount: string; date: string; daysOverdue: number }>
+  recentInvoices: {
+    count: number,
+    invoices: Array<{
+      invoiceNumber: string;
+      totalAmount: string;
+      dueDate: string;
+      status: string;
+      customer: {
+        user: {
+          firstName: string,
+          lastName: string,
+        }
+      }
+    }>
+  };
+  recentPayments: Array<{
+    reference: string;
+    Invoice: {
+      invoiceNumber: string,
+      customer: {
+        user: {
+          firstName: string,
+          lastName: string,
+        }
+      }
+    };
+    amount: string;
+    paymentMethod: string,
+    creationDate: string;
+    method: string
+  }>;
+  unpaidInvoices: Array<{
+    invoiceNumber: string;
+    totalAmount: string;
+    dueDate: string;
+    remainingAmount: string;
+  }>
 };

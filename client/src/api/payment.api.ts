@@ -1,10 +1,35 @@
+import type { PaymentCreateInput } from "../types/payment.types";
 import { api } from "./axios";
 
 const getAllPayment = async () => {
-    const resposne = await api.get("/payments");
+    const resposne = await api.get("/payment");
     return resposne;
+}
+
+const getPaymentById = async (paymentId: string) => {
+    const response = await api.get("/payment/" + paymentId);
+    return response;
+}
+
+const getInvoicesByNumber = async (invoiceNumber: string) => {
+    const response = await api.get("/invoice/search/" + invoiceNumber);
+    return response;
+}
+
+const savePayment = async (paymentData: PaymentCreateInput) => {
+    const response = await api.post("/payment", paymentData);
+    return response;
+}
+
+const reconsiliatePayment = async (paymentId: string) => {
+    const response = await api.get("/payment/" + paymentId + "/rapprocher");
+    return response;
 }
 
 export const paymentApi = {
     getAllPayment,
+    getPaymentById,
+    getInvoicesByNumber,
+    savePayment,
+    reconsiliatePayment
 }
