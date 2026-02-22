@@ -7,19 +7,22 @@ const getAllPayment = async () => {
 }
 
 const getPaymentById = async (paymentId: string) => {
-    const response = await api.get("/payment/"+paymentId);
+    const response = await api.get("/payment/" + paymentId);
     return response;
 }
 
 const getInvoicesByNumber = async (invoiceNumber: string) => {
-    const response = await api.get("/invoice/search/"+invoiceNumber);
+    const response = await api.get("/invoice/search/" + invoiceNumber);
     return response;
 }
 
 const savePayment = async (paymentData: PaymentCreateInput) => {
-    const response = await api.post("/payment", paymentData);  
-    console.log(response);
-      
+    const response = await api.post("/payment", paymentData);
+    return response;
+}
+
+const reconsiliatePayment = async (paymentId: string) => {
+    const response = await api.get("/payment/" + paymentId + "/rapprocher");
     return response;
 }
 
@@ -28,4 +31,5 @@ export const paymentApi = {
     getPaymentById,
     getInvoicesByNumber,
     savePayment,
+    reconsiliatePayment
 }

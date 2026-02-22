@@ -13,7 +13,8 @@ import { DashboardView } from "./pages/views/DashboardView";
 import { ProfilePage } from "./pages/views/ProfilePageView";
 import { ArticlesServicesView } from "./pages/views/ArticlesServicesView";
 import { QuotsInvoicesView } from "./pages/views/QuotsInvoicesView";
-import { PaymentsExpensesView } from "./pages/views/PaymentsExpensesView";
+import { PaymentsView } from "./pages/views/PaymentsView";
+import { ExpensesView } from "./pages/views/ExpensesView";
 import { CADeclarationView } from "./pages/views/CADeclarationView";
 import { CNSSPaymentView } from "./pages/views/CNSSPaymentView";
 // import { AnalyticsView } from "./pages/views/AnalyticsView";
@@ -51,7 +52,8 @@ export const router = createBrowserRouter([
       { path: "dashboard", Component: DashboardView },
       { path: "articles-services", Component: ArticlesServicesView },
       { path: "quots-invoices", Component: QuotsInvoicesView },
-      { path: "payments-expenses", Component: PaymentsExpensesView },
+      { path: "payments", Component: PaymentsView },  
+      { path: "expenses", Component: ExpensesView },
       { path: "ca-declaration", Component: CADeclarationView },
       { path: "cnss-payment", Component: CNSSPaymentView },
       // { path: "analytics", Component: AnalyticsView },

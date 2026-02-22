@@ -29,7 +29,6 @@ router.delete("/payment/:paymentId",
     paymentController.deletePayment
 );
 
-
 router.get("/payment/:paymentId/recu",
     paymentController.getPaymentById
 );

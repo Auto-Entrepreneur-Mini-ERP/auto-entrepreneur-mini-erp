@@ -1,30 +1,39 @@
-import { Download, Eye, Pen } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Download, Eye, Handshake } from "lucide-react";
+import { useState } from "react";
 import { usePayment } from "../../hooks/usePayment";
 import ModalViewPayment from "./ModalViewPayment";
 import type { Payment } from "../../types/payment.types";
 
-function TablePayment() {
+type TablePaymentProps = {
+  payments: Payment[]
+}
 
-  const { payments, onePayment, fetchPayments, getOnePayment } = usePayment();
+function TablePayment({
+  payments,
+}: TablePaymentProps) {
+
+  const { errors, onePayment, getOnePayment, reconsiliatePayment } = usePayment();
 
   const [isViewPaymentModalOpen, setIsViewPaymentModalOpen] = useState(false);
-  const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
-
-  useEffect(() => {
-    fetchPayments();
-  }, []);
+  // const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
 
   const handleViewPayment = (id: string) => {
     getOnePayment(id);
     setIsViewPaymentModalOpen(true);
   };
 
-
-  const handleEditPayment = (id: string) => {
-    getOnePayment(id);
-    setIsEditPaymentModalOpen(true)
+  const handleReconsiliate = (paymentId: string) => {
+    reconsiliatePayment(paymentId);
+    if(!errors){
+      window.location.reload();
+    }
   };
+
+
+  // const handleEditPayment = (id: string) => {
+  //   getOnePayment(id);
+  //   setIsEditPaymentModalOpen(true)
+  // };
 
   return (
     <>
@@ -52,13 +61,13 @@ function TablePayment() {
                 <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
                   Statut
                 </th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
+                <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody>
-              {payments && payments?.map((transaction) => (
+              {payments && payments?.map((transaction: Payment) => (
                 <tr
                   key={transaction.id}
                   className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
@@ -94,7 +103,7 @@ function TablePayment() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={() => handleViewPayment(transaction.id)}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -102,7 +111,7 @@ function TablePayment() {
                       >
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button
+                      {/* <button
                         className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Modifier"
                       >
@@ -110,6 +119,13 @@ function TablePayment() {
                           onClick={() => handleEditPayment(transaction.id)}
                           className="w-4 h-4 text-blue-600"
                         />
+                      </button> */}
+                      <button
+                      onClick={() => handleReconsiliate(transaction.id)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Rapprocher"
+                      >
+                        <Handshake className="w-4 h-4 text-gray-600" />
                       </button>
                       <button
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"

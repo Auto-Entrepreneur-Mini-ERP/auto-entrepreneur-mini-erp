@@ -24,7 +24,8 @@ export function DashboardLayout() {
     "/app/dashboard": "Dashboard",
     "/app/articles-services": "Articles & Services",
     "/app/quots-invoices": "Devis & Factures",
-    "/app/payments-expenses": "Paiments & Dépenses",
+    "/app/payments": "Paiements",
+    "/app/expenses": "Dépenses",    
     "/app/ca-declaration": "Déclaration Chiffre d'affaire",
     "/app/cnss-payment": "Paiment CNSS",
     "/app/analytics": "Analytics",
@@ -38,7 +39,8 @@ export function DashboardLayout() {
       "Dashboard": "/app/dashboard",
       "Articles & Services": "/app/articles-services",
       "Devis & Factures": "/app/quots-invoices",
-      "Paiments & Dépenses": "/app/payments-expenses",
+      "Paiements": "/app/payments",
+      "Dépenses": "/app/expenses",
       "Déclaration Chiffre d'affaire": "/app/ca-declaration",
       "Paiment CNSS": "/app/cnss-payment",
       "Analytics": "/app/analytics",
@@ -53,34 +55,31 @@ export function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-white flex">
-      {/* Mobile & Tablet Overlay */}
+      {/* Mobile overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 xl:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* Fixed Left Sidebar - Hidden on mobile & tablet, shown on desktop */}
+      {/* Sidebar */}
       <div className={`
         fixed left-0 top-0 h-screen w-full max-w-[300px] min-w-[230px] z-50
         transition-transform duration-300 ease-in-out
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
         xl:translate-x-0
       `}>
         <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
       </div>
 
-      {/* Main Content Area - Takes remaining space */}
+      {/* Main content */}
       <main className="flex-1 xl:ml-[230px] 2xl:ml-[300px] w-full">
-        {/* Sticky Header */}
-        <ContentHeader 
+        <ContentHeader
           onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
           isSidebarOpen={isSidebarOpen}
           autoEData={headerData}
         />
-        
-        {/* Page Content */}
         <div className="px-4 sm:px-8 pb-8">
           <Outlet />
         </div>

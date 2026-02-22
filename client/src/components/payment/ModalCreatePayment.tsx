@@ -1,10 +1,10 @@
-import { useState, type ReactElement } from "react";
+import { useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Modal } from "../../components/ui/modal";
 import type { PaymentCreateInput } from "../../types/payment.types";
-import { PaymentMethod, type Invoice } from "../../types/invoice.types";
+import { type Invoice } from "../../types/invoice.types";
 import { usePayment } from "../../hooks/usePayment";
 import { CircleX } from "lucide-react";
 
@@ -18,6 +18,7 @@ function ModalCreatePayment({
   isPaymentModalOpen
 }: ModalCreatePaymentProps) {
 
+
   const { errors, getInvoicesByNumber, createPayment } = usePayment();
 
   const [paymentFormData, setPaymentFormData] = useState<PaymentCreateInput>();
@@ -30,12 +31,12 @@ function ModalCreatePayment({
     console.log("paymentData", paymentFormData);
     
     createPayment(paymentFormData as PaymentCreateInput);
-    console.log(errors);
     
-    // if (!errors) {
-    //   setIsPaymentModalOpen(false);
-    //   setPaymentFormData(undefined);
-    // }
+    if (!errors) {
+      setIsPaymentModalOpen(false);
+      setPaymentFormData(undefined);
+      window.location.reload();
+    }
   };
 
   const handleInvoiceNumberChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,11 +113,11 @@ function ModalCreatePayment({
               <Input
                 type="date"
                 id="date"
-                value={
-                    new Date(paymentFormData?.paymentDate || new Date())
-                      .toISOString()
-                      .split("T")[0] || ""
-                  }
+                // value={
+                //     new Date(paymentFormData?.paymentDate || new Date())
+                //       .toISOString()
+                //       .split("T")[0] || ""
+                //   }
                 onChange={(e) =>
                   setPaymentFormData({
                     ...paymentFormData,

@@ -42,6 +42,16 @@ export const usePayment = () => {
         return res;
     };
 
+    const reconsiliatePayment = async (paymentId: string) => {
+        const res = await paymentApi.reconsiliatePayment(paymentId);
+        
+        if(res.data.statusCode && res.data.statusCode !== 200){
+            setErrors(res.data);
+            return;
+        }
+        return res;
+    }
+
     return {
         errors,
         payments,
@@ -50,5 +60,6 @@ export const usePayment = () => {
         getOnePayment,
         getInvoicesByNumber,
         createPayment,
+        reconsiliatePayment,
     };
 }

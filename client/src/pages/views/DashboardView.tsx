@@ -24,7 +24,7 @@ export function DashboardView() {
       await getRecentsData();
     })();
   },[]);  
-  
+    
   return (
     <div className="space-y-6">
       {/* KPI Cards */}

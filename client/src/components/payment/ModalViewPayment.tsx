@@ -18,8 +18,8 @@ function ModalViewPayment({
     return (
         <>
             <Modal
-                maxWidth="max-w-7xl"
-                title="Créer une facture"
+                maxWidth="max-w-4xl"
+                title="Voir un paiement"
                 isOpen={isPaymentModalOpen}
                 onClose={() => setIsPaymentModalOpen(false)}
             >

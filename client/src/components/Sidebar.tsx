@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, FileText, CreditCard, FileCheck, Building, User, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, FileText, CreditCard,Receipt, FileCheck, Building, User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 import Logo from "./Logo";
 
@@ -28,7 +28,8 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
     { name: "Dashboard", icon: LayoutDashboard },
     { name: "Articles & Services", icon: Package },
     { name: "Devis & Factures", icon: FileText },
-    { name: "Paiments & Dépenses", icon: CreditCard },
+{ name: "Paiements", icon: CreditCard },
+    { name: "Dépenses", icon: Receipt },    
     { name: "Déclaration Chiffre d'affaire", icon: FileCheck },
     { name: "Paiment CNSS", icon: Building },
   ];
@@ -95,7 +96,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
           )}
         </button>
         
-        <button 
+        <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[#1A1A1A] hover:bg-red-50 hover:text-red-600 transition-all duration-300"
         >
