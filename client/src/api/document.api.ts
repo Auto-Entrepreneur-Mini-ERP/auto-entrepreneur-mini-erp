@@ -11,7 +11,7 @@ const getDocumentById = async (documentId: string) => {
     return response;
 }
 
-const createDocument = async (data: DocumentCreateData) => {
+const createDocument = async (data: FormData) => {
     const response = await api.post("/document", data);
     return response;
 }

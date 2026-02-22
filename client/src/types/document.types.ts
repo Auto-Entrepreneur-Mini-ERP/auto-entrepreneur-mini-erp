@@ -11,6 +11,7 @@ export interface DocumentCreateData {
     name: string,
     category?: string,
     description?: string,
+    document?: File | null;
 }
 
 export interface DocumentUpdateData {

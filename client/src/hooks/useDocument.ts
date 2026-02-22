@@ -25,7 +25,7 @@ export const useDocument = () => {
         }
     }
 
-    const createDocument = async (data: DocumentCreateData) => {
+    const createDocument = async (data: FormData) => {
         const res = await documentApi.createDocument(data);
 
         if (res.data.statusCode && res.data.statusCode !== 200) {

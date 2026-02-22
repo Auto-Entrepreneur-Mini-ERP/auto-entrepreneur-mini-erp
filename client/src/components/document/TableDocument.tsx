@@ -120,7 +120,7 @@ function TableDocument({
                 </div>
             </div>
 
-            <ModalEditDocument />
+            <ModalEditDocument document={document as Document} isDocumentModalOpen={isEditDocumentModalOpen} setIsDocumentModalOpen={setIsEditDocumentModalOpen} />
         </>
     )
 }

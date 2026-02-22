@@ -3,7 +3,7 @@ import { aws } from "../../lib/aws.js";
 import { prisma } from "../../lib/prisma.js";
 import { pagination } from "../../utils/pagination.js";
 import { autoentrepreneurExists } from "../auto-entrepreneur/utils/autoentrepreneurExists.js";
-import type { DocumentCreateInput, DocumentUpdateInput } from "./document.types.js";
+import type { DocumentCreateInput, DocumentOutput, DocumentUpdateInput } from "./document.types.js";
 import { documentExists } from "./utils/documentExists.js";
 
 const getAllDocuments = async (autoentrepreneurId: string, page: number, limit: number) => {
@@ -25,12 +25,9 @@ const getAllDocuments = async (autoentrepreneurId: string, page: number, limit: 
 const getOneDocument = async (autoentrepreneurId: string, documentId: string) => {
     autoentrepreneurExists(autoentrepreneurId);
 
-    // get file from S3 bucket
-
     const document = await prisma.document.findUnique({
         where:{
             id: documentId,
-            AutoEntrepreneurId: autoentrepreneurId,
         }
     });
     
@@ -41,9 +38,8 @@ const createDocument = async (autoentrepreneurId: string, data: DocumentCreateIn
     autoentrepreneurExists(autoentrepreneurId);    
 
     //upload file to  AWS S3 bucket
-    await aws.s3Upload(file);
+    const fileUrl = await aws.s3Upload(file);
 
-    const fileUrl: string = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${Date.now()}-${file.originalname}`;
     const DocumentInputData: Prisma.DocumentCreateInput = {
         name: data.name,
         type: file.mimetype,
@@ -60,7 +56,7 @@ const createDocument = async (autoentrepreneurId: string, data: DocumentCreateIn
 
     const newDoc = await prisma.document.create({
         data: DocumentInputData
-    });
+    }) as DocumentOutput;
 
     return newDoc;
 };
@@ -72,12 +68,7 @@ const updateDocument = async (autoentrepreneurId: string, documentId: string,  d
     const DocumentUpdateData: Prisma.DocumentUpdateInput = {
         name: data.name,
         category: data.category || null,
-        description: data.description || null,
-        AutoEntrepreneur:{
-            connect:{
-                id: autoentrepreneurId
-            }
-        }
+        description: data.description || null
     };
 
     const updatedDoc = await prisma.document.update({
