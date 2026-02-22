@@ -3,7 +3,12 @@ import { prisma } from "../../lib/prisma.js";
 import type { Prisma } from "../../../generated/prisma/browser.js";
 import * as fs from "fs";
 import * as path from "path";
-import * as ExcelJS from "exceljs";
+// ✅ Correct import for ExcelJS with "module": "nodenext" + verbatimModuleSyntax
+// ExcelJS is a CJS package — use createRequire or import the default export this way
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const ExcelJS = require("exceljs") as typeof import("exceljs");
+
 import type {
   CreateExpenseInput,
   UpdateExpenseInput,
@@ -19,7 +24,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   COMMUNICATION: "Communication",
   FORMATION: "Formation",
   LOGICIEL: "Logiciel",
-  HÉBERGEMENT : "Hébergement",
   REPAS: "Repas",
   LOYER: "Loyer / Bureau",
   MATERIEL: "Matériel",
@@ -178,6 +182,8 @@ export class ExpenseService {
       orderBy: { date: "desc" },
     });
 
+    console.log(`[ExcelExport] Generating Excel for ${expenses.length} expenses`);
+
     const workbook = new ExcelJS.Workbook();
     workbook.creator = "Auto-Entrepreneur ERP";
     workbook.created = new Date();
@@ -186,7 +192,6 @@ export class ExpenseService {
       pageSetup: { paperSize: 9, orientation: "landscape" },
     });
 
-    // ── Column definitions
     sheet.columns = [
       { header: "Date", key: "date", width: 14 },
       { header: "Catégorie", key: "category", width: 18 },
@@ -200,13 +205,11 @@ export class ExpenseService {
 
     // ── Header row styling
     const headerRow = sheet.getRow(1);
-    headerRow.eachCell((cell: ExcelJS.Cell) => {
+    headerRow.eachCell((cell: { fill: { type: string; pattern: string; fgColor: { argb: string; }; }; font: { bold: boolean; color: { argb: string; }; size: number; }; alignment: { vertical: string; horizontal: string; }; border: { bottom: { style: string; color: { argb: string; }; }; }; }) => {
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF2D3194" } };
       cell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 11 };
       cell.alignment = { vertical: "middle", horizontal: "center" };
-      cell.border = {
-        bottom: { style: "thin", color: { argb: "FFE0E0E0" } },
-      };
+      cell.border = { bottom: { style: "thin", color: { argb: "FFE0E0E0" } } };
     });
     headerRow.height = 28;
 
@@ -223,76 +226,55 @@ export class ExpenseService {
         receipt: e.receiptUrl ? "✓" : "",
       });
 
-      // Alternating row background
       const bgColor = idx % 2 === 0 ? "FFFAFAFA" : "FFFFFFFF";
-      row.eachCell((cell: ExcelJS.Cell) => {
+      row.eachCell((cell: { fill: { type: string; pattern: string; fgColor: { argb: string; }; }; alignment: { vertical: string; }; border: { bottom: { style: string; color: { argb: string; }; }; }; }) => {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: bgColor } };
         cell.alignment = { vertical: "middle" };
-        cell.border = {
-          bottom: { style: "hair", color: { argb: "FFE8E8E8" } },
-        };
+        cell.border = { bottom: { style: "hair", color: { argb: "FFE8E8E8" } } };
       });
 
-      // Amount column: number format + right-align
       const amountCell = row.getCell("amount");
       amountCell.numFmt = '#,##0.00 "MAD"';
       amountCell.alignment = { horizontal: "right", vertical: "middle" };
 
-      // Deductible: center + color
       const deductCell = row.getCell("isDeductible");
       deductCell.alignment = { horizontal: "center", vertical: "middle" };
-      if (e.isDeductible) {
-        deductCell.font = { color: { argb: "FF16A34A" }, bold: true };
-      }
+      if (e.isDeductible) deductCell.font = { color: { argb: "FF16A34A" }, bold: true };
 
-      // Receipt: center
       row.getCell("receipt").alignment = { horizontal: "center", vertical: "middle" };
-
       row.height = 22;
     });
 
-    // ── Summary row at the bottom
+    // ── Total row
     if (expenses.length > 0) {
-      sheet.addRow({}); // empty spacer
-
+      sheet.addRow({});
       const totalRow = sheet.addRow({
-        date: "",
-        category: "",
         description: "TOTAL",
-        supplier: "",
         amount: expenses.reduce((s, e) => s + Number(e.amount), 0),
-        paymentMethod: "",
-        isDeductible: "",
-        receipt: "",
       });
-
-      totalRow.eachCell((cell: ExcelJS.Cell) => {
+      totalRow.eachCell((cell: { fill: { type: string; pattern: string; fgColor: { argb: string; }; }; font: { bold: boolean; size: number; }; alignment: { vertical: string; }; }) => {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8BC00" } };
         cell.font = { bold: true, size: 11 };
         cell.alignment = { vertical: "middle" };
       });
-
       const totalAmountCell = totalRow.getCell("amount");
       totalAmountCell.numFmt = '#,##0.00 "MAD"';
       totalAmountCell.alignment = { horizontal: "right", vertical: "middle" };
-
-      const totalLabelCell = totalRow.getCell("description");
-      totalLabelCell.alignment = { horizontal: "right", vertical: "middle" };
-
+      totalRow.getCell("description").alignment = { horizontal: "right", vertical: "middle" };
       totalRow.height = 26;
     }
 
-    // ── Freeze header row
     sheet.views = [{ state: "frozen", ySplit: 1 }];
-
-    // ── Auto-filter on header
     sheet.autoFilter = {
       from: { row: 1, column: 1 },
       to: { row: 1, column: sheet.columns.length },
     };
 
     const arrayBuffer = await workbook.xlsx.writeBuffer();
-    return Buffer.from(arrayBuffer);
+    const buffer = Buffer.from(arrayBuffer);
+
+    console.log(`[ExcelExport] Buffer generated: ${buffer.length} bytes`);
+    return buffer;
   }
 
   // ── PRIVATE HELPERS ────────────────────────────────────────────────────────
@@ -301,22 +283,18 @@ export class ExpenseService {
     filters?: ExpenseFilters,
   ): Prisma.ExpenseWhereInput {
     const where: Prisma.ExpenseWhereInput = { AutoEntrepreneurId: autoEntrepreneurId };
-
     if (filters?.category) where.category = filters.category;
     if (filters?.isDeductible !== undefined) where.isDeductible = filters.isDeductible;
-
     if (filters?.startDate || filters?.endDate) {
       where.date = {};
       if (filters.startDate) (where.date as any).gte = new Date(filters.startDate);
       if (filters.endDate) (where.date as any).lte = new Date(filters.endDate);
     }
-
     if (filters?.minAmount !== undefined || filters?.maxAmount !== undefined) {
       where.amount = {};
       if (filters.minAmount !== undefined) (where.amount as any).gte = filters.minAmount;
       if (filters.maxAmount !== undefined) (where.amount as any).lte = filters.maxAmount;
     }
-
     return where;
   }
 
