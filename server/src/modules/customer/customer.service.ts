@@ -13,7 +13,7 @@ const getAllCustomers = async (id:string) => {
   if (!customers) throw new AppError("No customers found", 404);
   return customers;
 };
-const createCustomer = async (customerData: customer) => {
+const createCustomer = async (authID : string,customerData: customer) => {
  
   const newUser = await prisma.user.create({
     data: {
@@ -29,7 +29,7 @@ const createCustomer = async (customerData: customer) => {
     data: {
       ice: customerData.ice,
       city: customerData.city ?? null,
-      AutoEntrepreneurId: customerData.AutoEntrepreneurId,
+      AutoEntrepreneurId:  authID,
       userId: newUser.id,  
     },
     include: {
@@ -40,35 +40,46 @@ const createCustomer = async (customerData: customer) => {
   if (!newCustomer) throw new Error("Customer creation failed");
   return newCustomer;
 };
-
-const updateCustomer = async (id: string, customerData: Partial<customer>) => {
+ 
+const updateCustomer = async (id: string, customerData: Partial<Customer>) => {
   const data: any = {};
 
   // Customer fields
   if (customerData.ice !== undefined) data.ice = customerData.ice;
+
   if (customerData.city !== undefined) data.city = customerData.city ?? null;
-  if (customerData.AutoEntrepreneurId !== undefined)
-    data.AutoEntrepreneurId = customerData.AutoEntrepreneurId;
+
+  if (customerData.country !== undefined)
+    data.country = customerData.country ?? null;
+
+  if (customerData.isActive !== undefined)
+    data.isActive = customerData.isActive;
 
   // Nested user fields
   if (customerData.user) {
     const userData: any = {};
+
     if (customerData.user.email !== undefined)
       userData.email = customerData.user.email;
+
     if (customerData.user.firstName !== undefined)
       userData.firstName = customerData.user.firstName ?? null;
+
     if (customerData.user.lastName !== undefined)
       userData.lastName = customerData.user.lastName ?? null;
+
     if (customerData.user.phone !== undefined)
       userData.phone = customerData.user.phone ?? null;
+
     if (customerData.user.address !== undefined)
       userData.address = customerData.user.address ?? null;
 
-     if (Object.keys(userData).length > 0) {
+    if (Object.keys(userData).length > 0) {
       data.user = { update: userData };
     }
   }
 
+ 
   const updatedCustomer = await prisma.customer.update({
     where: { id },
     data,
@@ -77,6 +88,7 @@ const updateCustomer = async (id: string, customerData: Partial<customer>) => {
 
   return updatedCustomer;
 };
+
 
 const getCustomer = async (id: string) => {
   const customer = await prisma.customer.findUnique({

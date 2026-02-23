@@ -21,6 +21,11 @@ router.patch(
   validateBody(updateTaxDeclarationRoute),
   taxDeclartaionController.patchTaxDeclaration,
 );
+router.get(
+  "/taxDeclarations/current",
+  taxDeclartaionController.getCurrentTaxDeclarationInfo,
+); 
+
 
 router.get(
   "/taxDeclarations/:id",
@@ -33,5 +38,10 @@ router.delete(
   taxDeclartaionController.deleteTaxDeclaration,
 ); 
 
+router.get(
+  "/taxDeclarations/current",
+  taxDeclartaionController.getCurrentTaxDeclarationInfo
+,
+); 
 
 export default router;

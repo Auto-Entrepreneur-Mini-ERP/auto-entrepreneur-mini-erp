@@ -2,8 +2,9 @@
 import { InvoiceStatus } from "../../invoice/invoice.types.js"
  
 import { prisma } from "../../../lib/prisma.js"
-import type { TaxDeclaration } from "../taxDeclaration.types.js";
+import type { TaxDeclaration,currentTaxDeclaaration } from "../taxDeclaration.types.js";
 
+ 
 
 export const calculateTotalRevenue = async (
   autoEntrepreneurId: string,
@@ -43,6 +44,40 @@ const getTaxRate = async (autoId : string) => {
   });
 
   return result
+}
+export async function prepareCurrentTaxDeclarationInfo(autoId: string): Promise<currentTaxDeclaaration> {
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+
+  const dueDate = new Date(currentYear, currentMonth, 15);
+
+  const remainDays = Math.ceil(
+    (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  const period = now.toLocaleDateString("fr-FR", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const [totalRevenue, { taxRate }] = await Promise.all([
+    calculateTotalRevenue(autoId, currentYear, currentMonth),
+    getTaxRate(autoId),
+  ]);
+
+  const taxAmount = parseFloat(((totalRevenue * taxRate) / 100).toFixed(2));
+
+  const current: currentTaxDeclaaration = {
+    totalRevenue,
+    taxAmount,
+    ramainDays: remainDays,
+    period,
+    dueDate,
+    status: "DRAFT",
+  };
+
+  return current;
 }
 
 export const PrepareTaxDeclarationData = async (data : any, autoEID: string) =>

@@ -3,15 +3,12 @@ import type { Request, Response, NextFunction } from "express";
 export const validateBody =
   (schema: any) => async (req: Request, res: Response, next: NextFunction) => {
     try {
-
-      await schema.body.parse(req.body);
-      // await schema.query.parse(req.query);
+       await schema.body.parse(req.body);
       next();
       
     } catch (error: any) {
       return res.status(200).json({
         message: "Validation error " + error.message,
-        statusCode: 400,
       });
       
     }

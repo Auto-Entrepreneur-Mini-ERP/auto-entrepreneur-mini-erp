@@ -13,7 +13,7 @@ export const isAthenticated = async (req: Request, res: Response, next: NextFunc
     const decoded = JWT.verifyToken(token, env.JWT_SECRET as string) as JwtPayload;
 
     if(!decoded) throw new AppError("Invalid Token!", 401);
-    if(!decoded.exp) throw new AppError("Invalid Token!", 401);
+    if(!decoded.exp) throw new AppError ("Invalid Token!", 401);
     
     const dateNow = Math.floor(Date.now() / 1000);
     if (decoded.exp < dateNow) throw new AppError("Token expired!", 401);
