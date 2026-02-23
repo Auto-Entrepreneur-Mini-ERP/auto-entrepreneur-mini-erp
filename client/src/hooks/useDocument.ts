@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { documentApi } from "../api/document.api";
-import type { Document, DocumentCreateData, DocumentUpdateData } from "../types/document.types";
+import type { Document, DocumentUpdateData } from "../types/document.types";
 
 export const useDocument = () => {
 
@@ -36,7 +36,8 @@ export const useDocument = () => {
 
     const editDocument = async (documentId: string, data: DocumentUpdateData) => {
         const res = await documentApi.editDocument(documentId, data);
-
+        console.log(res);
+        
         if (res.data.statusCode && res.data.statusCode !== 200) {
             setErrors(res.data.message);
             return;
