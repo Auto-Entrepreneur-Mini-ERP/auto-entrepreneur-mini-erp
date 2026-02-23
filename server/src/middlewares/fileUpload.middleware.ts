@@ -30,7 +30,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilt
     if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new AppError("Only PDF, JPG, and PNG files are allowed", 422));
+        cb(new AppError("Seuls les fichiers PDF, JPG et PNG sont autorisés", 422));
     }
 };
 

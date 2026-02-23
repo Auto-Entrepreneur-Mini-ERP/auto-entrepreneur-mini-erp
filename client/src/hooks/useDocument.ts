@@ -30,7 +30,6 @@ export const useDocument = () => {
 
         if (res.data.statusCode && res.data.statusCode !== 200) {
             setErrors(res.data.message);
-            return;
         }
     }
 

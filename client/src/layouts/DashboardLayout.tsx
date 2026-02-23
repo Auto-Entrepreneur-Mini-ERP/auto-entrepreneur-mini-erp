@@ -22,7 +22,7 @@ export function DashboardLayout() {
   // Map URL paths to sidebar sections
   const pathToSection: Record<string, string> = {
     "/app/dashboard": "Dashboard",
-    "/app/articles-services": "Articles & Services",
+    "/app/articles-services": "Produits & Services",
     "/app/quots-invoices": "Devis & Factures",
     "/app/payments": "Paiements",
     "/app/expenses": "Dépenses",    
@@ -38,7 +38,7 @@ export function DashboardLayout() {
   const handleSectionChange = (section: string) => {
     const sectionToPath: Record<string, string> = {
       "Dashboard": "/app/dashboard",
-      "Articles & Services": "/app/articles-services",
+      "Produits & Services": "/app/articles-services",
       "Devis & Factures": "/app/quots-invoices",
       "Paiements": "/app/payments",
       "Dépenses": "/app/expenses",

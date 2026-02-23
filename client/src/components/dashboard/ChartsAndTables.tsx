@@ -60,7 +60,7 @@ export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: C
           {/* Table Content */}
           <div className="flex-1 -mx-6 px-6 overflow-auto">
             <div className="space-y-3">
-              {activeTab === "invoices" && (recents.recentInvoices?.invoices?.length > 0 ?
+              {activeTab === "invoices" && (recents?.recentInvoices?.invoices?.length > 0 ?
                 recents.recentInvoices.invoices.map((invoice, index) => (
                   <div key={index} className="p-3 bg-gray-50 rounded-[12px] hover:bg-gray-100 transition-all">
                     <div className="flex items-start justify-between mb-1">
@@ -80,7 +80,7 @@ export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: C
                   </div>
                 )) : <p className="text-[#1A1A1A] text-center font-medium text-md">No invoices</p>)}
 
-              {activeTab === "payments" && (recents.recentPayments.length > 0 ? recents.recentPayments.map((payment, index) => (
+              {activeTab === "payments" && (recents.recentPayments?.length > 0 ? recents.recentPayments.map((payment, index) => (
                 <div key={index} className="p-3 bg-gray-50 rounded-[12px] hover:bg-gray-100 transition-all">
                   <div className="flex items-start justify-between mb-1">
                     <p className="text-[#2D3194] font-medium text-sm">{payment.reference}</p>
@@ -96,7 +96,7 @@ export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: C
                 </div>
               )) : <p className="text-[#1A1A1A] text-center font-medium text-md">No payments</p>)}
 
-              {activeTab === "unpaid" && (recents.unpaidInvoices.length > 0 ? recents.unpaidInvoices.map((invoice, index) => (
+              {activeTab === "unpaid" && (recents.unpaidInvoices?.length > 0 ? recents?.unpaidInvoices.map((invoice, index) => (
                 <div key={index} className="p-3 bg-gray-50 rounded-[12px] hover:bg-gray-100 transition-all">
                   <div className="flex items-start justify-between mb-1">
                     <p className="text-[#2D3194] font-medium text-sm">{invoice.invoiceNumber}</p>

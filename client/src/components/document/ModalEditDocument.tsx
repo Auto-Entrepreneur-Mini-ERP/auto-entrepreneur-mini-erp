@@ -1,10 +1,10 @@
-import { Label } from "recharts"
 import { Modal } from "../ui/modal"
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
 import { useEffect, useState } from "react"
 import { type Document, type DocumentUpdateData } from "../../types/document.types"
 import { useDocument } from "../../hooks/useDocument"
+import { Label } from "../ui/label"
 
 type ModalEditDocumentProps ={ 
   isDocumentModalOpen: boolean,
@@ -32,11 +32,11 @@ function ModalEditDocument({
   
   const handleDocumentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    editDocument(document.id as string, documentFormData as DocumentUpdateData);
-    // if(!errors){
-    //   setIsDocumentModalOpen(false);
-    //   window.location.reload();
-    // }
+    await editDocument(document.id as string, documentFormData as DocumentUpdateData);
+    if(!errors){
+      setIsDocumentModalOpen(false);
+      window.location.reload();
+    }
   }
 
   return (
@@ -50,7 +50,7 @@ function ModalEditDocument({
           {errors && <p className="text-red-500 mb-4 text-center">{errors}</p>}
           <form onSubmit={handleDocumentSubmit}>
             <div className="mb-4">
-              <Label className="mb-2">Nom du Document</Label>
+              <Label htmlFor="docName" className="mb-2">Nom du Document</Label>
               <Input
                 type="text"
                 id="docName"
@@ -66,7 +66,7 @@ function ModalEditDocument({
             </div>
 
             <div className="mb-4">
-              <Label className="mb-2">Categorie</Label>
+              <Label htmlFor="category" className="mb-2">Categorie</Label>
               <Input
                 type="text"
                 id="category"
@@ -82,7 +82,7 @@ function ModalEditDocument({
             </div>
 
             <div className="mb-4">
-              <Label className="mb-2">Description</Label>
+              <Label htmlFor="description" className="mb-2">Description</Label>
               <Input
                 type="text"
                 id="description"

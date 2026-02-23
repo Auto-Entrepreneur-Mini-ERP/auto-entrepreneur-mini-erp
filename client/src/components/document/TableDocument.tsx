@@ -16,19 +16,15 @@ function TableDocument({ documents }: TableDocument) {
     useState<boolean>(false);
 
   const handleEditDocument = async (documentId: string) => {
-    getOneDocument(documentId);
+    await getOneDocument(documentId);
     setIsEditDocumentModalOpen(true);
   };
 
   const handleDeleteDocument = async (documentId: string) => {
-    deleteDocument(documentId);
+    await deleteDocument(documentId);
     if (!errors) {
       window.location.reload();
     }
-  };
-
-  const handleDownloadDocument = async (documentId: string) => {
-    getOneDocument(documentId);
   };
 
   return (
@@ -96,7 +92,6 @@ function TableDocument({ documents }: TableDocument) {
                         </button>
 
                         <button
-                          onClick={() => handleDownloadDocument(doc.id)}
                           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                           title="Télécharger"
                         >

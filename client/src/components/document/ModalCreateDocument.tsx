@@ -1,10 +1,10 @@
-import { Label } from "recharts"
 import { Modal } from "../ui/modal"
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
 import { useState } from "react"
 import { type DocumentCreateData } from "../../types/document.types"
 import { useDocument } from "../../hooks/useDocument"
+import { Label } from "../ui/label"
 
 type ModalCreateDocumentProps = {
   isDocumentModalOpen: boolean,
@@ -19,8 +19,8 @@ function ModalCreateDocument({
 
   const [documentFormData, setDocumentFormData] = useState<DocumentCreateData>();
 
-  const handleDocumentSubmit = async () => {
-
+  const handleDocumentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     const formData = new FormData();
     formData.append("name", documentFormData?.name as string);
     formData.append("category", documentFormData?.category as string);
@@ -30,7 +30,8 @@ function ModalCreateDocument({
       formData.append("document", documentFormData.document);
     }
 
-    createDocument(formData as FormData);
+    await createDocument(formData as FormData);
+    
     if (!errors) {
       setIsDocumentModalOpen(false);
       window.location.reload();
@@ -48,7 +49,7 @@ function ModalCreateDocument({
           {errors && <p className="text-red-500 mb-4 text-center">{errors}</p>}
           <form onSubmit={handleDocumentSubmit}>
             <div className="mb-4">
-              <Label className="mb-2">Nom du Document</Label>
+              <Label htmlFor="docName" className="mb-2">Nom du Document</Label>
               <Input
                 type="text"
                 id="docName"
@@ -64,7 +65,7 @@ function ModalCreateDocument({
             </div>
 
             <div className="mb-4">
-              <Label className="mb-2">Categorie</Label>
+              <Label htmlFor="category" className="mb-2">Categorie</Label>
               <Input
                 type="text"
                 id="category"
@@ -80,7 +81,7 @@ function ModalCreateDocument({
             </div>
 
             <div className="mb-4">
-              <Label className="mb-2">Description</Label>
+              <Label htmlFor="description" className="mb-2">Description</Label>
               <Input
                 type="text"
                 id="description"
@@ -94,12 +95,12 @@ function ModalCreateDocument({
                 className="w-full h-12 border-gray-200 rounded-xl"
               />
             </div>
-            <div className="mb-4 relative">
+            <div className="mb-4">
               <Label htmlFor="document" className="flex items-center justify-center h-12 border rounded-xl cursor-pointer hover:bg-gray-50">
                 Choisir un fichier
               </Label>
               <Input
-                id="file"
+                id="document"
                 type="file"
                 className="hidden"
                 onChange={(e) =>
