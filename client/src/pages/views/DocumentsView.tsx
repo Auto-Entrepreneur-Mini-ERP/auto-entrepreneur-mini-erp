@@ -68,7 +68,7 @@ export function DocumentsView() {
             </div>
 
             {/* Document Modal */}
-            <ModalCreateDocument isPaymentModalOpen={isDocumentModalOpen} setIsPaymentModalOpen={setIsDocumentModalOpen} />
+            <ModalCreateDocument isDocumentModalOpen={isDocumentModalOpen} setIsDocumentModalOpen={setIsDocumentModalOpen} />
         </div>
     )
 }

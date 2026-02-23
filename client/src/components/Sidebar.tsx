@@ -26,7 +26,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard },
-    { name: "Articles & Services", icon: Package },
+    { name: "Produits & Services", icon: Package },
     { name: "Devis & Factures", icon: FileText },
     { name: "Paiements", icon: CreditCard },
     { name: "Dépenses", icon: Receipt },    

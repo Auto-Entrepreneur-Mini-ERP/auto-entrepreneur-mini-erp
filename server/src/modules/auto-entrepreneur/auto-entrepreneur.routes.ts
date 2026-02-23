@@ -11,7 +11,7 @@ const router = Router();
 router.get("/profile", autoEntrepreneurController.getProfile);
 router.put("/profile", 
     upload.single("profile-photo"), 
-    validateBody(modifyAutoEntrepreneurSchema), 
+    // validateBody(modifyAutoEntrepreneurSchema), 
     autoEntrepreneurController.editProfile
 );
 

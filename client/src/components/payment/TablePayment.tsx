@@ -67,7 +67,7 @@ function TablePayment({
               </tr>
             </thead>
             <tbody>
-              {payments && payments?.map((transaction: Payment) => (
+              {payments?.length > 0 && payments?.map((transaction: Payment) => (
                 <tr
                   key={transaction.id}
                   className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
@@ -139,6 +139,11 @@ function TablePayment({
               ))}
             </tbody>
           </table>
+          {payments?.length === 0 && (
+            <div className="p-3 text-center text-gray-500">
+              Aucune Paiement trouvée.
+            </div>
+          )}
         </div>
       </div>
 
