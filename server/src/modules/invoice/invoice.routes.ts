@@ -10,17 +10,21 @@ router.get('/invoice',
     invoiceController.getInvoices
 );
 
+router.get('/invoice/search/:invoiceNumber',
+    invoiceController.getInvoicesByNumber
+);
+
 router.get('/invoice/:invoiceId',
     invoiceController.getOneInvoice
 );
 
 router.post('/invoice',
-    validateBody(createInvoiceSchema),
+    // validateBody(createInvoiceSchema),
     invoiceController.createInvoice
 );
 
 router.put('/invoice/:invoiceId',
-    validateBody(updateInvoiceSchema),
+    // validateBody(updateInvoiceSchema),
     invoiceController.editInvoice
 );
 

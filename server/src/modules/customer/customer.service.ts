@@ -2,9 +2,11 @@ import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/errorHandler.js";
 import type { customer } from "./customer.types.js";
 
-const getAllCustomers = async (id:string) => {
+const getAllCustomers = async (autoentrepreneurId: string) => {
   const customers = await prisma.customer.findMany({
-    where: { AutoEntrepreneurId: id },
+    where: {
+      AutoEntrepreneurId: autoentrepreneurId,
+    },
     include: {
       user: true,
     },
@@ -103,6 +105,24 @@ const getCustomer = async (id: string) => {
   return customer;
 };
 
+const getCustomerByName = async (name: string) => {
+  const customer = await prisma.customer.findMany({
+    where: { user: {
+      OR: [
+        { firstName: { contains: name } },
+        { lastName: { contains: name } },
+      ],
+    }},
+    include: {
+      user: true,
+    },
+  });
+
+  if (!customer) throw new AppError("Customer not found", 404);
+
+  return customer;
+};
+
 const deleteCustomer = async (id: string) => {
   try {
     const customer = await prisma.customer.delete({
@@ -160,6 +180,7 @@ export const customerService = {
   createCustomer: createCustomer,
   updateCustomer: updateCustomer,
   getCustomer: getCustomer,
+  getCustomerByName: getCustomerByName,
   deleteCustomer: deleteCustomer,
   getAllInvoices: getAllInvoices,
   getAllQuotes: getAllQuotes

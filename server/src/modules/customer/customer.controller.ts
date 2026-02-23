@@ -6,9 +6,10 @@ import { AppError } from "../../utils/errorHandler.js";
 const getAllCustomers = async (req: Request, res: Response) => {
    
   try {
-    const id = req.AutoEntrepreneurID;
-    const customers = await customerService.getAllCustomers(id);
- 
+    const autoentrepreneurId = req.AutoEntrepreneurID;
+    const customers = await customerService.getAllCustomers(autoentrepreneurId as string);
+    debugger; // optional
+
     return res.status(200).json(customers);
   } catch (error: any) {
     console.error("Controller Error:", error);
@@ -67,7 +68,24 @@ const getCustomer = async (
 ) => {
   try {
     const { id } = req.params;
-    const customer = await customerService.getCustomer(id);
+    const customer = await customerService.getCustomer(id as string);
+    return res.status(200).json(customer);
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const getCustomerByName = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const { customerName } = req.params;
+    const customer = await customerService.getCustomerByName(customerName as string);
     return res.status(200).json(customer);
   } catch (error: any) {
     if (error instanceof AppError) {
@@ -82,7 +100,7 @@ const getCustomer = async (
 const deleteCustomer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await customerService.deleteCustomer(id);
+    await customerService.deleteCustomer(id as string);
     return res.status(204).send();
   } catch (error: any) {
     if (error instanceof AppError) {
@@ -100,8 +118,8 @@ const getAllInvoices = async (req: Request, res: Response) => {
     const AutoEntrepreneurID = req.AutoEntrepreneurID;
 
     const invoices = await customerService.getAllInvoices(
-      CustomerId,
-      AutoEntrepreneurID,
+      CustomerId as string,
+      AutoEntrepreneurID as string,
     );
     return res.status(200).json(invoices);
   } catch (error: any) {
@@ -117,8 +135,8 @@ const getAllQuotes = async (req: Request, res: Response) => {
     const { CustomerId } = req.params;
     const AutoEntrepreneurID = req.AutoEntrepreneurID;
     const invoices = await customerService.getAllQuotes(
-      CustomerId,
-      AutoEntrepreneurID,
+      CustomerId as string,
+      AutoEntrepreneurID as string,
     );
     return res.status(200).json(invoices);
   } catch (error: any) {
@@ -137,6 +155,7 @@ export const customerController = {
   createCustomer,
   updateCustomer,
   getCustomer,
+  getCustomerByName,
   deleteCustomer,
   getAllInvoices,
   getAllQuotes,

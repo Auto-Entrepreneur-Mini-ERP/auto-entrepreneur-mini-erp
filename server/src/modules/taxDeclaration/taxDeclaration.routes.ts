@@ -1,4 +1,4 @@
-import { Router } from "express";
+ import { Router } from "express";
 import { taxDeclartaionController } from "./taxDeclaration.controller.js";
  import { validateBody } from "../../middlewares/validation.middleware.js";
 

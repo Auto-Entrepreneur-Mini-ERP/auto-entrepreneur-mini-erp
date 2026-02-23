@@ -8,8 +8,8 @@ const overview = async (autoenretpreneurId: string)=>{
     const currMonth = new Date().getMonth();
     const currYear = new Date().getFullYear();
 
-    const startDate = currYear+'/'+currMonth+'/01';
-    const lastDate = currYear+'/'+currMonth+'/30';
+    const startDate = currYear+'/'+(currMonth+1)+'/01';
+    const lastDate = currYear+'/'+(currMonth+1)+'/30';
 
     // chiffre d'affaire mois actuel
     const CAmois = await prisma.invoice.groupBy({
@@ -75,61 +75,67 @@ const overview = async (autoenretpreneurId: string)=>{
     });
 
     return {
-        CAmois: CAmois[0]?._sum,
-        unpaidInvoices: unpaidInvoices[0]?._count,
-        netRevenues: netRevenues[0]?._sum || {},
-        depenses: depenses[0]?._sum || {},
+        CAmois: CAmois[0]?._sum.totalAmount || 0,
+        unpaidInvoices: unpaidInvoices[0]?._count.id || 0,
+        netRevenues: netRevenues[0]?._sum.amount || 0,
+        depenses: depenses[0]?._sum.amount || 0,
     }
 };
 
 const monthlyRevenues = async (autoentrepreneurId: string) => {
 
-    let revenues = {};
+    let revenues: Array<{ index: number; amount: number }> = [];
+
     for (let index = 1; index <= 12; index++) {
         const rev = await prisma.$queryRaw`
-        SELECT sum(amount) 
+        SELECT sum(amount) AS sumAmount
         FROM auto_entrepreneur_erp_db.payments
         WHERE AutoentrepreneurId = ${autoentrepreneurId}
-        AND MONTH('paymentDate') = ${index}
-        GROUP BY MONTH('paymentDate')`;
+        AND MONTH(paymentDate) = ${index}
+        GROUP BY MONTH('paymentDate')` as Array<{ sumAmount?: number }>;
         
-        revenues = {
+        revenues = [
             ...revenues,
-            index: rev
-        }
+            { index: index, amount: rev[0]?.sumAmount || 0 }
+        ];
     }
     return revenues;
 };
 
 const monthlyDepenses = async (autoentrepreneurId: string) => {
 
-    let expenses = {};
+    let expenses: Array<{ index: number; amount: number }> = [];
     for (let index = 1; index <= 12; index++) {
         const exp = await prisma.$queryRaw`
-        SELECT sum(amount) 
+        SELECT sum(amount) AS sumAmount
         FROM auto_entrepreneur_erp_db.expenses
         WHERE AutoentrepreneurId = ${autoentrepreneurId}
-        AND MONTH('date') = ${index}
-        GROUP BY MONTH('date')`;
+        AND MONTH(date) = ${index}
+        GROUP BY MONTH(date)`  as Array<{ sumAmount?: number }>;
         
-        expenses = {
+        expenses = [
             ...expenses,
-            index: exp
-        }
+            { index: index, amount: exp[0]?.sumAmount || 0 }
+        ];
     }
     return expenses;
 };
 
 const recents = async (autoentrepreneurId: string) => {
 
+    const page = 1;
+    const limit = 4;
+
     //recent invoices
-    const recentInvoices = await invoicesService.getAllInvoices(autoentrepreneurId, 1, 4);
+    const recentInvoices = await invoicesService.getAllInvoices(autoentrepreneurId, page, limit);
 
     //recent payments
-    const recentPayments = await paymentService.getAllPayments(autoentrepreneurId, 1, 4);
+    const recentPayments = await paymentService.getAllPayments(autoentrepreneurId, page, limit);
 
     //unpaid invoices
     const unpaidInvoices = await prisma.invoice.findMany({
+        skip: 0,
+        take: limit,
         where:{
             AutoEntrepreneurId: autoentrepreneurId,
             status: {

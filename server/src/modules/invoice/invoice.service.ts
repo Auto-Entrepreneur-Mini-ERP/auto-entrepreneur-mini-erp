@@ -21,11 +21,18 @@ const getAllInvoices = async (autoentrepreneurId: string, page: number, limit: n
         take: limit,
         where: {
             AutoEntrepreneurId: autoentrepreneurId
+        },
+        include:{
+            customer: {
+                include: {
+                    user: true
+                }
+            }
         }
     }) as unknown as InvoiceOutput[];
 
     if(!invoices) throw new AppError("No invoices found", 404);
-    return invoices;
+    return {invoices, count: invoices.length};
 };
 
 const getInvoiceById = async (autoentrepreneurId: string, invoiceId: string) => {
@@ -35,15 +42,68 @@ const getInvoiceById = async (autoentrepreneurId: string, invoiceId: string) => 
     const invoice = await prisma.invoice.findUnique({
         where: {
             id: invoiceId,
-            AutoEntrepreneurId: autoentrepreneurId
         },
         include: {
-            invoiceLines: true
+            invoiceLines: {
+                include:{
+                    product:{
+                        include:{
+                            item: true
+                        }
+                    },
+                    service:{
+                        include:{
+                            item: true
+                        }
+                    }
+                }
+            },
+            customer: {
+                include: {
+                    user: true
+                }
+            }
         }
     }) as unknown as InvoiceOutput;
 
     if(!invoice) throw new AppError("Invoice not found", 404);
     return invoice;
+};
+
+const getInvoiceByNumber = async (autoentrepreneurId: string, invoiceNumber: string) => {
+
+    autoentrepreneurExists(autoentrepreneurId);
+
+    const invoices = await prisma.invoice.findMany({
+        where: {
+            invoiceNumber : { contains: invoiceNumber },
+            AutoEntrepreneurId: autoentrepreneurId,
+        },
+        include: {
+            invoiceLines: {
+                include:{
+                    product:{
+                        include:{
+                            item: true
+                        }
+                    },
+                    service:{
+                        include:{
+                            item: true
+                        }
+                    }
+                }
+            },
+            customer: {
+                include: {
+                    user: true
+                }
+            }
+        }
+    }) as unknown as InvoiceOutput;
+
+    if(!invoices) throw new AppError("Invoice not found", 404);
+    return invoices;
 };
 
 const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaInput) => {
@@ -152,7 +212,7 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
 const updateInvoice = async (autoentrepreneurId: string, invoiceId: string, data: InvoiceUpdateSchemaInput) => {
     autoentrepreneurExists(autoentrepreneurId);
     invoiceExists(invoiceId);
-
+    
     // check if theres payements for this invoice - cant update invoice with a payement
     const payementExist = await prisma.payment.findMany({
         where:{
@@ -244,6 +304,7 @@ const deleteInvoice = async (autoentrepreneurId: string, invoiceId: string) => {
 export const invoicesService = {
     getAllInvoices,
     getInvoiceById,
+    getInvoiceByNumber,
     addInvoice,
     updateInvoice,
     cancelInvoice,

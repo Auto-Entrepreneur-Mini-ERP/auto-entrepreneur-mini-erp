@@ -1,0 +1,25 @@
+import { Router } from 'express';
+import { DevisController } from './devis.controller.js';
+import { validateBody } from '../../middlewares/validation.middleware.js';
+import {
+  createQuoteSchema,
+  updateQuoteSchema,
+} from './devis.validation.js';
+import  {isAthenticated}  from '../../middlewares/auth.middelware.js'; // middleware au singulier
+
+const router = Router();
+const controller = new DevisController();
+
+router.use(isAthenticated);
+
+router.post('/quote', validateBody(createQuoteSchema), controller.create);
+router.get('/quote', controller.getAll);
+router.get('/quote/:id', controller.getById);
+router.patch('/quote/:id', validateBody(updateQuoteSchema), controller.update);
+router.delete('/quote/:id', controller.delete);
+
+router.post('/quote/:id/envoyer', controller.envoyer);
+router.post('/quote/:id/accepter', controller.accepter);
+router.post('/quote/:id/refuser', controller.refuser);
+
+export default router;

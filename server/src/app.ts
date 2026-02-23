@@ -20,7 +20,7 @@ app.get('/api', async (req: express.Request, res: express.Response) => {
 });
 
 app.use(cors({
-  "origin": "http://localhost:5173",
+  "origin": env.FRONT_END_URL || "http://localhost:5173",
   "credentials": true
 }));
 app.use(helmet());
@@ -32,6 +32,12 @@ app.use(rateLimit({
 app.use(morgan('common'));
 app.use(bodyParser.json());
 app.use(cookieParser());
+ // to avoid 304 not modified(cache prblms)
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
 
 app.use("/api", router);
 

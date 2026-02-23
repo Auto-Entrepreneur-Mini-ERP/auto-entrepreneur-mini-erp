@@ -18,6 +18,17 @@ const getAllPayments = async (autoentrepreneurId: string, page: number, limit: n
         take: limit,
         where:{
             AutoEntrepreneurId: autoentrepreneurId
+        },
+        include: {
+            Invoice: {
+                include: {
+                    customer: {
+                        include: {
+                            user: true
+                        }
+                    }
+                }
+            }
         }
     });
     if(!payments) throw new AppError("No payments found!", 404);
@@ -29,15 +40,25 @@ const getOnePayment = async (autoentrepreneurId: string, paymentId: string) => {
     autoentrepreneurExists(autoentrepreneurId);
     paymentExists(paymentId);
 
-    const payments = await prisma.payment.findMany({
+    const payment = await prisma.payment.findUnique({
         where:{
             id: paymentId,
-            AutoEntrepreneurId: autoentrepreneurId
+        },
+        include: {
+            Invoice: {
+                include: {
+                    customer: {
+                        include: {
+                            user: true
+                        }
+                    }
+                }
+            }
         }
     });
-    if(!payments) throw new AppError("No payments found!", 404);
+    if(!payment) throw new AppError("No payments found!", 404);
 
-    return payments;
+    return payment;
 };
 
 const createPayment = async (autoentrepreneurId: string, data: PaymentCreateInput) => {
@@ -64,10 +85,10 @@ const createPayment = async (autoentrepreneurId: string, data: PaymentCreateInpu
         transactionNumber: data.transactionNumber as string,
         AutoEntrepreneur: {
             connect: {
-                id: data.AutoEntrepreneurId
+                id: autoentrepreneurId
             }
         },
-        invoice: {
+        Invoice: {
             connect:{
                 id: data.invoiceId
             }
