@@ -12,7 +12,7 @@ router.get("/profile", autoEntrepreneurController.getProfile);
 router.put("/profile", 
     upload.single("profile-photo"), 
     // validateBody(modifyAutoEntrepreneurSchema), 
-    autoEntrepreneurController.editProfile
+    autoEntrepreneurController.editProfile,
 );
 
 
