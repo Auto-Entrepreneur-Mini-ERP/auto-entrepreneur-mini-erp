@@ -22,7 +22,7 @@ export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: Content
   const year = today.getFullYear();
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-gray-100 mb-8">
+    <header className="sticky top-0 z-40 bg-white border-b border-gray-100 pl-8 mb-8">
       <div className="flex items-center justify-between px-4 sm:px-8 py-4">
         {/* Left - Mobile & Tablet Menu Button + Current Period */}
         <div className="flex items-center gap-3">

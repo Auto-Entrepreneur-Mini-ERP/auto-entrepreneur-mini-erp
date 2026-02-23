@@ -1,0 +1,168 @@
+.customer-page {
+min-height: 100vh;
+background: linear-gradient(135deg, #eef2ff, #f8fafc);
+padding-bottom: 40px;
+font-family: system-ui, -apple-system, sans-serif;
+}
+
+.customer-header {
+background: white;
+padding: 28px 40px;
+border-bottom: 1px solid #e5e7eb;
+box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.customer-header h1 {
+margin: 0;
+font-size: 24px;
+color: #1e293b;
+}
+
+.customer-card {
+max-width: 850px;
+margin: 40px auto;
+background: white;
+border-radius: 20px;
+padding: 40px;
+box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+
+.section {
+margin-bottom: 32px;
+}
+
+.section-title {
+font-size: 18px;
+font-weight: 600;
+margin-bottom: 20px;
+display: flex;
+align-items: center;
+gap: 10px;
+color: #334155;
+}
+
+.form-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 20px;
+}
+
+.field {
+display: flex;
+flex-direction: column;
+}
+
+.field label {
+font-size: 14px;
+margin-bottom: 6px;
+color: #475569;
+}
+
+.field input {
+height: 42px;
+padding: 0 12px;
+border-radius: 10px;
+border: 1px solid #d1d5db;
+transition: 0.2s ease;
+font-size: 14px;
+}
+
+.field input:focus {
+outline: none;
+border-color: #6366f1;
+box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+}
+
+.input-icon {
+position: relative;
+}
+
+.input-icon svg {
+position: absolute;
+left: 12px;
+top: 50%;
+transform: translateY(-50%);
+color: #94a3b8;
+}
+
+.input-icon input {
+padding-left: 36px;
+}
+
+.error {
+color: #dc2626;
+font-size: 12px;
+margin-top: 4px;
+}
+
+.actions {
+margin-top: 30px;
+display: flex;
+justify-content: flex-end;
+gap: 16px;
+padding-top: 20px;
+border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+height: 42px;
+padding: 0 18px;
+border-radius: 10px;
+font-weight: 500;
+cursor: pointer;
+border: none;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: 0.2s ease;
+}
+
+.btn-primary {
+background: #4f46e5;
+color: white;
+}
+
+.btn-primary:hover {
+background: #4338ca;
+}
+
+.btn-outline {
+background: white;
+border: 1px solid #cbd5e1;
+color: #334155;
+}
+
+.btn-outline:hover {
+background: #f1f5f9;
+}
+
+.success-overlay {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.45);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.success-modal {
+background: white;
+padding: 40px;
+border-radius: 20px;
+text-align: center;
+width: 320px;
+box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+
+.success-icon {
+width: 60px;
+height: 60px;
+margin: 0 auto 20px;
+background: #dcfce7;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+color: #16a34a;
+}
+ 
