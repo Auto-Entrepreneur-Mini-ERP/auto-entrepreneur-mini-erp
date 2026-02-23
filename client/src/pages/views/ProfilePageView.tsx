@@ -43,7 +43,7 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA]">
+    <div className="max-h-screen bg-[#F5F7FA]">
       {/* Page Header */}
       <div className="bg-white border-b border-gray-100 px-8 py-6">
         <h1 className="text-3xl font-bold text-[#2D3194]">Mon Profil</h1>
@@ -61,7 +61,7 @@ export function ProfilePage() {
               </h2>
 
               {/* Profile Photo */}
-              <div className="flex flex-col items-center mb-8">
+              {/* <div className="flex flex-col items-center mb-8">
                 <div className="relative">
                   <div className="w-32 h-32 bg-gradient-to-br from-[#2D3194] to-[#1f2266] rounded-full flex items-center justify-center shadow-lg">
                     <User className="w-16 h-16 text-white" />
@@ -74,7 +74,7 @@ export function ProfilePage() {
                   <Camera className="w-4 h-4" />
                   Importer une image
                 </button>
-              </div>
+              </div> */}
 
               {/* Form Fields */}
               <div className="space-y-5">

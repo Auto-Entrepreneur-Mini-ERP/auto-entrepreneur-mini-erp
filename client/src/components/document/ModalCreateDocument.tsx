@@ -19,8 +19,8 @@ function ModalCreateDocument({
 
   const [documentFormData, setDocumentFormData] = useState<DocumentCreateData>();
 
-  const handleDocumentSubmit = async () => {
-
+  const handleDocumentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     const formData = new FormData();
     formData.append("name", documentFormData?.name as string);
     formData.append("category", documentFormData?.category as string);
@@ -30,7 +30,8 @@ function ModalCreateDocument({
       formData.append("document", documentFormData.document);
     }
 
-    createDocument(formData as FormData);
+    await createDocument(formData as FormData);
+    
     if (!errors) {
       setIsDocumentModalOpen(false);
       window.location.reload();
@@ -50,7 +51,7 @@ function ModalCreateDocument({
             <div className="mb-4">
               <Label htmlFor="docName" className="mb-2">Nom du Document</Label>
               <Input
-                type="number"
+                type="text"
                 id="docName"
                 value={documentFormData?.name}
                 onChange={(e) =>
@@ -109,8 +110,9 @@ function ModalCreateDocument({
                   } as DocumentCreateData)
                 }
               />
+              {/* <X className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" /> */}
               {documentFormData?.document && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-center text-gray-500 mt-2">
                   Fichier: {documentFormData.document.name}
                 </p>
               )}
