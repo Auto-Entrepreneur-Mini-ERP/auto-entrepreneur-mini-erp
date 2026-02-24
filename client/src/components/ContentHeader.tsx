@@ -84,7 +84,7 @@ export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: Content
         {/* Right - Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Dark/Light Toggle */}
-          <button
+          {/* <button
             onClick={() => setIsDark(!isDark)}
             className="w-10 h-10 rounded-[12px] bg-gray-50 hover:bg-[#2D3194]/5 flex items-center justify-center transition-all duration-300 hover:border hover:border-[#2D3194]"
             aria-label="Toggle theme"
@@ -94,7 +94,7 @@ export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: Content
             ) : (
               <Moon className="w-5 h-5 text-[#7A7A7A]" strokeWidth={2} />
             )}
-          </button>
+          </button> */}
 
           {/* Notifications */}
           <div className="relative">

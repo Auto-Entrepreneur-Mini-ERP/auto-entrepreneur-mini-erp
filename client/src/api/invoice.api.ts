@@ -23,12 +23,16 @@ const getAllArticles = async (articleName: string) => {
 }
 
 const createInvoice = async (invoiceData: CreateInvoiceData, invoiceLinesData: CreateInvoiceLineData[]) => {
-        const response = await api.post("/invoice", { invoice: invoiceData, invoiceLine: invoiceLinesData });
+        // Prisma model for InvoiceLine doesn’t have a `name` field, so strip it
+        const sanitizedLines = invoiceLinesData.map(({ name, ...rest }) => rest);
+        const response = await api.post("/invoice", { invoice: invoiceData, invoiceLine: sanitizedLines });
         return response.data;
 };
 
 const updateInvoice = async (invoiceId: string, invoiceData: UpdateInvoiceData, invoiceLinesData: UpdateInvoiceLineData[]) => {
-    const response = await api.put("/invoice/"+invoiceId, { invoice: invoiceData, invoiceLine: invoiceLinesData });
+    // strip name from lines as well when updating
+    const sanitizedLines = invoiceLinesData.map(({ name, ...rest }) => rest);
+    const response = await api.put("/invoice/"+invoiceId, { invoice: invoiceData, invoiceLine: sanitizedLines });
     return response.data;
 }
 

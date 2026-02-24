@@ -4,7 +4,7 @@ import { AppError } from "../../utils/errorHandler.js";
 import { pagination } from "../../utils/pagination.js";
 import { autoentrepreneurExists } from "../auto-entrepreneur/utils/autoentrepreneurExists.js";
 import { paymentExists } from "./utils/paymentExists.js";
-import type { PayementMetod ,PaymentCreateInput, PaymentOutput, PaymentUpdateInput } from "./payment.types.js";
+import type { PayementMetod, PaymentCreateInput, PaymentOutput, PaymentUpdateInput } from "./payment.types.js";
 import { updateInvoiceAfterCreate, updateInvoiceAfterUpdate } from "./utils/updateInvoicewithPayment.js";
 import { paymentNumberGenerator } from "./utils/paymentNumberGenerator.js";
 
@@ -16,9 +16,13 @@ const getAllPayments = async (autoentrepreneurId: string, page: number, limit: n
     const payments = await prisma.payment.findMany({
         skip: startIndex,
         take: limit,
-        where:{
+        where: {
             AutoEntrepreneurId: autoentrepreneurId
         },
+        orderBy: [
+            {paymentDate: 'desc'},
+            {reference: 'desc'}
+        ],
         include: {
             Invoice: {
                 include: {
@@ -31,9 +35,14 @@ const getAllPayments = async (autoentrepreneurId: string, page: number, limit: n
             }
         }
     });
-    if(!payments) throw new AppError("No payments found!", 404);
+    if (!payments) throw new AppError("No payments found!", 404);
 
-    return payments;
+    const count = await prisma.payment.count({
+    where: {
+      AutoEntrepreneurId: autoentrepreneurId
+    }
+  })
+    return {payments, count};
 };
 
 const getOnePayment = async (autoentrepreneurId: string, paymentId: string) => {
@@ -41,7 +50,7 @@ const getOnePayment = async (autoentrepreneurId: string, paymentId: string) => {
     paymentExists(paymentId);
 
     const payment = await prisma.payment.findUnique({
-        where:{
+        where: {
             id: paymentId,
         },
         include: {
@@ -56,7 +65,7 @@ const getOnePayment = async (autoentrepreneurId: string, paymentId: string) => {
             }
         }
     });
-    if(!payment) throw new AppError("No payments found!", 404);
+    if (!payment) throw new AppError("No payments found!", 404);
 
     return payment;
 };
@@ -65,10 +74,10 @@ const createPayment = async (autoentrepreneurId: string, data: PaymentCreateInpu
     autoentrepreneurExists(autoentrepreneurId);
 
     const lastPayment = await prisma.payment.findFirst({
-        select:{
+        select: {
             reference: true
         },
-        orderBy:{
+        orderBy: {
             creationDate: 'desc'
         }
     });
@@ -89,20 +98,19 @@ const createPayment = async (autoentrepreneurId: string, data: PaymentCreateInpu
             }
         },
         Invoice: {
-            connect:{
+            connect: {
                 id: data.invoiceId
             }
         }
     };
-
     const payment = await prisma.payment.create({
         data: PaymentData
     });
-    if(!payment) throw new Error();
+    if (!payment) throw new Error();
 
     // logic to update invoice status if needed
     updateInvoiceAfterCreate(data.invoiceId, data);
-    
+
     return payment;
 };
 
@@ -123,13 +131,13 @@ const updatePayment = async (autoentrepreneurId: string, paymentId: string, data
         },
         data: PaymentUpdateData
     });
-    if(!updatedPayment) throw new Error();
+    if (!updatedPayment) throw new Error();
 
     // login update invoice after updating payement
     updateInvoiceAfterUpdate(updatedPayment.invoiceId, data);
 
     return updatedPayment;
-    
+
 };
 
 const deletePayment = async (autoentrepreneurId: string, paymentId: string) => {
@@ -141,12 +149,12 @@ const deletePayment = async (autoentrepreneurId: string, paymentId: string) => {
 
     // delete payment
     const payment = await prisma.payment.delete({
-        where:{
+        where: {
             id: paymentId
         }
     });
-    if(!payment) throw new AppError("Payment not found!", 404);
-    
+    if (!payment) throw new AppError("Payment not found!", 404);
+
     return true;
 };
 
@@ -155,23 +163,23 @@ const reconciliatePayment = async (autoentrepreneurId: string, paymentId: string
     paymentExists(paymentId);
 
     const payment = await prisma.payment.update({
-        where:{
+        where: {
             id: paymentId,
         },
         data: {
             isReconciled: true,
         }
     }) as unknown as PaymentOutput;
-    if(!payment) throw new Error();
+    if (!payment) throw new Error();
 
     return payment;
 }
 
 const paymentStats = async (autoentrepreneurId: string, periodFrom: string, periodTo: string, paymentMethod: PayementMetod, isReconcieled: string) => {
-    autoentrepreneurExists(autoentrepreneurId);        
-    
+    autoentrepreneurExists(autoentrepreneurId);
+
     const payments = await prisma.payment.findMany({
-        where:{
+        where: {
             AutoEntrepreneurId: autoentrepreneurId,
             paymentDate: {
                 gte: periodFrom,
@@ -181,7 +189,7 @@ const paymentStats = async (autoentrepreneurId: string, periodFrom: string, peri
             paymentMethod: paymentMethod,
         },
     })
-    if(!payments) throw new Error();
+    if (!payments) throw new Error();
 
     return payments;
 };

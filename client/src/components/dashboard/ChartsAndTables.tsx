@@ -15,7 +15,6 @@ type ChartsAndTablesProps = {
 export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: ChartsAndTablesProps) {
   const [activeTab, setActiveTab] = useState<TabType>("invoices");
 
-
   const tabs = [
     { id: "invoices" as TabType, label: "Factures Recentes", icon: FileText },
     { id: "payments" as TabType, label: "Paiments Recentes", icon: CreditCard },
@@ -65,22 +64,28 @@ export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: C
                   <div key={index} className="p-3 bg-gray-50 rounded-[12px] hover:bg-gray-100 transition-all">
                     <div className="flex items-start justify-between mb-1">
                       <p className="text-[#2D3194] font-medium text-sm">{invoice.invoiceNumber}</p>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${invoice.status === "PAID"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-orange-100 text-orange-700"
+                      <span 
+                      className={`text-xs font-bold px-2 py-0.5 rounded-full 
+                      ${invoice.status.toString() === "PAID"
+                          ? "bg-green-100 text-green-700"
+                          : invoice.status.toString() === "PARTIALLY_PAID"
+                            ? "bg-orange-100 text-orange-700"
+                            : invoice.status.toString() === "UNPAID"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-blue-100 text-blue-700"
                         }`}>
                         {invoice.status}
                       </span>
                     </div>
                     <p className="text-[#1A1A1A] text-sm mb-1">{invoice.customer.user.firstName} {invoice.customer.user.lastName}</p>
                     <div className="flex items-center justify-between">
-                      <p className="text-[#1A1A1A] font-medium text-sm">{invoice.totalAmount}</p>
+                      <p className="text-[#1A1A1A] font-medium text-sm">{invoice.totalAmount} DHs</p>
                       <p className="text-[#7A7A7A] text-xs">{invoice.dueDate.toString().split("T")[0]}</p>
                     </div>
                   </div>
                 )) : <p className="text-[#1A1A1A] text-center font-medium text-md">No invoices</p>)}
 
-              {activeTab === "payments" && (recents.recentPayments?.length > 0 ? recents.recentPayments.map((payment, index) => (
+              {activeTab === "payments" && (recents.recentPayments?.payments.length > 0 ? recents.recentPayments.payments.map((payment, index) => (
                 <div key={index} className="p-3 bg-gray-50 rounded-[12px] hover:bg-gray-100 transition-all">
                   <div className="flex items-start justify-between mb-1">
                     <p className="text-[#2D3194] font-medium text-sm">{payment.reference}</p>
@@ -91,7 +96,7 @@ export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: C
                   <p className="text-[#1A1A1A] text-sm mb-1">{payment.Invoice.customer.user.firstName} {payment.Invoice.customer.user.lastName}</p>
                   <div className="flex items-center justify-between">
                     <p className="text-green-700 font-medium text-sm">{payment.amount} DHs</p>
-                    <p className="text-[#7A7A7A] text-xs">{payment.creationDate}</p>
+                    <p className="text-[#7A7A7A] text-xs">{payment.creationDate.toString().split("T")[0]}</p>
                   </div>
                 </div>
               )) : <p className="text-[#1A1A1A] text-center font-medium text-md">No payments</p>)}
@@ -101,7 +106,7 @@ export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: C
                   <div className="flex items-start justify-between mb-1">
                     <p className="text-[#2D3194] font-medium text-sm">{invoice.invoiceNumber}</p>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">
-                      {invoice.dueDate.toString().split("T")[0]}
+                      Echéance: {invoice.dueDate.toString().split("T")[0]}
                     </span>
                   </div>
                   <p className="text-[#1A1A1A] text-sm mb-1">Total Facture: {invoice.totalAmount} DHs</p>
@@ -109,7 +114,7 @@ export function ChartsAndTables({ monthlyRevenues, monthlyDepences, recents }: C
                     <p className="text-red-700 font-medium text-sm">Reste: {invoice.remainingAmount} DHs</p>
                   </div>
                 </div>
-              )): <p className="text-[#1A1A1A] text-center font-medium text-md">No Unpaid Invoices</p>)}
+              )) : <p className="text-[#1A1A1A] text-center font-medium text-md">No Unpaid Invoices</p>)}
             </div>
           </div>
         </div>

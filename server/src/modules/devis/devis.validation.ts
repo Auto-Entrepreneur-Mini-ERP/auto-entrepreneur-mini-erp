@@ -4,8 +4,9 @@ import { z } from 'zod';
 import { LineType } from '../../../generated/prisma/enums.js';
 
 export const quoteLineSchema = z.object({
-    lineType: z.nativeEnum(LineType),
-    description: z.string().min(1),
+    order: z.number().nonnegative().nonoptional(),
+    lineType: z.enum(LineType).nonoptional(),
+    description: z.string().min(1).optional(),
     quantity: z.number().positive(),
     unitPrice: z.number().nonnegative(),
     productId: z.string().uuid().optional(),
@@ -14,9 +15,8 @@ export const quoteLineSchema = z.object({
 
 export const createQuoteSchema = {
   body: z.object({
-    issueDate: z.string().datetime(),
-    validityDate: z.string().datetime(),
-    customerId: z.string().uuid(),
+    validityDate: z.coerce.date().nonoptional(),
+    customerId: z.string().nonempty(),
     notes: z.string().optional(),
     lines: z.array(quoteLineSchema).min(1),
   })
@@ -24,7 +24,7 @@ export const createQuoteSchema = {
 
 export const updateQuoteSchema = {
   body: z.object({
-    validityDate: z.string().datetime().optional(),
+    validityDate: z.coerce.date().optional(),
     notes: z.string().optional(),
   })
 };

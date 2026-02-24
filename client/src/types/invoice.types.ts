@@ -89,7 +89,10 @@ export interface CreateInvoiceData {
 export interface CreateInvoiceLineData{
     order: number,
     lineType: LineType,
-    name: string,
+    // `name` is only used client‑side for display and auto‑complete purposes,
+    // it is stripped before payloads are sent to the server because the
+    // Prisma `InvoiceLine` model does not have a `name` column.
+    name?: string,
     quantity: number,
     unitPrice: number,
     productId?: string,
@@ -104,6 +107,7 @@ export interface UpdateInvoiceData {
 export interface UpdateInvoiceLineData{
     order: number,
     lineType: LineType,
+    // client-only display field; removed before sending to back-end
     name?: string,
     quantity: number,
     unitPrice: number,
