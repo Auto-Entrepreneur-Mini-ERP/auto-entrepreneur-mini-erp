@@ -15,3 +15,14 @@ export interface TaxDeclaration {
   AutoEntrepreneurId: string;
   creationDate?: Date;
 }
+
+
+export interface currentTaxDeclaaration {
+  id?: string | null;
+  totalRevenue: number;
+  taxAmount: number;
+  ramainDays: number;
+  periode: string;
+  dueDate: Date;
+  status: string;
+}
