@@ -7,7 +7,7 @@ export const createInvoiceSchema = {
             dueDate: z.date().nonoptional(),
             discount: z.number().optional(),
             paidAmount: z.number().optional(),
-            payementMethod: z.enum(['CASH', 'CHECK', 'BACK_TRANSFER', 'CREDIT_CARD', 'MOBILE_PAYEMENT', 'OTHER']),
+            payementMethod: z.enum(['CASH', 'CHECK', 'BACK_TRANSFER', 'CREDIT_CARD', 'MOBILE_PAYEMENT', 'OTHER']).optional(),
             note: z.string().optional(),
         }).nonoptional(),
         invoiceLine: z.array(

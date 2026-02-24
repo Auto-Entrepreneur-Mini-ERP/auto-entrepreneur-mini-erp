@@ -5,18 +5,11 @@ import { useEffect, useState } from "react";
 import TablePayment from "../../components/payment/TablePayment";
 import ModalCreatePayment from "../../components/payment/ModalCreatePayment";
 import { usePayment } from "../../hooks/usePayment";
-import type { Payment } from "../../types/payment.types";
 
 export function PaymentsView() {
 
-  const { payments, fetchPayments } = usePayment();
-
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    fetchPayments();
-  }, []);
 
   const handlePaymentSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -77,7 +70,7 @@ export function PaymentsView() {
 
       {/* Table */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm">
-        <TablePayment payments={payments as Payment[]} />
+        <TablePayment />
       </div>
 
       {/* Payment Modal */}
