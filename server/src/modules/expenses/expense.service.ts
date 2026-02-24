@@ -3,8 +3,6 @@ import { prisma } from "../../lib/prisma.js";
 import type { Prisma } from "../../../generated/prisma/browser.js";
 import * as fs from "fs";
 import * as path from "path";
-// ✅ Correct import for ExcelJS with "module": "nodenext" + verbatimModuleSyntax
-// ExcelJS is a CJS package — use createRequire or import the default export this way
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const ExcelJS = require("exceljs") as typeof import("exceljs");

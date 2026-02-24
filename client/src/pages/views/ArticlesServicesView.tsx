@@ -700,26 +700,24 @@ export function ArticlesServicesView() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20
-            border border-dashed border-slate-200 rounded-xl bg-white">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
-              <Package className="w-6 h-6 text-slate-300" strokeWidth={1.5} />
-            </div>
-            <p className="font-semibold text-slate-700">
-              Aucun produit{searchQuery ? ` pour "${searchQuery}"` : ""}
-            </p>
-            <p className="text-sm text-slate-400 mt-1 mb-5">
-              {searchQuery ? "Essayez d'autres termes de recherche" : "Créez votre premier produit pour commencer"}
-            </p>
-            {!searchQuery && (
-              <button onClick={() => openCreate("product")}
-                className="h-9 px-4 rounded-xl bg-blue-600 text-white text-sm font-medium
-                  hover:bg-blue-700 transition-colors flex items-center gap-1.5
-                  shadow-sm shadow-blue-200">
-                <Plus className="w-4 h-4" /> Nouveau produit
-              </button>
-            )}
-          </div>
+      <div className="flex flex-col items-center justify-center py-12
+  border border-dashed border-slate-200 rounded-xl bg-white">
+
+  <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
+    <Package className="w-6 h-6 text-slate-300" strokeWidth={1.5} />
+  </div>
+
+  <p className="font-semibold text-slate-700">
+    Aucun produit{searchQuery ? ` pour "${searchQuery}"` : ""}
+  </p>
+
+  <p className="text-sm text-slate-400 mt-1">
+    {searchQuery 
+      ? "Essayez d'autres termes de recherche" 
+      : "Créez votre premier produit pour commencer"}
+  </p>
+
+</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {products.map(p => (
@@ -742,26 +740,24 @@ export function ArticlesServicesView() {
             ))}
           </div>
         ) : services.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20
-            border border-dashed border-slate-200 rounded-xl bg-white">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
-              <Wrench className="w-6 h-6 text-slate-300" strokeWidth={1.5} />
-            </div>
-            <p className="font-semibold text-slate-700">
-              Aucun service{searchQuery ? ` pour "${searchQuery}"` : ""}
-            </p>
-            <p className="text-sm text-slate-400 mt-1 mb-5">
-              {searchQuery ? "Essayez d'autres termes de recherche" : "Créez votre premier service pour commencer"}
-            </p>
-            {!searchQuery && (
-              <button onClick={() => openCreate("service")}
-                className="h-9 px-4 rounded-xl bg-blue-600 text-white text-sm font-medium
-                  hover:bg-blue-700 transition-colors flex items-center gap-1.5
-                  shadow-sm shadow-blue-200">
-                <Plus className="w-4 h-4" /> Nouveau service
-              </button>
-            )}
-          </div>
+ <div className="flex flex-col items-center justify-center py-12
+  border border-dashed border-slate-200 rounded-xl bg-white">
+
+  <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
+    <Wrench className="w-6 h-6 text-slate-300" strokeWidth={1.5} />
+  </div>
+
+  <p className="font-semibold text-slate-700">
+    Aucun service{searchQuery ? ` pour "${searchQuery}"` : ""}
+  </p>
+
+  <p className="text-sm text-slate-400 mt-1">
+    {searchQuery 
+      ? "Essayez d'autres termes de recherche" 
+      : "Créez votre premier service pour commencer"}
+  </p>
+
+</div>
         ) : (
           <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
             <table className="w-full">
