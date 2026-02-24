@@ -94,6 +94,20 @@ const deleteTaxDeclaration = async (id: string) => {
     }
     throw new AppError("Failed to delete tax declaration", 500);
   }
+};;
+
+  
+const getCurrentTaxDeclaration = async (
+  autoEntrepreneurId: string,
+ 
+  currentMonth : number,
+  currentYear : number,
+) => {
+  const taxDeclaration= await prisma.taxDeclaration.findFirst({
+    where: { AutoEntrepreneurId: autoEntrepreneurId, month : currentMonth, year : currentYear },
+  });
+
+  return taxDeclaration;
 };
 
 export const taxDeclarationService = {
@@ -102,4 +116,5 @@ export const taxDeclarationService = {
   updateTaxDeclaration,
   getTaxDeclaration,
   deleteTaxDeclaration,
+  getCurrentTaxDeclaration,
 };
