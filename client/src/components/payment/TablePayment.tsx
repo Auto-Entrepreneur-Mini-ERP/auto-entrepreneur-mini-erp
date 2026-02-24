@@ -1,21 +1,30 @@
 import { Download, Eye, Handshake } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePayment } from "../../hooks/usePayment";
 import ModalViewPayment from "./ModalViewPayment";
 import type { Payment } from "../../types/payment.types";
 
 type TablePaymentProps = {
-  payments: Payment[]
+  payments: Payment[];
+  initialHighlightId?: string | null;
 }
 
 function TablePayment({
   payments,
+  initialHighlightId,
 }: TablePaymentProps) {
 
   const { errors, onePayment, getOnePayment, reconsiliatePayment } = usePayment();
 
   const [isViewPaymentModalOpen, setIsViewPaymentModalOpen] = useState(false);
   // const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
+
+ useEffect(() => {
+    if (initialHighlightId) {
+      getOnePayment(initialHighlightId);
+      setIsViewPaymentModalOpen(true);
+    }
+  }, [initialHighlightId]);
 
   const handleViewPayment = (id: string) => {
     getOnePayment(id);

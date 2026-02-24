@@ -66,20 +66,23 @@ interface UseContributionReturn {
   refetch: () => void;
 }
 
-export function useContribution(contributionId: string): UseContributionReturn {
+export function useContribution(contributionId: string | null): UseContributionReturn {
   const [contribution, setContribution] = useState<Contribution | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // ✅ false par défaut, pas true
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!contributionId) return;
+    if (!contributionId) {
+      setIsLoading(false); // ✅ reset proprement si id vide/null
+      setContribution(null);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
       const data = await contributionApi.getContributionById(contributionId);
-
       setContribution(data);
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -102,6 +105,9 @@ export function useContribution(contributionId: string): UseContributionReturn {
   return { contribution, isLoading, error, refetch: load };
 }
 
+// ─────────────────────────────────────────────────────────────
+// useCurrentContribution
+// ─────────────────────────────────────────────────────────────
 
 interface UseCurrentContributionReturn {
   current: CurrentContribution | null;
