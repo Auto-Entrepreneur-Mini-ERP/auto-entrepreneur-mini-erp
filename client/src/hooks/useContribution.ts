@@ -1,12 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import type { Contribution } from "../types/contribution.types";
+import type { Contribution, CurrentContribution } from "../types/contribution.types";
 import { contributionApi } from "../api/contribution.api";
 import type { GetContributionsParams } from "../api/contribution.api";
 
-// ─────────────────────────────────────────────────────────────
-// useContributions
-// ─────────────────────────────────────────────────────────────
 
 interface UseContributionsReturn {
   contributions: Contribution[];
@@ -55,10 +52,6 @@ export function useContributions({
   return { contributions, isLoading, error, refetch: load };
 }
 
-// ─────────────────────────────────────────────────────────────
-// useContribution
-// ─────────────────────────────────────────────────────────────
-
 interface UseContributionReturn {
   contribution: Contribution | null;
   isLoading: boolean;
@@ -68,12 +61,12 @@ interface UseContributionReturn {
 
 export function useContribution(contributionId: string | null): UseContributionReturn {
   const [contribution, setContribution] = useState<Contribution | null>(null);
-  const [isLoading, setIsLoading] = useState(false); // ✅ false par défaut, pas true
+  const [isLoading, setIsLoading] = useState(false); 
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!contributionId) {
-      setIsLoading(false); // ✅ reset proprement si id vide/null
+      setIsLoading(false); 
       setContribution(null);
       return;
     }

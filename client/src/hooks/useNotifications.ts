@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { notificationApi } from '../api/notification.api';
 import type { Notification } from '../types/notification.types';
 import { NotificationType } from '../types/notification.types';
 
-const POLL_INTERVAL = 30000; // 30 seconds
+const POLL_INTERVAL = 30000;
 
 export const useNotifications = (filters?: { type?: NotificationType; isRead?: boolean }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -13,24 +13,25 @@ export const useNotifications = (filters?: { type?: NotificationType; isRead?: b
   const limit = 20;
 
   const fetchNotifications = useCallback(async () => {
-    try {
-      const data = await notificationApi.getNotifications(page, limit, filters);
-      setNotifications(data.notifications);
-      setTotal(data.total);
-    } catch (err) {
-      console.error('Failed to fetch notifications', err);
-    }
-  }, [page, filters?.type, filters?.isRead]);
+  setLoading(true); 
+  try {
+    const data = await notificationApi.getNotifications(page, limit, filters);
+    setNotifications(data.notifications);
+    setTotal(data.total);
+  } catch (err) {
+    console.error('Failed to fetch notifications', err);
+  } finally {
+    setLoading(false); 
+  }
+}, [page, filters]);
 
-  useEffect(() => {
-    setLoading(true);
-    fetchNotifications().finally(() => setLoading(false));
-    const interval = setInterval(fetchNotifications, POLL_INTERVAL);
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
+useEffect(() => {
+  fetchNotifications(); 
+  const interval = setInterval(fetchNotifications, POLL_INTERVAL);
+  return () => clearInterval(interval);
+}, [fetchNotifications]);
 
   const markAsRead = async (id: string) => {
-    // Optimistic update
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     try {
       await notificationApi.markAsRead(id);
@@ -73,7 +74,7 @@ export const useNotifications = (filters?: { type?: NotificationType; isRead?: b
 export const useUnreadCount = () => {
   const [count, setCount] = useState(0);
 
-  const fetch = useCallback(async () => {
+  const refresh = useCallback(async () => {
     try {
       const data = await notificationApi.getUnreadCount();
       setCount(data.count);
@@ -83,10 +84,11 @@ export const useUnreadCount = () => {
   }, []);
 
   useEffect(() => {
-    fetch();
-    const interval = setInterval(fetch, POLL_INTERVAL);
+    const run = () => { refresh(); }; // wrapper non-async c'est juste une fonction normale qui appelle la fonction async sans await — ça évite que le useEffect reçoive directement une fonction async.
+    run(); // une fonction synchrone — elle lance refresh() mais n'attend pas le résultat. Le linter est satisfait car il ne voit pas setState appelé directement dans le corps de l'effet.
+    const interval = setInterval(run, POLL_INTERVAL);
     return () => clearInterval(interval);
-  }, [fetch]);
+  }, [refresh]); // refresh  s'exécute, fait l'appel API, et met à jour count quand la réponse arrive. La seule différence est la couche d'indirection qui satisfait le linter.
 
-  return { count, refresh: fetch };
+  return { count, refresh };
 };

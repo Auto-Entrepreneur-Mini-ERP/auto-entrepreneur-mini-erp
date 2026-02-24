@@ -26,6 +26,21 @@ const formatPrice = (n: number) =>
 
 export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: ContentHeaderProps) {
   const [isDark, setIsDark] = useState(false);
+//   const [isDark, setIsDark] = useState(
+//   () => document.documentElement.classList.contains('dark')
+// );
+
+// const toggleTheme = () => {
+//   const newDark = !isDark;
+//   setIsDark(newDark);
+//   if (newDark) {
+//     document.documentElement.classList.add('dark');
+//     localStorage.setItem('theme', 'dark');
+//   } else {
+//     document.documentElement.classList.remove('dark');
+//     localStorage.setItem('theme', 'light');
+//   }
+// };
   const [showNotifications, setShowNotifications] = useState(false);
   const [alertProducts, setAlertProducts] = useState<Product[]>([]);
 
@@ -86,8 +101,8 @@ export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: Content
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Dark/Light Toggle */}
           <button
-            onClick={() => setIsDark(!isDark)}
-            className="w-10 h-10 rounded-[12px] bg-gray-50 hover:bg-[#2D3194]/5 flex items-center justify-center transition-all duration-300 hover:border hover:border-[#2D3194]"
+            // onClick={() => setIsDark(!isDark)}
+         onClick={() => setIsDark(!isDark)}            className="w-10 h-10 rounded-[12px] bg-gray-50 hover:bg-[#2D3194]/5 flex items-center justify-center transition-all duration-300 hover:border hover:border-[#2D3194]"
             aria-label="Toggle theme"
           >
             {isDark ? (

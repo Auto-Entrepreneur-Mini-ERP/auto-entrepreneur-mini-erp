@@ -4,7 +4,7 @@ import { Input } from "../../components/ui/input";
 import { useEffect, useState } from "react";
 import TablePayment from "../../components/payment/TablePayment";
 import ModalCreatePayment from "../../components/payment/ModalCreatePayment";
-import ModalViewPayment from "../../components/payment/ModalViewPayment";
+// import ModalViewPayment from "../../components/payment/ModalViewPayment";
 import { usePayment } from "../../hooks/usePayment";
 import type { Payment } from "../../types/payment.types";
 import { useSearchParams } from "react-router";
@@ -13,7 +13,7 @@ export function PaymentsView() {
 
   const [searchParams] = useSearchParams();
 
-  const { payments, fetchPayments } = usePayment();
+  const { payments} = usePayment();
 
 const [highlightId, setHighlightId] = useState<string | null>(null);  
 const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -23,14 +23,12 @@ const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    fetchPayments();
-  }, []);
-
-  // Highlight payment from URL (same logic as invoices)
-  useEffect(() => {
+  const run = () => {
     const id = searchParams.get("highlight");
     if (id) setHighlightId(id);
-  }, [searchParams]);
+  };
+  run();
+}, [searchParams]);
 
   const handlePaymentSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();

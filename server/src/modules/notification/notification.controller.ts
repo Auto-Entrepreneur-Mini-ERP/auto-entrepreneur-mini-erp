@@ -11,9 +11,26 @@ const getNotifications = async (req: Request, res: Response) => {
     ? req.query.isRead === 'true'
     : undefined;
 
+  const filters: {
+    type?: NotificationType;
+    isRead?: boolean;
+  } = {};
+
+  if (type !== undefined) {
+    filters.type = type;
+  }
+
+  if (isRead !== undefined) {
+    filters.isRead = isRead;
+  }
+
   const result = await notificationService.getAllNotifications(
-    autoEntrepreneurId, page, limit, { type, isRead }
+    autoEntrepreneurId,
+    page,
+    limit,
+    filters
   );
+
   return res.status(200).json(result);
 };
 

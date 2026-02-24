@@ -1,6 +1,5 @@
 import { useSearchParams } from 'react-router';
 import { useEffect, useState } from 'react';
-import { useInvoice } from '../../hooks/useInvoice';
 import ModalViewInvoice from '../../components/invoice/ModalViewInvoice';
 
 import { FileText, Plus, Search, ChevronDownIcon, RefreshCw } from "lucide-react";
@@ -10,6 +9,8 @@ import ModalCreateInvoice from "../../components/invoice/ModalCreateInvoice";
 import TableInvoice from "../../components/invoice/TableInvoice";
 import TableQuote from "../../components/quote/TableQuote";
 import ModalCreateQuote from "../../components/quote/ModalCreateQuote";
+import { invoiceApi } from '../../api/invoice.api';
+import type { Invoice } from '../../types/invoice.types';
 
 import {
   Collapsible,
@@ -21,9 +22,8 @@ import { Card, CardContent } from "../../components/ui/card";
 export function QuotsInvoicesView() {
 
   const [searchParams] = useSearchParams();
-  const [highlightedInvoice, setHighlightedInvoice] = useState(null);
+const [highlightedInvoice, setHighlightedInvoice] = useState<Invoice | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const { getOneInvoice } = useInvoice();
 
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
@@ -40,18 +40,18 @@ export function QuotsInvoicesView() {
 
   // Highlight invoice from URL
   useEffect(() => {
-    const highlight = searchParams.get('highlight');
-    const id = searchParams.get('id');
+  const highlight = searchParams.get('highlight');
+  const id = searchParams.get('id');
 
-    if (highlight === 'invoice' && id) {
-      getOneInvoice(id).then((invoice) => {
-        if (invoice) {
-          setHighlightedInvoice(invoice);
-          setIsViewModalOpen(true);
-        }
-      });
-    }
-  }, [searchParams]);
+  if (highlight === 'invoice' && id) {
+    invoiceApi.getOneInvoice(id).then((res) => {
+      if (res.data) {
+        setHighlightedInvoice(res.data as Invoice);
+        setIsViewModalOpen(true);
+      }
+    });
+  }
+}, [searchParams]);
 
   return (
     <div className="py-8">

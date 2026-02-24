@@ -1,13 +1,16 @@
-export enum NotificationType {
-  INVOICE = 'INVOICE',
-  QUOTE = 'QUOTE',
-  PAYMENT = 'PAYMENT',
-  EXPENSE = 'EXPENSE',
-  TAX = 'TAX',
-  CONTRIBUTION = 'CONTRIBUTION',
-  SYSTEM = 'SYSTEM',
-  REMINDER = 'REMINDER',
-}
+export const NotificationType = {
+  INVOICE: 'INVOICE',
+  QUOTE: 'QUOTE',
+  PAYMENT: 'PAYMENT',
+  EXPENSE: 'EXPENSE',
+  TAX: 'TAX',
+  CONTRIBUTION: 'CONTRIBUTION',
+  SYSTEM: 'SYSTEM',
+  REMINDER: 'REMINDER',
+} as const;
+
+export type NotificationType =
+  typeof NotificationType[keyof typeof NotificationType];
 
 export type NotificationPriority = 'low' | 'medium' | 'high';
 

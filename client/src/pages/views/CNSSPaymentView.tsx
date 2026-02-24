@@ -20,7 +20,11 @@ function formatAmount(amount: number) {
   }).format(amount);
 }
 
-function formatDate(date?: Date) {
+// function formatDate(date?: Date) {
+//   if (!date) return "—";
+//   return new Intl.DateTimeFormat("fr-FR").format(new Date(date));
+// }
+function formatDate(date?: Date | string) {
   if (!date) return "—";
   return new Intl.DateTimeFormat("fr-FR").format(new Date(date));
 }
@@ -65,19 +69,22 @@ export function CNSSPaymentView() {
   const { contributions, isLoading, error, refetch } = useContributions({});
   const { current } = useCurrentContribution();
 
-  // ── Notification highlight (EPIC 10) ─────────
+  // ── Notification highlight─────────
   const [searchParams] = useSearchParams();
 const [highlightId, setHighlightId] = useState<string | null>(null);  
 const [isDetailOpen, setIsDetailOpen] = useState(false);
   const { contribution } = useContribution(highlightId);
 
-  useEffect(() => {
+ useEffect(() => {
+  const run = () => {
     const id = searchParams.get("highlight");
     if (id) {
       setHighlightId(id);
       setIsDetailOpen(true);
     }
-  }, [searchParams]);
+  };
+  run();
+}, [searchParams]);
 
   // ── Loading State ─────────────────────────────
   if (isLoading) {
@@ -88,7 +95,6 @@ const [isDetailOpen, setIsDetailOpen] = useState(false);
     );
   }
 
-  // ── Error State ───────────────────────────────
   if (error) {
     return (
       <div className="py-8 text-center">
@@ -98,7 +104,6 @@ const [isDetailOpen, setIsDetailOpen] = useState(false);
     );
   }
 
-  // ── Empty State ───────────────────────────────
   if (!contributions.length) {
     return (
       <div className="py-8 text-center text-gray-500">
@@ -136,7 +141,7 @@ const [isDetailOpen, setIsDetailOpen] = useState(false);
       {lastPaid && (
         <div className="bg-green-50 border-l-4 border-green-500 p-6 rounded-xl mb-6">
           <div className="flex items-start gap-4">
-            <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
+            <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0 mt-1" />
             <div className="flex-1">
               <h3 className="font-bold text-green-900 mb-1">
                 Dernier paiement effectué
@@ -156,7 +161,7 @@ const [isDetailOpen, setIsDetailOpen] = useState(false);
 
       {/* ── Current Contribution ──────────────── */}
       {current && (
-        <div className="bg-gradient-to-br from-[#2D3194] to-[#1f2266] rounded-2xl p-8 mb-8 text-white shadow-lg">
+        <div className="bg-linear-to-br from-[#2D3194] to-[#1f2266] rounded-2xl p-8 mb-8 text-white shadow-lg">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold mb-2">

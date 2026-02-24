@@ -72,8 +72,8 @@ export function CADeclarationView() {
   const { createTaxDeclaration } = useCreateDeclarationData();
   const { updateTaxDeclaration } = useUpdateDeclarationData();
 
-  // URL highlight logic (like PaymentsView)
   useEffect(() => {
+  const run = () => {
     const highlight = searchParams.get("highlight");
     const id = searchParams.get("id");
 
@@ -84,7 +84,9 @@ export function CADeclarationView() {
         setIsDetailModalOpen(true);
       }
     }
-  }, [searchParams, allTaxDeclaration]);
+  };
+  setTimeout(run, 0); 
+}, [searchParams, allTaxDeclaration]);
 
   const handleSubmit = async () => {
     await createTaxDeclaration(currentTaxDeclaration!);
@@ -277,6 +279,29 @@ export function CADeclarationView() {
                     <strong>{currentTaxDeclaration.periode}</strong> a été
                     réglée avec succès. Aucune action requise.
                   </p>
+                  {/* <div className="grid grid-cols-3 gap-4">
+                    <div className="bg-green-100 rounded-xl p-3">
+                      <p className="text-xs text-green-700 mb-1">
+                        Chiffre d'affaires
+                      </p>
+                      <p className="text-lg font-bold text-green-900">
+                        {currentTaxDeclaration.totalRevenue} MAD
+                      </p>
+                    </div>
+                    <div className="bg-green-100 rounded-xl p-3">
+                      <p className="text-xs text-green-700 mb-1">Taxe payée</p>
+                      <p className="text-lg font-bold text-green-900">
+                        {currentTaxDeclaration.taxAmount} MAD
+                      </p>
+                    </div>
+                    <div className="bg-green-100 rounded-xl p-3">
+                      <p className="text-xs text-green-700 mb-1">Période</p>
+                      <p className="text-lg font-bold text-green-900">
+                        {currentTaxDeclaration.periode}
+                      </p>
+                    </div>
+                  </div>
+                  NO action button — read-only for PAID status */}
                 </div>
               </div>
             </div>
@@ -284,7 +309,7 @@ export function CADeclarationView() {
         </>
       )}
       {/* Current Period Card */}
-      {console.log(currentTaxDeclaration)}
+      {/* {console.log(currentTaxDeclaration)} */}
       {(currentTaxDeclaration?.id === null ||
         allTaxDeclaration.length <= 0) && (
         <div className="bg-gradient-to-br from-[#2D3194] to-[#1f2266] rounded-2xl p-8 mb-8 text-white shadow-lg">

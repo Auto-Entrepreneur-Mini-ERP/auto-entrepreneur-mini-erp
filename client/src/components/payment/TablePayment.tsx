@@ -19,12 +19,21 @@ function TablePayment({
   const [isViewPaymentModalOpen, setIsViewPaymentModalOpen] = useState(false);
   // const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
 
- useEffect(() => {
+//  useEffect(() => {
+//     if (initialHighlightId) {
+//       getOnePayment(initialHighlightId);
+//       setIsViewPaymentModalOpen(true);
+//     }
+//   }, [initialHighlightId]);
+useEffect(() => {
+  const run = async () => {
     if (initialHighlightId) {
-      getOnePayment(initialHighlightId);
+      await getOnePayment(initialHighlightId);
       setIsViewPaymentModalOpen(true);
     }
-  }, [initialHighlightId]);
+  };
+  run();
+}, [initialHighlightId, getOnePayment]);
 
   const handleViewPayment = (id: string) => {
     getOnePayment(id);
