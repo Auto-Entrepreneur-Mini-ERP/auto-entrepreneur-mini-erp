@@ -25,10 +25,12 @@ export function DashboardLayout() {
     "/app/articles-services": "Produits & Services",
     "/app/quots-invoices": "Devis & Factures",
     "/app/payments": "Paiements",
-    "/app/expenses": "Dépenses",    
+    "/app/expenses": "Dépenses",
     "/app/ca-declaration": "Déclaration Chiffre d'affaire",
     "/app/cnss-payment": "Paiment CNSS",
     "/app/documents": "Documents",
+    "/app/customers": "Customers",
+
     // "/app/analytics": "Analytics",
     "/app/profile": "Profile",
   };
@@ -37,14 +39,16 @@ export function DashboardLayout() {
 
   const handleSectionChange = (section: string) => {
     const sectionToPath: Record<string, string> = {
-      "Dashboard": "/app/dashboard",
+      Dashboard: "/app/dashboard",
       "Produits & Services": "/app/articles-services",
       "Devis & Factures": "/app/quots-invoices",
-      "Paiements": "/app/payments",
-      "Dépenses": "/app/expenses",
+      Paiements: "/app/payments",
+      Dépenses: "/app/expenses",
       "Déclaration Chiffre d'affaire": "/app/ca-declaration",
       "Paiment CNSS": "/app/cnss-payment",
-      "Documents": "/app/documents",
+      "Customers": "/app/customers",
+
+      Documents: "/app/documents",
       // "Analytics": "/app/analytics",
     };
     

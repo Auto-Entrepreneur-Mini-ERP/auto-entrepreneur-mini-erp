@@ -1,4 +1,4 @@
-import { Router } from "express";
+ import { Router } from "express";
 import { customerController } from "./customer.controller.js";
  import { isAthenticated } from "../../middlewares/auth.middelware.js";
 import { validateBody } from "../../middlewares/validation.middleware.js";
@@ -19,8 +19,9 @@ router.post(
 );
 
  router.patch(
-   "/customers",
-   validateBody(patchCustomerSchema),
+ 
+   "/customers/:id",
+    validateBody(patchCustomerSchema),
    customerController.updateCustomer,
  );
  

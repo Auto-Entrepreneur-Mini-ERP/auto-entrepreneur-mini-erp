@@ -25,15 +25,19 @@ const getAllCustomers = async (req: Request, res: Response) => {
 
 const createCustomer = async (req: Request<{}, {}, CreateCustomerInput>, res: Response) => {
   try {
-
-    const customer = await customerService.createCustomer(req.body);
+    let id = req.AutoEntrepreneurID;
+     const customer = await customerService.createCustomer(id , req.body);
     return res.status(200).json(customer);
   } catch (error: any) {
  
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ "message": error.message });
     }
-
+       if (error.code === "P2002") {
+          return res.status(409).json({ message: "Email already exists" });
+       }
+     
+    console.log(error)
     return res.status(500).json({ "message": "Internal Server Error" });
   }
 };
@@ -51,7 +55,8 @@ const updateCustomer = async (
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ message: error.message });
     }
-
+    console.log(error);
+    
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -101,7 +106,7 @@ const deleteCustomer = async (req: Request, res: Response) => {
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ message: error.message });
     }
-
+ 
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };

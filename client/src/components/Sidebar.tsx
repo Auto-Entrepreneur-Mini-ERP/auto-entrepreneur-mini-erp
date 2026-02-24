@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, FileText, CreditCard,Receipt, FileCheck, Building, User, LogOut, File } from "lucide-react";
+import { LayoutDashboard,Users, Package, FileText, CreditCard,Receipt, FileCheck, Building, User, LogOut, File } from "lucide-react";
 import { useNavigate } from "react-router";
 import Logo from "./Logo";
 
@@ -29,7 +29,9 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
     { name: "Produits & Services", icon: Package },
     { name: "Devis & Factures", icon: FileText },
     { name: "Paiements", icon: CreditCard },
-    { name: "Dépenses", icon: Receipt },    
+    { name: "Customers", icon: Users },
+
+    { name: "Dépenses", icon: Receipt },
     { name: "Déclaration Chiffre d'affaire", icon: FileCheck },
     { name: "Paiment CNSS", icon: Building },
     { name: "Documents", icon: File },
