@@ -72,7 +72,10 @@ const CATEGORY_COLORS: Record<string, string> = {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const fmtMAD = (n: number) =>
-  n.toLocaleString("fr-MA", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " MAD";
+  n.toLocaleString("fr-MA", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }) + " MAD";
 
 const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString("fr-FR", {
@@ -136,35 +139,44 @@ export default function TableExpense() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // ── Fetch ────────────────────────────────────────────────────────────────────
-  const fetchExpenses = useCallback(async (silent = false) => {
-    if (!silent) setLoading(true);
-    setError(null);
-    try {
-      const filters: ExpenseFilters = {
-        category: (catFilter as ExpenseCategory) || undefined,
-        isDeductible:
-          deductFilter === "true" ? true : deductFilter === "false" ? false : "",
-        page,
-        limit: 10,
-      };
-      const res = await expenseApi.getAll(filters);
-      const list: Expense[] = res.data ?? [];
-      const filtered = searchQuery
-        ? list.filter(
-            (e) =>
-              e.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              e.supplier?.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-        : list;
-      setExpenses(filtered);
-      setTotal(res.total ?? 0);
-      setTotalPages(res.totalPages ?? 1);
-    } catch {
-      setError("Impossible de charger les dépenses.");
-    } finally {
-      if (!silent) setLoading(false);
-    }
-  }, [catFilter, deductFilter, page, searchQuery]);
+  const fetchExpenses = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      setError(null);
+      try {
+        const filters: ExpenseFilters = {
+          category: (catFilter as ExpenseCategory) || undefined,
+          isDeductible:
+            deductFilter === "true"
+              ? true
+              : deductFilter === "false"
+                ? false
+                : "",
+          page,
+          limit: 10,
+        };
+        const res = await expenseApi.getAll(filters);
+        const list: Expense[] = res.data ?? [];
+        const filtered = searchQuery
+          ? list.filter(
+              (e) =>
+                e.description
+                  ?.toLowerCase()
+                  .includes(searchQuery.toLowerCase()) ||
+                e.supplier?.toLowerCase().includes(searchQuery.toLowerCase()),
+            )
+          : list;
+        setExpenses(filtered);
+        setTotal(res.total ?? 0);
+        setTotalPages(res.totalPages ?? 1);
+      } catch {
+        setError("Impossible de charger les dépenses.");
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [catFilter, deductFilter, page, searchQuery],
+  );
 
   const fetchStats = useCallback(async () => {
     try {
@@ -208,11 +220,22 @@ export default function TableExpense() {
 
   // ── Validate ─────────────────────────────────────────────────────────────────
   const validate = (): boolean => {
-    if (!form.description.trim()) { setFormError("La description est requise."); return false; }
-    if (!form.amount || isNaN(Number(form.amount)) || Number(form.amount) <= 0) {
-      setFormError("Le montant doit être supérieur à 0."); return false;
+    if (!form.description.trim()) {
+      setFormError("La description est requise.");
+      return false;
     }
-    if (!form.date) { setFormError("La date est requise."); return false; }
+    if (
+      !form.amount ||
+      isNaN(Number(form.amount)) ||
+      Number(form.amount) <= 0
+    ) {
+      setFormError("Le montant doit être supérieur à 0.");
+      return false;
+    }
+    if (!form.date) {
+      setFormError("La date est requise.");
+      return false;
+    }
     return true;
   };
 
@@ -239,7 +262,9 @@ export default function TableExpense() {
       setFile(null);
       refreshAll();
     } catch (err: any) {
-      setFormError(err?.response?.data?.error ?? err.message ?? "Une erreur est survenue.");
+      setFormError(
+        err?.response?.data?.error ?? err.message ?? "Une erreur est survenue.",
+      );
     } finally {
       setSaving(false);
     }
@@ -267,7 +292,9 @@ export default function TableExpense() {
       setEditingExpense(null);
       refreshAll();
     } catch (err: any) {
-      setFormError(err?.response?.data?.error ?? err.message ?? "Une erreur est survenue.");
+      setFormError(
+        err?.response?.data?.error ?? err.message ?? "Une erreur est survenue.",
+      );
     } finally {
       setSaving(false);
     }
@@ -344,7 +371,9 @@ export default function TableExpense() {
         >
           <option value="">Toutes catégories</option>
           {CATEGORIES.map((c) => (
-            <option key={c.id} value={c.id}>{c.icon} {c.label}</option>
+            <option key={c.id} value={c.id}>
+              {c.icon} {c.label}
+            </option>
           ))}
         </select>
 
@@ -359,7 +388,10 @@ export default function TableExpense() {
         </select>
 
         <button
-          onClick={() => { fetchExpenses(); fetchStats(); }}
+          onClick={() => {
+            fetchExpenses();
+            fetchStats();
+          }}
           className="h-11 px-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-600"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -392,7 +424,12 @@ export default function TableExpense() {
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-2 text-sm">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           {error}
-          <button onClick={() => setError(null)} className="ml-auto underline text-xs">Fermer</button>
+          <button
+            onClick={() => setError(null)}
+            className="ml-auto underline text-xs"
+          >
+            Fermer
+          </button>
         </div>
       )}
 
@@ -408,7 +445,9 @@ export default function TableExpense() {
             <p className="text-4xl mb-3">💸</p>
             <p className="font-medium">Aucune dépense trouvée</p>
             <p className="text-sm mt-1">
-              {searchQuery || catFilter ? "Essayez d'autres filtres." : "Ajoutez votre première dépense."}
+              {searchQuery || catFilter
+                ? "Essayez d'autres filtres."
+                : "Ajoutez votre première dépense."}
             </p>
           </div>
         ) : (
@@ -416,32 +455,57 @@ export default function TableExpense() {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">Description</th>
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">Catégorie</th>
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">Date</th>
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">Montant</th>
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">Déductible</th>
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">Justif.</th>
-                  <th className="text-right px-5 py-4 text-sm font-semibold text-gray-700">Actions</th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">
+                    Description
+                  </th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">
+                    Catégorie
+                  </th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">
+                    Date
+                  </th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">
+                    Montant
+                  </th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">
+                    Déductible
+                  </th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-gray-700">
+                    Justif.
+                  </th>
+                  <th className="text-right px-5 py-4 text-sm font-semibold text-gray-700">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {expenses.map((expense) => {
                   const cat = CATEGORIES.find((c) => c.id === expense.category);
-                  const colorClass = CATEGORY_COLORS[expense.category] ?? "bg-gray-100 text-gray-600";
+                  const colorClass =
+                    CATEGORY_COLORS[expense.category] ??
+                    "bg-gray-100 text-gray-600";
                   return (
-                    <tr key={expense.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={expense.id}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    >
                       <td className="px-5 py-4">
                         <p className="font-medium text-gray-900 text-sm">
-                          {expense.description ?? <span className="text-gray-300">—</span>}
+                          {expense.description ?? (
+                            <span className="text-gray-300">—</span>
+                          )}
                         </p>
                         {expense.supplier && (
-                          <p className="text-xs text-gray-400">{expense.supplier}</p>
+                          <p className="text-xs text-gray-400">
+                            {expense.supplier}
+                          </p>
                         )}
                       </td>
 
                       <td className="px-5 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${colorClass}`}>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${colorClass}`}
+                        >
                           {cat?.icon} {cat?.label ?? expense.category}
                         </span>
                       </td>
@@ -455,9 +519,13 @@ export default function TableExpense() {
                       </td>
 
                       <td className="px-5 py-4">
-                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                          expense.isDeductible ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
-                        }`}>
+                        <span
+                          className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            expense.isDeductible
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-600"
+                          }`}
+                        >
                           {expense.isDeductible ? "✅ Oui" : "❌ Non"}
                         </span>
                       </td>
@@ -465,7 +533,10 @@ export default function TableExpense() {
                       <td className="px-5 py-4 text-sm">
                         {expense.receiptUrl ? (
                           <button
-                            onClick={() => { setViewerExpense(expense); setViewerOpen(true); }}
+                            onClick={() => {
+                              setViewerExpense(expense);
+                              setViewerOpen(true);
+                            }}
                             className="flex items-center gap-1 text-[#2D3194] hover:underline text-xs"
                           >
                             <Eye className="w-3 h-3" /> Voir
@@ -526,18 +597,36 @@ export default function TableExpense() {
       )}
 
       {/* ── Create modal ── */}
-      <Modal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} title="Ajouter une dépense">
+      <Modal
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        title="Ajouter une dépense"
+      >
         <div className="p-6 max-h-[80vh] overflow-y-auto">
           <form onSubmit={handleCreate} className="space-y-4">
-            <ExpenseForm form={form} onChange={setForm} file={file} onFileChange={setFile} fileInputRef={fileInputRef} />
+            <ExpenseForm
+              form={form}
+              onChange={setForm}
+              file={file}
+              onFileChange={setFile}
+              fileInputRef={fileInputRef}
+            />
             {formError && <FormErrorBanner message={formError} />}
-            <FormActions onCancel={() => setCreateModalOpen(false)} saving={saving} label="Ajouter" />
+            <FormActions
+              onCancel={() => setCreateModalOpen(false)}
+              saving={saving}
+              label="Ajouter"
+            />
           </form>
         </div>
       </Modal>
 
       {/* ── Edit modal ── */}
-      <Modal isOpen={editModalOpen} onClose={() => setEditModalOpen(false)} title="Modifier la dépense">
+      <Modal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title="Modifier la dépense"
+      >
         <div className="p-6 max-h-[80vh] overflow-y-auto">
           <form onSubmit={handleUpdate} className="space-y-4">
             <ExpenseForm
@@ -549,18 +638,29 @@ export default function TableExpense() {
               existingReceiptUrl={editingExpense?.receiptUrl ?? null}
             />
             {formError && <FormErrorBanner message={formError} />}
-            <FormActions onCancel={() => setEditModalOpen(false)} saving={saving} label="Enregistrer" />
+            <FormActions
+              onCancel={() => setEditModalOpen(false)}
+              saving={saving}
+              label="Enregistrer"
+            />
           </form>
         </div>
       </Modal>
 
       {/* ── Receipt viewer ── */}
       {viewerExpense && (
-        <Modal isOpen={viewerOpen} onClose={() => setViewerOpen(false)} title="Justificatif">
+        <Modal
+          isOpen={viewerOpen}
+          onClose={() => setViewerOpen(false)}
+          title="Justificatif"
+        >
           <div className="p-6">
             <ReceiptViewer receiptUrl={viewerExpense.receiptUrl} />
             <div className="flex justify-end mt-4">
-              <Button onClick={() => setViewerOpen(false)} className="bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 h-11 px-5 rounded-xl">
+              <Button
+                onClick={() => setViewerOpen(false)}
+                className="bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 h-11 px-5 rounded-xl"
+              >
                 Fermer
               </Button>
             </div>
@@ -571,27 +671,45 @@ export default function TableExpense() {
       {/* ── Delete confirm ── */}
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-red-600" />
+          <div className="bg-white rounded-2xl shadow-2xl p-4 w-80 h-40 ">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-9 bg-red-100 rounded-xl flex items-center justify-center">
+                <Trash2 className="w-4 h-4 text-red-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Confirmer la suppression</h3>
-                <p className="text-sm text-gray-500">Cette action est irréversible</p>
+                <h3 className="font-semibold text-gray-900 text-sm">
+                  Confirmer la suppression
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Cette action est irréversible
+                </p>
               </div>
             </div>
-            <p className="text-gray-700 mb-6">
-              Supprimer <strong>«{deleteConfirm.description ?? deleteConfirm.category}»</strong> ?
+
+            <p className="text-gray-700 text-sm mb-4">
+              Supprimer{" "}
+              <strong>
+                «{deleteConfirm.description ?? deleteConfirm.category}»
+              </strong>{" "}
+              ?
               {deleteConfirm.receiptUrl && (
-                <span className="block text-sm text-orange-600 mt-1">⚠ Le justificatif sera également supprimé.</span>
+                <span className="block text-xs text-orange-600 mt-1">
+                  ⚠ Le justificatif sera également supprimé.
+                </span>
               )}
             </p>
-            <div className="flex gap-3">
-              <Button onClick={() => setDeleteConfirm(null)} className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 h-11 rounded-xl">
+
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 h-10 rounded-xl text-sm"
+              >
                 Annuler
               </Button>
-              <Button onClick={handleDelete} className="flex-1 bg-red-500 hover:bg-red-600 text-white h-11 rounded-xl">
+              <Button
+                onClick={handleDelete}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white h-10 rounded-xl text-sm"
+              >
                 Supprimer
               </Button>
             </div>
@@ -619,40 +737,90 @@ function ExpenseForm({
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   existingReceiptUrl?: string | null;
 }) {
-  const set = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    onChange({ ...form, [key]: e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value });
-  };
+  const set =
+    (key: keyof FormState) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      onChange({
+        ...form,
+        [key]:
+          e.target.type === "checkbox"
+            ? (e.target as HTMLInputElement).checked
+            : e.target.value,
+      });
+    };
 
   return (
     <>
       <FieldWrap label="Description" required>
-        <Input value={form.description} onChange={set("description")} required placeholder="Ex: Abonnement Adobe Cloud" className="h-11 border-gray-200 rounded-xl" />
+        <Input
+          value={form.description}
+          onChange={set("description")}
+          required
+          placeholder="Ex: Abonnement Adobe Cloud"
+          className="h-11 border-gray-200 rounded-xl"
+        />
       </FieldWrap>
 
       <div className="grid grid-cols-2 gap-4">
         <FieldWrap label="Catégorie" required>
-          <select value={form.category} onChange={set("category")} className="w-full h-11 px-3 border border-gray-200 rounded-xl text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2D3194]">
-            {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.label}</option>)}
+          <select
+            value={form.category}
+            onChange={set("category")}
+            className="w-full h-11 px-3 border border-gray-200 rounded-xl text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2D3194]"
+          >
+            {CATEGORIES.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.icon} {c.label}
+              </option>
+            ))}
           </select>
         </FieldWrap>
         <FieldWrap label="Montant (MAD)" required>
-          <Input type="number" value={form.amount} onChange={set("amount")} required placeholder="0.00" min={0.01} step={0.01} className="h-11 border-gray-200 rounded-xl" />
+          <Input
+            type="number"
+            value={form.amount}
+            onChange={set("amount")}
+            required
+            placeholder="0.00"
+            min={0.01}
+            step={0.01}
+            className="h-11 border-gray-200 rounded-xl"
+          />
         </FieldWrap>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <FieldWrap label="Date" required>
-          <Input type="date" value={form.date} onChange={set("date")} required className="h-11 border-gray-200 rounded-xl" />
+          <Input
+            type="date"
+            value={form.date}
+            onChange={set("date")}
+            required
+            className="h-11 border-gray-200 rounded-xl"
+          />
         </FieldWrap>
         <FieldWrap label="Moyen de paiement">
-          <select value={form.paymentMethod} onChange={set("paymentMethod")} className="w-full h-11 px-3 border border-gray-200 rounded-xl text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2D3194]">
-            {PAYMENT_METHODS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+          <select
+            value={form.paymentMethod}
+            onChange={set("paymentMethod")}
+            className="w-full h-11 px-3 border border-gray-200 rounded-xl text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2D3194]"
+          >
+            {PAYMENT_METHODS.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label}
+              </option>
+            ))}
           </select>
         </FieldWrap>
       </div>
 
       <FieldWrap label="Fournisseur">
-        <Input value={form.supplier} onChange={set("supplier")} placeholder="Nom du fournisseur (optionnel)" className="h-11 border-gray-200 rounded-xl" />
+        <Input
+          value={form.supplier}
+          onChange={set("supplier")}
+          placeholder="Nom du fournisseur (optionnel)"
+          className="h-11 border-gray-200 rounded-xl"
+        />
       </FieldWrap>
 
       <div className="flex items-center gap-3 py-1">
@@ -660,49 +828,90 @@ function ExpenseForm({
           id="deductible"
           type="checkbox"
           checked={form.isDeductible}
-          onChange={(e) => onChange({ ...form, isDeductible: e.target.checked })}
+          onChange={(e) =>
+            onChange({ ...form, isDeductible: e.target.checked })
+          }
           className="w-4 h-4 accent-[#2D3194] rounded"
         />
-        <Label htmlFor="deductible" className="cursor-pointer select-none">Déductible fiscalement</Label>
+        <Label htmlFor="deductible" className="cursor-pointer select-none">
+          Déductible fiscalement
+        </Label>
       </div>
 
       <FieldWrap label="Justificatif (PDF / image)">
         {existingReceiptUrl && !file && (
           <p className="text-xs text-gray-500 mb-1">
             📎 Fichier existant :{" "}
-            <a href={existingReceiptUrl} target="_blank" rel="noopener noreferrer" className="text-[#2D3194] underline">Voir</a>
-            {" "}— Sélectionnez un nouveau fichier pour le remplacer.
+            <a
+              href={existingReceiptUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#2D3194] underline"
+            >
+              Voir
+            </a>{" "}
+            — Sélectionnez un nouveau fichier pour le remplacer.
           </p>
         )}
         {file ? (
           <div className="flex items-center gap-2 p-3 rounded-xl border border-green-200 bg-green-50">
-            <span className="text-xl">{file.name.endsWith(".pdf") ? "📄" : "🖼️"}</span>
+            <span className="text-xl">
+              {file.name.endsWith(".pdf") ? "📄" : "🖼️"}
+            </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-800 truncate">{file.name}</p>
-              <p className="text-xs text-gray-400">{(file.size / 1024).toFixed(1)} Ko</p>
+              <p className="text-sm font-medium text-gray-800 truncate">
+                {file.name}
+              </p>
+              <p className="text-xs text-gray-400">
+                {(file.size / 1024).toFixed(1)} Ko
+              </p>
             </div>
-            <button type="button" onClick={() => onFileChange(null)} className="text-xs text-red-500 hover:text-red-700 font-semibold px-2 py-1 rounded-lg hover:bg-red-50">
+            <button
+              type="button"
+              onClick={() => onFileChange(null)}
+              className="text-xs text-red-500 hover:text-red-700 font-semibold px-2 py-1 rounded-lg hover:bg-red-50"
+            >
               Retirer
             </button>
           </div>
         ) : (
-          <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full border-2 border-dashed border-gray-200 hover:border-[#2D3194] rounded-xl p-4 text-center text-sm text-gray-400 hover:text-gray-600 transition-all">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full border-2 border-dashed border-gray-200 hover:border-[#2D3194] rounded-xl p-4 text-center text-sm text-gray-400 hover:text-gray-600 transition-all"
+          >
             📎 Cliquez pour joindre un fichier (PDF, JPG, PNG — max 10 Mo)
           </button>
         )}
-        <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) onFileChange(f); }}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) onFileChange(f);
+          }}
         />
       </FieldWrap>
     </>
   );
 }
 
-function FieldWrap({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function FieldWrap({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <Label className="text-gray-700 font-medium mb-1.5 block text-sm">
-        {label}{required && <span className="text-red-500 ml-1">*</span>}
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
       </Label>
       {children}
     </div>
@@ -718,13 +927,30 @@ function FormErrorBanner({ message }: { message: string }) {
   );
 }
 
-function FormActions({ onCancel, saving, label }: { onCancel: () => void; saving: boolean; label: string }) {
+function FormActions({
+  onCancel,
+  saving,
+  label,
+}: {
+  onCancel: () => void;
+  saving: boolean;
+  label: string;
+}) {
   return (
     <div className="flex gap-3 pt-4 border-t border-gray-100">
-      <Button type="button" onClick={onCancel} disabled={saving} className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 h-12 rounded-xl font-medium">
+      <Button
+        type="button"
+        onClick={onCancel}
+        disabled={saving}
+        className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 h-12 rounded-xl font-medium"
+      >
         Annuler
       </Button>
-      <Button type="submit" disabled={saving} className="flex-1 bg-[#2D3194] hover:bg-[#1f2266] text-white h-12 rounded-xl font-medium">
+      <Button
+        type="submit"
+        disabled={saving}
+        className="flex-1 bg-[#2D3194] hover:bg-[#1f2266] text-white h-12 rounded-xl font-medium"
+      >
         {saving && <RefreshCw className="w-4 h-4 animate-spin mr-2" />}
         {saving ? "Enregistrement..." : label}
       </Button>
@@ -733,7 +959,10 @@ function FormActions({ onCancel, saving, label }: { onCancel: () => void; saving
 }
 
 function ReceiptViewer({ receiptUrl }: { receiptUrl: string | null }) {
-  if (!receiptUrl) return <p className="text-gray-400 text-center py-8">Aucun justificatif.</p>;
+  if (!receiptUrl)
+    return (
+      <p className="text-gray-400 text-center py-8">Aucun justificatif.</p>
+    );
 
   const filename = receiptUrl.split("/").pop() ?? "";
   const isPdf = filename.toLowerCase().endsWith(".pdf");
@@ -746,17 +975,31 @@ function ReceiptViewer({ receiptUrl }: { receiptUrl: string | null }) {
     <div className="space-y-3">
       {isImage && (
         <div className="rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center min-h-[200px]">
-          <img src={fullUrl} alt={filename} className="max-w-full max-h-[450px] object-contain" />
+          <img
+            src={fullUrl}
+            alt={filename}
+            className="max-w-full max-h-[450px] object-contain"
+          />
         </div>
       )}
-      {isPdf && <iframe src={fullUrl} title={filename} className="w-full h-[450px] rounded-xl border border-gray-100" />}
+      {isPdf && (
+        <iframe
+          src={fullUrl}
+          title={filename}
+          className="w-full h-[450px] rounded-xl border border-gray-100"
+        />
+      )}
       {!isImage && !isPdf && (
         <div className="text-center py-10 text-gray-400">
           <p className="text-4xl mb-2">📎</p>
           <p className="text-sm">Aperçu non disponible.</p>
         </div>
       )}
-      <a href={fullUrl} download={filename} className="flex items-center justify-center gap-2 w-full py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+      <a
+        href={fullUrl}
+        download={filename}
+        className="flex items-center justify-center gap-2 w-full py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+      >
         ⬇ Télécharger
       </a>
     </div>
