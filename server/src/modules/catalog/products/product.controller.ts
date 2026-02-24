@@ -6,7 +6,6 @@ import type {
   UpdateProductInput,
   UpdateStockInput,
   ProductFiltersInput,
-  ProductResponse
 } from "./product.types.js";
 
 const productService = new ProductService();
@@ -63,6 +62,16 @@ const getProducts = asyncHandler(async (req: Request, res: Response) => {
   const serviceFilters = convertFiltersToService(filtersInput);
   const products = await productService.getProducts(req.AutoEntrepreneurID as string, serviceFilters);
   res.status(200).json({ success: true, count: products.length, data: products });
+});
+
+// GET /products/alertes
+const getAlerts = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const products = await productService.getProductAlerts(req.AutoEntrepreneurID as string);
+    res.status(200).json({ success: true, count: products.length, data: products });
+  } catch (error: any) {
+    res.status(400).json({ success: false, error: error.message || "Failed to get alerts" });
+  }
 });
 
 // GET /products/search?articleName=...
@@ -146,7 +155,7 @@ const updateProduct = asyncHandler(async (req: Request, res: Response) => {
 const updateStock = asyncHandler(async (req: Request, res: Response) => {
   try {
     const id = getParamId(req.params.id);
-    const { quantity } = req.body as UpdateStockInput;
+    const { quantity, reason } = req.body as UpdateStockInput & { reason?: string };
     const product = await productService.updateStock(id, req.AutoEntrepreneurID as string, quantity);
     if (!product) {
       return res.status(404).json({ success: false, error: "Product not found" });
@@ -162,7 +171,6 @@ const deleteProduct = asyncHandler(async (req: Request, res: Response) => {
   try {
     const id = getParamId(req.params.id);
 
-    // Verify ownership before deleting
     const existing = await productService.getProductById(id, req.AutoEntrepreneurID as string);
     if (!existing) {
       return res.status(404).json({ success: false, error: "Product not found" });
@@ -182,6 +190,7 @@ const deleteProduct = asyncHandler(async (req: Request, res: Response) => {
 
 export const productController = {
   getProducts,
+  getAlerts,
   getProduct,
   getProductByName,
   createProduct,

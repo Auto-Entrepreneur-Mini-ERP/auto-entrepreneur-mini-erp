@@ -112,6 +112,43 @@ export class ProductService {
   }
 
 
+  /**
+   * GET /products/alertes
+   * Returns products whose stockQuantity <= alertThreshold (low stock or empty)
+   */
+  async getProductAlerts(
+    autoEntrepreneurId: string
+  ): Promise<ProductWithItem[]> {
+    const items = await prisma.item.findMany({
+      where: {
+        isActive: true,
+        product: {
+          AutoEntrepreneurId: autoEntrepreneurId
+        }
+      },
+      include: {
+        product: true
+      },
+      orderBy: {
+        creationDate: "desc"
+      }
+    });
+
+    const lowStockItems = items.filter((item: any) =>
+      item.product && item.product.stockQuantity <= item.product.alertThreshold
+    );
+
+    return lowStockItems.map((item: any) => ({
+      ...item,
+      product: {
+        ...item.product,
+        autoEntrepreneurId: item.product.AutoEntrepreneurId,
+        unitPrice: Number(item.product.unitPrice)
+      }
+    })) as ProductWithItem[];
+  }
+
+
   async getProductById(
     id: string,
     autoEntrepreneurId: string
@@ -276,7 +313,6 @@ export class ProductService {
 
 
   async checkProductUsage(itemId: string): Promise<boolean> {
-
     const [invoiceLines, quoteLines] = await Promise.all([
       prisma.invoiceLine.count({
         where: { productId: itemId }
