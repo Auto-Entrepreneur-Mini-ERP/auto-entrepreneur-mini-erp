@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { User, Mail, Phone, MapPin, Building2, Camera, X, Save, Briefcase } from "lucide-react";
+import { User, Mail, Phone, MapPin, Building2, X, Save, Briefcase } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
