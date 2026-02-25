@@ -14,7 +14,7 @@ import {
 } from "../ui/table";
 import { CircleArrowDown, CircleArrowUp, CircleX, Search } from "lucide-react";
 import { useQuote } from "../../hooks/useQuote";
-import type { CreateQuoteInput, LineType, Quote, QuoteLineInput, UpdateQuoteInput } from "../../types/quote.types";
+import type { LineType, Quote, QuoteLineInput, UpdateQuoteInput } from "../../types/quote.types";
 
 type ModalQuoteProps = {
   isQuoteModalOpen: boolean;

@@ -1,4 +1,3 @@
-import Logo from "../Logo"
 import LogoWhite from "../LogoWhite"
 
 function AuthBranding() {
