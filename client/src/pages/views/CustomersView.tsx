@@ -1,7 +1,7 @@
 import {
-  Search,
+  ArrowDownRight,
   Users,
-  Building,
+  RefreshCw,
   MapPin,
   Mail,
   Phone,
@@ -135,11 +135,11 @@ export function CustomerProfile({
 
   const handleSuccessClose = () => {
     setShowSuccess(false);
-    onCancel(); // go back after success
+    onCancel();  
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA]">
+    <div className="min-h-screen ">
       {showSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-xl shadow-lg w-[420px] max-w-[90%] p-6 flex flex-col items-center gap-3">
@@ -162,15 +162,27 @@ export function CustomerProfile({
           </div>
         </div>
       )}
-      <div className="bg-white border-b border-gray-100 px-8 py-6">
-        <h1 className="text-3xl font-bold text-[#2D3194]">Client details</h1>
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-[#2D3194]/10 rounded-xl flex items-center justify-center">
+            <Users className="w-5 h-5 text-[#2D3194]" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-[#2D3194]">
+              Gestion des Clients
+            </h1>
+            <p className="text-gray-600">
+              Suivez et gérez votre portefeuille clients
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="px-8 py-8 flex justify-center">
+      <div className="px-8 py-8 flex justify-center  bg-[#F5F7FA]">
         <div className="w-full max-w-2xl">
-          <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm space-y-6">
+          <div className=" bg-white rounded-2xl border border-gray-100 p-8 shadow-sm space-y-6">
             {/* Prénom + Nom */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 ">
               <div>
                 <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-2">
                   <User className="w-4 h-4 text-gray-400" />
@@ -322,7 +334,12 @@ export function CustomerProfile({
                 <X className="w-4 h-4 mr-1.5" />
                 Annuler
               </Button>
-              <Button onClick={handleSave} disabled={isSubmitting}>
+
+              <Button
+                onClick={handleSave}
+                className="bg-[#2D3194] hover:bg-[#1f2266] text-white h-12 px-6 rounded-xl"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
@@ -351,7 +368,7 @@ export function CustomerProfile({
 
  
 export function CustomersView() {
-  const { allCustomers: customers = [], loading } = useGetAllCustomers();
+  const { allCustomers: customers = [], loading  , refetch} = useGetAllCustomers();
   const { deleteCustomer } = useDeleteCustomer();
 
   const [showProfile, setShowProfile] = useState(false);
@@ -370,6 +387,7 @@ export function CustomersView() {
   const handleAddClient = (customer: Customer | null) => {
     setMode("ADD");
     setCurrentCustomer(customer ?? emptyCustomer);
+
     setShowProfile(true);
   };
 
@@ -382,6 +400,7 @@ export function CustomersView() {
   const handleDeleteClient = (customer: Customer) => {
     setCustomerToDelete(customer);
     setShowDeleteModal(true);
+    refetch();
   };
 
   const confirmDelete = async () => {
@@ -440,7 +459,7 @@ export function CustomersView() {
           </div>
         </div>
       </div>
-       
+
       {/* Search + Add */}
       <div className="mb-6 flex items-center gap-3 max-w-xl">
         <input
@@ -450,7 +469,23 @@ export function CustomersView() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="flex-1 px-4 py-2 border rounded-md text-sm bg-[#4F46E5"
         />
-        <Button onClick={() => handleAddClient(null)}>Ajouter</Button>
+        <button
+          onClick={() => refetch()}
+          className="h-12 px-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-600"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          <span className="hidden sm:inline text-sm">Actualiser</span>
+        </button>
+
+        <Button
+          className="bg-[#2D3194] hover:bg-[#1f2266] text-white h-12 px-6 rounded-xl"
+          onClick={() => handleAddClient(null)}
+        >
+          <Plus className="w-4 h-4 " />
+          Ajouter  
+        </Button>
+
+         
       </div>
 
       {/* TABLE */}
@@ -463,86 +498,134 @@ export function CustomersView() {
           boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
         }}
       >
-        <table className="w-full border-collapse">
-          <thead>
-            <tr
-              style={{
-                background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
-                borderBottom: "2px solid #e2e8f0",
-                fontSize: "0.9rem",
-                fontWeight: "700",
-                color: "#475569",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
-              <th className="text-left px-6 py-4">Client</th>
-              <th className="text-left px-6 py-4">Localisation</th>
-              <th className="text-left px-6 py-4">Contact</th>
-              <th className="text-left px-6 py-4">Date d'inscription</th>
-              <th className="text-center px-6 py-4">Statut</th>
-              <th className="text-center px-6 py-4">Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredCustomers.map((customer, idx) => (
+        <div className="w-full overflow-auto rounded-xl border border-slate-200">
+          <table className="w-full border-collapse">
+            <thead>
               <tr
-                key={customer.id}
                 style={{
-                  borderBottom:
-                    idx < filteredCustomers.length - 1
-                      ? "1px solid #f1f5f9"
-                      : "none",
-                  transition: "all 0.2s ease",
-                  cursor: "pointer",
+                  background:
+                    "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+                  borderBottom: "2px solid #e2e8f0",
+                  fontSize: "0.9rem",
+                  fontWeight: "700",
+                  color: "#475569",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#f8fafc")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
               >
-                {/* CLIENT */}
-                <td className="px-6 py-6 align-top">
-                  <div className="flex flex-col gap-2">
-                    <div
-                      style={{
-                        fontSize: "0.95rem",
-                        fontWeight: 600,
-                        color: "#1e293b",
-                      }}
-                    >
-                      {customer.user.firstName} {customer.user.lastName}
+                <th className="text-left px-6 py-4">Client</th>
+                <th className="text-left px-6 py-4">Localisation</th>
+                <th className="text-left px-6 py-4">Contact</th>
+                <th className="text-left px-6 py-4">Date d'inscription</th>
+                <th className="text-center px-6 py-4">Statut</th>
+                <th className="text-center px-6 py-4">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredCustomers.map((customer, idx) => (
+                <tr
+                  key={customer.id}
+                  style={{
+                    borderBottom:
+                      idx < filteredCustomers.length - 1
+                        ? "1px solid #f1f5f9"
+                        : "none",
+                    transition: "all 0.2s ease",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "#f8fafc")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "transparent")
+                  }
+                >
+                  {/* CLIENT */}
+                  <td className="px-6 py-6 align-top">
+                    <div className="flex flex-col gap-2">
+                      <div
+                        style={{
+                          fontSize: "0.95rem",
+                          fontWeight: 600,
+                          color: "#1e293b",
+                        }}
+                      >
+                        {customer.user.firstName} {customer.user.lastName}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "#64748b",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        <Mail size={13} />
+                        {customer.user.email}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.8rem",
+                          color: "#94a3b8",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        ICE: {customer.ice}
+                      </div>
                     </div>
+                  </td>
+
+                  {/* LOCATION */}
+                  <td className="px-6 py-6 align-top">
+                    <div className="flex flex-col gap-2">
+                      <div
+                        style={{
+                          fontSize: "0.9rem",
+                          fontWeight: 500,
+                          color: "#334155",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        <MapPin size={14} style={{ color: "#667eea" }} />
+                        {customer.city}
+                      </div>
+                      <div style={{ fontSize: "0.85rem", color: "#64748b" }}>
+                        {customer.country}
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* CONTACT */}
+                  <td className="px-6 py-6 align-top">
                     <div
                       style={{
                         fontSize: "0.85rem",
-                        color: "#64748b",
+                        color: "#475569",
                         display: "flex",
                         alignItems: "center",
                         gap: "0.5rem",
                       }}
                     >
-                      <Mail size={13} />
-                      {customer.user.email}
+                      <Phone size={13} style={{ color: "#10b981" }} />
+                      {customer.user.phone}
                     </div>
                     <div
                       style={{
                         fontSize: "0.8rem",
                         color: "#94a3b8",
-                        fontFamily: "monospace",
+                        marginTop: "6px",
                       }}
                     >
-                      ICE: {customer.ice}
+                      {customer.user.address.split(",")[0]}
                     </div>
-                  </div>
-                </td>
+                  </td>
 
-                {/* LOCATION */}
-                <td className="px-6 py-6 align-top">
-                  <div className="flex flex-col gap-2">
+                  {/* DATE */}
+                  <td className="px-6 py-6 align-top">
                     <div
                       style={{
                         fontSize: "0.9rem",
@@ -553,97 +636,52 @@ export function CustomersView() {
                         gap: "0.5rem",
                       }}
                     >
-                      <MapPin size={14} style={{ color: "#667eea" }} />
-                      {customer.city}
+                      <Calendar size={13} style={{ color: "#f59e0b" }} />
+                      {formatDate(customer.creationDate)}
                     </div>
-                    <div style={{ fontSize: "0.85rem", color: "#64748b" }}>
-                      {customer.country}
+                  </td>
+
+                  {/* STATUS */}
+                  <td className="px-6 py-6 text-center align-middle">
+                    <span
+                      style={{
+                        padding: "0.375rem 0.875rem",
+                        borderRadius: "20px",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        background: customer.isActive ? "#d1fae5" : "#fee2e2",
+                        color: customer.isActive ? "#065f46" : "#991b1b",
+                        border: `1px solid ${customer.isActive ? "#a7f3d0" : "#fecaca"}`,
+                      }}
+                    >
+                      {customer.isActive ? "Actif" : "Inactif"}
+                    </span>
+                  </td>
+
+                  {/* ACTIONS */}
+                  <td className="px-6 py-6 text-center align-middle">
+                    <div className="flex justify-center gap-3">
+                      <Button
+                        onClick={() => handleShowClient(customer)}
+                        variant="ghost"
+                        size="icon"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteClient(customer)}
+                        variant="ghost"
+                        size="icon"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
                     </div>
-                  </div>
-                </td>
-
-                {/* CONTACT */}
-                <td className="px-6 py-6 align-top">
-                  <div
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "#475569",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <Phone size={13} style={{ color: "#10b981" }} />
-                    {customer.user.phone}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "#94a3b8",
-                      marginTop: "6px",
-                    }}
-                  >
-                    {customer.user.address.split(",")[0]}
-                  </div>
-                </td>
-
-                {/* DATE */}
-                <td className="px-6 py-6 align-top">
-                  <div
-                    style={{
-                      fontSize: "0.9rem",
-                      fontWeight: 500,
-                      color: "#334155",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <Calendar size={13} style={{ color: "#f59e0b" }} />
-                    {formatDate(customer.creationDate)}
-                  </div>
-                </td>
-
-                {/* STATUS */}
-                <td className="px-6 py-6 text-center align-middle">
-                  <span
-                    style={{
-                      padding: "0.375rem 0.875rem",
-                      borderRadius: "20px",
-                      fontSize: "0.8rem",
-                      fontWeight: 600,
-                      background: customer.isActive ? "#d1fae5" : "#fee2e2",
-                      color: customer.isActive ? "#065f46" : "#991b1b",
-                      border: `1px solid ${customer.isActive ? "#a7f3d0" : "#fecaca"}`,
-                    }}
-                  >
-                    {customer.isActive ? "Actif" : "Inactif"}
-                  </span>
-                </td>
-
-                {/* ACTIONS */}
-                <td className="px-6 py-6 text-center align-middle">
-                  <div className="flex justify-center gap-3">
-                    <Button
-                      onClick={() => handleShowClient(customer)}
-                      variant="ghost"
-                      size="icon"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      onClick={() => handleDeleteClient(customer)}
-                      variant="ghost"
-                      size="icon"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* DELETE CONFIRM MODAL */}

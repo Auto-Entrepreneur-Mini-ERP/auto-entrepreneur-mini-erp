@@ -63,7 +63,7 @@ export function CADeclarationView() {
   };
 
   const { allTaxDeclaration, loading, refetch } = useGetAllTaxDeclaration();
-const { currentTaxDeclaration, fetchCurrentDeclaration } =
+const { currentTaxDeclaration, fetchCurrentDeclaration, loadingCurrent } =
   useGetCurrentDeclarationData();
 
    const { deleteTaxDeclaration } = useDeleteDeclarationData();
@@ -153,7 +153,6 @@ const handleSubmit = async () => {
         </div>
       </div>
 
-      
       {currentTaxDeclaration?.id && (
         <>
           {/* ───── DRAFT ───── */}
@@ -223,7 +222,7 @@ const handleSubmit = async () => {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="bg-blue-100 rounded-xl p-3">
                       <p className="text-xs text-blue-700 mb-1">
-                        Montant à payer
+                        Impôt sur le chiffre d’affaires
                       </p>
                       <p className="text-xl font-bold text-blue-900">
                         {currentTaxDeclaration.taxAmount} MAD
@@ -305,62 +304,67 @@ const handleSubmit = async () => {
           )}
         </>
       )}
+
       {/* Current Period Card */}
+
       {console.log(currentTaxDeclaration)}
-      {(currentTaxDeclaration?.id === null ||
-        allTaxDeclaration.length <= 0) && (
-        <div className="bg-gradient-to-br from-[#2D3194] to-[#1f2266] rounded-2xl p-8 mb-8 text-white shadow-lg">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">
-                Période en cours : {currentTaxDeclaration?.periode}
-              </h2>
-              <p className="text-white/80">
-                Date limite de déclaration :{" "}
-                {currentTaxDeclaration?.dueDate
-                  ? new Date(currentTaxDeclaration.dueDate).toLocaleDateString(
-                      "fr-FR",
-                    )
-                  : "—"}
-              </p>
-            </div>
-            <div className="w-16 h-16 bg-[#F8BC00] rounded-2xl flex items-center justify-center">
-              <Calendar className="w-8 h-8 text-[#2D3194]" />
-            </div>
-          </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <p className="text-white/80 text-sm mb-2">Chiffre d'affaires</p>
-              <p className="text-3xl font-bold">
-                {currentTaxDeclaration?.totalRevenue}MAD
-              </p>
+      {!loadingCurrent &&
+        (currentTaxDeclaration?.id == null ||
+          allTaxDeclaration.length <= 0) && (
+          <div className="bg-gradient-to-br from-[#2D3194] to-[#1f2266] rounded-2xl p-8 mb-8 text-white shadow-lg">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold mb-2">
+                  Période en cours : {currentTaxDeclaration?.periode}
+                </h2>
+                <p className="text-white/80">
+                  Date limite de déclaration :{" "}
+                  {currentTaxDeclaration?.dueDate
+                    ? new Date(
+                        currentTaxDeclaration.dueDate,
+                      ).toLocaleDateString("fr-FR")
+                    : "—"}
+                </p>
+              </div>
+              <div className="w-16 h-16 bg-[#F8BC00] rounded-2xl flex items-center justify-center">
+                <Calendar className="w-8 h-8 text-[#2D3194]" />
+              </div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <p className="text-white/80 text-sm mb-2">Tax collectée</p>
-              <p className="text-3xl font-bold">
-                {currentTaxDeclaration?.taxAmount}
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <p className="text-white/80 text-sm mb-2">Jours restants</p>
-              <p className="text-3xl font-bold">
-                {currentTaxDeclaration?.ramainDays}
-              </p>
-            </div>
-          </div>
 
-          <div className="flex gap-4 mt-6">
-            <Button
-              onClick={() => handlCreateDeclaration()}
-              className="bg-[#F8BC00] hover:bg-[#e0ab00] text-[#2D3194] h-12 px-6 rounded-xl font-semibold flex-1"
-            >
-              <Send className="w-5 h-5 mr-2" />
-              Creer la déclaration
-            </Button>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <p className="text-white/80 text-sm mb-2">Chiffre d'affaires</p>
+                <p className="text-3xl font-bold">
+                  {currentTaxDeclaration?.totalRevenue}MAD
+                </p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <p className="text-white/80 text-sm mb-2">Tax collectée</p>
+                <p className="text-3xl font-bold">
+                  {currentTaxDeclaration?.taxAmount}
+                </p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <p className="text-white/80 text-sm mb-2">Jours restants</p>
+                <p className="text-3xl font-bold">
+                  {currentTaxDeclaration?.ramainDays}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-6">
+              <Button
+                onClick={() => handlCreateDeclaration()}
+                className="bg-[#F8BC00] hover:bg-[#e0ab00] text-[#2D3194] h-12 px-6 rounded-xl font-semibold flex-1"
+              >
+                <Send className="w-5 h-5 mr-2" />
+                Creer la déclaration
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
       {/* Historical Declarations */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">

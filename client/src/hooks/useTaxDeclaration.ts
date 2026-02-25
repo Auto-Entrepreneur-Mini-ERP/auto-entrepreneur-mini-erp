@@ -210,12 +210,13 @@ export function useGetAllTaxDeclaration() {
  export function useGetCurrentDeclarationData() {
   const [currentTaxDeclaration, setCurrentTaxDeclaration] =
     useState<currentTaxDeclaaration | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingCurrent, setLoading] = useState(true);
 
   const fetchCurrentDeclaration = useCallback(async () => {
     setLoading(true);
     try {
       const data = await taxDeclarationApi.getCurrentDeclarationData();
+      console.log( "cuur" , data)
       setCurrentTaxDeclaration(data);
     } finally {
       setLoading(false);
@@ -228,7 +229,7 @@ export function useGetAllTaxDeclaration() {
 
   return {
     currentTaxDeclaration,
-    loading,
+    loadingCurrent,
     fetchCurrentDeclaration: fetchCurrentDeclaration,
     setCurrentTaxDeclaration,
   };
