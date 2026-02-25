@@ -39,6 +39,14 @@ type ArticleSearch = {
   }
 };
 
+type CustomerSearch = {
+  id: string,
+  user: {
+    firstName: string,
+    lastName: string
+  }
+}
+
 function ModalCreateInvoice({
   isInvoiceModalOpen,
   setIsInvoiceModalOpen,
@@ -54,18 +62,18 @@ function ModalCreateInvoice({
   const [articleSearch, setArticleSearch] = useState<ArticleSearch[]>([]);
   const [showArticleSearch, setShowArticleSearch] = useState(false);
 
-  const [customerSearch, setCustomerSearch] = useState<{ id: string, name: string }[]>([]);
+  const [customerSearch, setCustomerSearch] = useState<CustomerSearch[]>([]);
   const [showCustomerSearch, setShowCustomerSearch] = useState(false);
 
   const handleInvoiceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // api all create invoice and invoice lines
-    const result = await createInvoice(invoiceFormData as CreateInvoiceData, invoiceLineFormData);
-    if (result.data.statusCode && result.data.statusCode === 200) {
-      navigate("/quots-invoices");
+    await createInvoice(invoiceFormData as CreateInvoiceData, invoiceLineFormData as CreateInvoiceLineData[]);
+    if (!errors) {
       setIsInvoiceModalOpen(false);
       setInvoiceFormData(undefined);
       setInvoiceLineFormData([]);
+      window.location.reload()
     }
   };
 
@@ -76,8 +84,7 @@ function ModalCreateInvoice({
     } as CreateInvoiceData);
     const customerName = invoiceFormData?.customerName;
     // call cusomers api
-    const res: { id: string, name: string }[] = await getCustomersNames(customerName as string);
-
+    const res = await getCustomersNames(customerName as string);
     if (res.length > 0) {
       setCustomerSearch(res);
       setShowCustomerSearch(true);
@@ -145,10 +152,10 @@ function ModalCreateInvoice({
                 />
                 <CircleX className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 mt-2" onClick={() => setShowCustomerSearch(false)} />
                 {showCustomerSearch && (
-                  <div className="absolute w-[800px] border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-1000 bg-white">
-                    {customerSearch.length > 0 && customerSearch.map((customer) => (
-                      <div onClick={handleSelectSuggestedCustomer(customer.id, customer.name)} key={customer.id} className="p-2 hover:bg-gray-100 cursor-pointer">
-                        {customer.name}
+                  <div className="absolute w-full border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-10 bg-white">
+                    {customerSearch.length > 0 && customerSearch?.map((customer) => (
+                      <div onClick={handleSelectSuggestedCustomer(customer.id, customer.user.firstName +" "+ customer.user.lastName)} key={customer.id} className="p-2 hover:bg-gray-100 cursor-pointer">
+                        {customer.user.firstName} {customer.user.lastName}
                       </div>
                     ))}
                   </div>
@@ -263,7 +270,7 @@ function ModalCreateInvoice({
                     {articleSearch.map((article) => (
                       <div onClick={handleSelectSuggestedArticle(
                         article.id,
-                        article.service ? "Service" : "Produit",
+                        article.service ? "SERVICE" : "PRODUCT",
                         article.name,
                         article.product?.unitPrice as number || article.service?.hourlyRate as number
                       )}

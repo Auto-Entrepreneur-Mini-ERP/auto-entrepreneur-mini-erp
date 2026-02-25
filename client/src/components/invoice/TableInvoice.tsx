@@ -4,6 +4,14 @@ import { useEffect, useState } from "react";
 import ModalViewInvoice from "./ModalViewInvoice";
 import ModalEditInvoice from "./ModalEditeInvoice";
 import type { Invoice } from "../../types/invoice.types";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../ui/pagination";
 
 
 // ${doc.status === "Payée"
@@ -16,19 +24,20 @@ import type { Invoice } from "../../types/invoice.types";
 //                       }
 
 function TableInvoice() {
-  const { invoices, invoice, fetchInvoices, getOneInvoice } = useInvoice();
-  // const [page, setPage] = useState<number>(1);
+  const { invoices, invoice, invoicesCount, fetchInvoices, getOneInvoice } = useInvoice();
+  const [page, setPage] = useState<number>(1);
+  const limit = 10;
 
   const [isViewInvoiceModalOpen, setIsViewInvoiceModalOpen] = useState(false);
   const [isEditInvoiceModalOpen, setIsEditInvoiceModalOpen] = useState(false);
 
-  // const handlePageChange = (newPage: number) => {
-  //   setPage(newPage);
-  //   fetchInvoices(newPage, 5);
-  // }
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    fetchInvoices(newPage, limit);
+  }
 
   useEffect(() => {
-    fetchInvoices(1, 10);
+    fetchInvoices(page, limit);
   }, []);
 
   const handleViewInvoice = async (invoiceId: string) => {
@@ -103,7 +112,15 @@ function TableInvoice() {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold `}
+                        className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold 
+                          ${doc.status.toString() === "PAID"
+                            ? "bg-green-100 text-green-700"
+                            : doc.status.toString() === "PARTIALLY_PAID"
+                              ? "bg-orange-100 text-orange-700"
+                              : doc.status.toString() === "UNPAID"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-blue-100 text-blue-700"
+                          }`}
                       >
                         {doc.status.toString()}
                       </span>
@@ -146,6 +163,46 @@ function TableInvoice() {
           )}
         </div>
       </div>
+
+      {invoicesCount > limit && (
+        <div className="mt-6 flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                size='default'
+                  onClick={() => page > 1 && handlePageChange(page - 1)}
+                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  href="#"
+                />
+              </PaginationItem>
+
+              {Array.from({ length: Math.ceil(invoicesCount / limit) }, (_, i) => i + 1).map((pageNum) => (
+                <PaginationItem key={pageNum}>
+                  <PaginationLink
+                  size="default" 
+                    onClick={() => handlePageChange(pageNum)}
+                    isActive={page === pageNum}
+                    href="#"
+                    className="cursor-pointer"
+                  >
+                    {pageNum}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                size="default" 
+                  onClick={() => page < Math.ceil(invoicesCount / limit) && handlePageChange(page + 1)}
+                  className={page === Math.ceil(invoicesCount / limit) ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  href="#"
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
       <ModalViewInvoice
         invoice={invoice as Invoice}
         isInvoiceModalOpen={isViewInvoiceModalOpen}

@@ -12,14 +12,16 @@ const controller = new DevisController();
 
 router.use(isAthenticated);
 
-router.post('/quote', validateBody(createQuoteSchema), controller.create);
+router.post('/quote', 
+  validateBody(createQuoteSchema), 
+  controller.create);
 router.get('/quote', controller.getAll);
 router.get('/quote/:id', controller.getById);
-router.patch('/quote/:id', validateBody(updateQuoteSchema), controller.update);
+router.put('/quote/:id', validateBody(updateQuoteSchema), controller.update);
 router.delete('/quote/:id', controller.delete);
 
 router.post('/quote/:id/envoyer', controller.envoyer);
-router.post('/quote/:id/accepter', controller.accepter);
-router.post('/quote/:id/refuser', controller.refuser);
+router.get('/quote/:id/accepter', controller.accepter);
+router.get('/quote/:id/refuser', controller.refuser);
 
 export default router;

@@ -21,7 +21,11 @@ export interface recentsTypes {
       }
     }>
   };
-  recentPayments: Array<{
+
+
+  recentPayments: {
+    count: number,
+    payments: Array<{
     reference: string;
     Invoice: {
       invoiceNumber: string,
@@ -36,7 +40,10 @@ export interface recentsTypes {
     paymentMethod: string,
     creationDate: string;
     method: string
-  }>;
+  }>
+  };
+
+
   unpaidInvoices: Array<{
     invoiceNumber: string;
     totalAmount: string;
