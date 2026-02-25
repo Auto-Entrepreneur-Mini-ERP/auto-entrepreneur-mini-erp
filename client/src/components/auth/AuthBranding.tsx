@@ -1,4 +1,5 @@
 import Logo from "../Logo"
+import LogoWhite from "../LogoWhite"
 
 function AuthBranding() {
   return (
@@ -9,8 +10,8 @@ function AuthBranding() {
 
         <div className="relative z-10 flex flex-1 flex-col justify-center px-16 xl:px-24 text-white mb-3 mt-8">
           {/* Logo */}
-          <div className="mb-12">
-            <Logo />
+          <div className="mb-10">
+            <LogoWhite />
           </div>
 
           {/* Content */}

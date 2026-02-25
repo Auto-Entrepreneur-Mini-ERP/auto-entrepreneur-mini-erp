@@ -68,7 +68,7 @@ function ModalCreateQuote({
     const handleQuoteSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log(quoteFormData, quoteLineFormData);
-        
+
         await createQuote(quoteFormData as CreateQuoteInput, quoteLineFormData as QuoteLineInput[]);
         if (!errors) {
             navigate("/quots-invoices");
@@ -152,7 +152,7 @@ function ModalCreateQuote({
                                 {showCustomerSearch && (
                                     <div className="absolute w-full border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-10 bg-white">
                                         {customerSearch.length > 0 && customerSearch?.map((customer) => (
-                                            <div onClick={handleSelectSuggestedCustomer(customer.id, customer.user.firstName +" "+ customer.user.lastName)} key={customer.id} className="p-2 hover:bg-gray-100 cursor-pointer">
+                                            <div onClick={handleSelectSuggestedCustomer(customer.id, customer.user.firstName + " " + customer.user.lastName)} key={customer.id} className="p-2 hover:bg-gray-100 cursor-pointer">
                                                 {customer.user.firstName} {customer.user.lastName}
                                             </div>
                                         ))}
@@ -178,7 +178,7 @@ function ModalCreateQuote({
                                     className="h-10 mt-1 border-gray-200 rounded-xl"
                                 />
                             </div>
-                            
+
                             <div>
                                 <Label htmlFor="notes">Notes</Label>
                                 <Input

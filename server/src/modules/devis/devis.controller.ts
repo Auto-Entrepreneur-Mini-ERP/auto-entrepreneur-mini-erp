@@ -13,7 +13,7 @@ export class DevisController {
       const devis = await devisService.create(autoentrepreneurId as string, req.body)
       return res.status(201).json(devis)
     } catch (error: any) {
-      return res.status(500).json({ 
+      return res.status(500).json({
         message: "Erreur lors de la création du devis",
         error: error.message || error
       })
@@ -79,15 +79,16 @@ export class DevisController {
   }
 
   // Envoyer un devis
-  async envoyer(req: Request, res: Response) {
+  async downloadQuote(req: Request, res: Response) {
     const { id } = req.params
 
-    if (!id) {
-      return res.status(400).json({ message: "ID manquant" })
-    }
+    const { pdf, quoteNumber } = await devisService.generatePdf(id as string);
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename=DEVIS-${quoteNumber}.pdf`,
+    });
 
-    const devis = await devisService.changeStatus(id as string, QuoteStatus.SENT)
-    return res.json(devis)
+    res.send(pdf);
   }
 
   // Accepter un devis

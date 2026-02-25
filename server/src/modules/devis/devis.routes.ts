@@ -20,7 +20,7 @@ router.get('/quote/:id', controller.getById);
 router.put('/quote/:id', validateBody(updateQuoteSchema), controller.update);
 router.delete('/quote/:id', controller.delete);
 
-router.post('/quote/:id/envoyer', controller.envoyer);
+router.post('/quote/:id/download', controller.downloadQuote);
 router.get('/quote/:id/accepter', controller.accepter);
 router.get('/quote/:id/refuser', controller.refuser);
 

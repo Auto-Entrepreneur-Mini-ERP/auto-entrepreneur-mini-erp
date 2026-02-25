@@ -12,9 +12,10 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 
   const handleLogout = () => {
     // Clear authentication
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userName");
+    // localStorage.removeItem("isAuthenticated");
+    // localStorage.removeItem("userEmail");
+    // localStorage.removeItem("userName");
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
     
     // Redirect to login page
     navigate("/login");
