@@ -426,7 +426,7 @@ function ProductForm({
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
             placeholder="Ex: Câble HDMI 2m"
-            className={inputCls}
+            className={inputCls} required
           />
         </Field>
       </div>
@@ -435,7 +435,7 @@ function ProductForm({
           value={form.reference}
           onChange={(e) => set("reference", e.target.value)}
           placeholder="REF-001"
-          className={inputCls}
+          className={inputCls} required
         />
       </Field>
       <Field label="Catégorie">
@@ -443,7 +443,7 @@ function ProductForm({
           value={form.category}
           onChange={(e) => set("category", e.target.value)}
           placeholder="Électronique..."
-          className={inputCls}
+          className={inputCls} required
         />
       </Field>
       <Field label="Unité" required>
@@ -468,7 +468,7 @@ function ProductForm({
           value={form.unitPrice}
           onChange={(e) => set("unitPrice", e.target.value)}
           placeholder="0.00"
-          className={inputCls}
+          className={inputCls} required
         />
       </Field>
       <Field label="Stock initial">
@@ -477,7 +477,7 @@ function ProductForm({
           min={0}
           value={form.stockQuantity}
           onChange={(e) => set("stockQuantity", e.target.value)}
-          className={inputCls}
+          className={inputCls} required
         />
       </Field>
       <Field
@@ -489,7 +489,7 @@ function ProductForm({
           min={0}
           value={form.alertThreshold}
           onChange={(e) => set("alertThreshold", e.target.value)}
-          className={inputCls}
+          className={inputCls} 
         />
       </Field>
       <div className="col-span-2">
@@ -528,7 +528,7 @@ function ServiceForm({
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
             placeholder="Ex: Transport express"
-            className={inputCls}
+            className={inputCls} required
           />
         </Field>
       </div>
@@ -538,7 +538,7 @@ function ServiceForm({
           value={form.category}
           onChange={(e) => set("category", e.target.value)}
           placeholder="Ex: Transport"
-          className={inputCls}
+          className={inputCls} required
         />
       </Field>
 

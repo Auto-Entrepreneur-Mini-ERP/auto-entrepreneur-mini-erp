@@ -12,9 +12,13 @@ import {
   PaginationPrevious,
 } from "../ui/pagination";
 
+type TablePaymentProps = {
+  initialHighlightId?: string | null;
+}
 
-function TablePayment() {
-
+function TablePayment({
+  initialHighlightId,
+}: TablePaymentProps) {
   const { errors, onePayment, payments, paymentsCount, fetchPayments, getOnePayment, reconsiliatePayment } = usePayment();
   const [page, setPage] = useState<number>(1);
   const limit = 10;
@@ -29,6 +33,22 @@ function TablePayment() {
     setPage(newPage);
     fetchPayments(newPage, limit)
   }
+
+//  useEffect(() => {
+//     if (initialHighlightId) {
+//       getOnePayment(initialHighlightId);
+//       setIsViewPaymentModalOpen(true);
+//     }
+//   }, [initialHighlightId]);
+useEffect(() => {
+  const run = async () => {
+    if (initialHighlightId) {
+      await getOnePayment(initialHighlightId);
+      setIsViewPaymentModalOpen(true);
+    }
+  };
+  run();
+}, [initialHighlightId, getOnePayment]);
 
   const handleViewPayment = (id: string) => {
     getOnePayment(id);

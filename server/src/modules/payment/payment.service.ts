@@ -7,6 +7,7 @@ import { paymentExists } from "./utils/paymentExists.js";
 import type { PayementMetod, PaymentCreateInput, PaymentOutput, PaymentUpdateInput } from "./payment.types.js";
 import { updateInvoiceAfterCreate, updateInvoiceAfterUpdate } from "./utils/updateInvoicewithPayment.js";
 import { paymentNumberGenerator } from "./utils/paymentNumberGenerator.js";
+import { notificationService } from '../notification/notification.service.js';
 
 const getAllPayments = async (autoentrepreneurId: string, page: number, limit: number) => {
     autoentrepreneurExists(autoentrepreneurId);
@@ -107,6 +108,17 @@ const createPayment = async (autoentrepreneurId: string, data: PaymentCreateInpu
         data: PaymentData
     });
     if (!payment) throw new Error();
+
+    // Fetch the invoice to get its number for the notification message
+    const invoice = await prisma.invoice.findUnique({ where: { id: payment.invoiceId } });
+if (invoice) {
+  await notificationService.createPaiementRecuNotification(
+    autoentrepreneurId,
+    payment.id,
+    invoice.invoiceNumber,
+    Number(payment.amount),
+  );
+}
 
     // logic to update invoice status if needed
     updateInvoiceAfterCreate(data.invoiceId, data);

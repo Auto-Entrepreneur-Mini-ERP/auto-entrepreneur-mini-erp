@@ -1,11 +1,16 @@
+import { useSearchParams } from 'react-router';
+import { useEffect, useState } from 'react';
+import ModalViewInvoice from '../../components/invoice/ModalViewInvoice';
+
 import { FileText, Plus, Search, ChevronDownIcon, RefreshCw } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { useState } from "react";
 import ModalCreateInvoice from "../../components/invoice/ModalCreateInvoice";
 import TableInvoice from "../../components/invoice/TableInvoice";
 import TableQuote from "../../components/quote/TableQuote";
 import ModalCreateQuote from "../../components/quote/ModalCreateQuote";
+import { invoiceApi } from '../../api/invoice.api';
+import type { Invoice } from '../../types/invoice.types';
 
 import {
   Collapsible,
@@ -15,6 +20,10 @@ import {
 import { Card, CardContent } from "../../components/ui/card";
 
 export function QuotsInvoicesView() {
+
+  const [searchParams] = useSearchParams();
+const [highlightedInvoice, setHighlightedInvoice] = useState<Invoice | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
@@ -28,6 +37,21 @@ export function QuotsInvoicesView() {
     { id: "QT-2024-001", type: "Devis", client: "Société XYZ", date: "15/01/2024", amount: "2,450.00", status: "En attente" },
     { id: "QT-2024-002", type: "Devis", client: "Transport ABC", date: "10/01/2024", amount: "1,200.00", status: "Accepté" },
   ];
+
+  // Highlight invoice from URL
+  useEffect(() => {
+  const highlight = searchParams.get('highlight');
+  const id = searchParams.get('id');
+
+  if (highlight === 'invoice' && id) {
+    invoiceApi.getOneInvoice(id).then((res) => {
+      if (res.data) {
+        setHighlightedInvoice(res.data as Invoice);
+        setIsViewModalOpen(true);
+      }
+    });
+  }
+}, [searchParams]);
 
   return (
     <div className="py-8">
@@ -136,6 +160,14 @@ export function QuotsInvoicesView() {
 
       {/* Invoice Modal */}
       <ModalCreateInvoice isInvoiceModalOpen={isInvoiceModalOpen} setIsInvoiceModalOpen={setIsInvoiceModalOpen} />
+      {/* View highlighted invoice */}
+      {highlightedInvoice && (
+        <ModalViewInvoice
+          invoice={highlightedInvoice}
+          isInvoiceModalOpen={isViewModalOpen}
+          setIsInvoiceModalOpen={setIsViewModalOpen}
+        />
+      )}
     </div>
   );
 }
