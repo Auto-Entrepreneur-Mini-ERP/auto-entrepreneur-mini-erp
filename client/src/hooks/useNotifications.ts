@@ -12,24 +12,31 @@ export const useNotifications = (filters?: { type?: NotificationType; isRead?: b
   const [loading, setLoading] = useState(false);
   const limit = 20;
 
-  const fetchNotifications = useCallback(async () => {
-  setLoading(true); 
-  try {
-    const data = await notificationApi.getNotifications(page, limit, filters);
-    setNotifications(data.notifications);
-    setTotal(data.total);
-  } catch (err) {
-    console.error('Failed to fetch notifications', err);
-  } finally {
-    setLoading(false); 
-  }
-}, [page, filters]);
+  // Extract primitives to avoid infinite loop caused by new object reference on every render
+  const filterType = filters?.type;
+  const filterIsRead = filters?.isRead;
 
-useEffect(() => {
-  fetchNotifications(); 
-  const interval = setInterval(fetchNotifications, POLL_INTERVAL);
-  return () => clearInterval(interval);
-}, [fetchNotifications]);
+  const fetchNotifications = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await notificationApi.getNotifications(page, limit, {
+        type: filterType,
+        isRead: filterIsRead,
+      });
+      setNotifications(data.notifications);
+      setTotal(data.total);
+    } catch (err) {
+      console.error('Failed to fetch notifications', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, filterType, filterIsRead]);
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, POLL_INTERVAL);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
   const markAsRead = async (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
@@ -84,11 +91,11 @@ export const useUnreadCount = () => {
   }, []);
 
   useEffect(() => {
-    const run = () => { refresh(); }; // wrapper non-async c'est juste une fonction normale qui appelle la fonction async sans await — ça évite que le useEffect reçoive directement une fonction async.
-    run(); // une fonction synchrone — elle lance refresh() mais n'attend pas le résultat. Le linter est satisfait car il ne voit pas setState appelé directement dans le corps de l'effet.
+    const run = () => { refresh(); };
+    run();
     const interval = setInterval(run, POLL_INTERVAL);
     return () => clearInterval(interval);
-  }, [refresh]); // refresh  s'exécute, fait l'appel API, et met à jour count quand la réponse arrive. La seule différence est la couche d'indirection qui satisfait le linter.
+  }, [refresh]);
 
   return { count, refresh };
 };

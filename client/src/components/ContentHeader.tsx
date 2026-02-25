@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Sun, Moon, Calendar, Menu, X, Package, AlertTriangle } from "lucide-react";
+import { User, Calendar, Menu, X, Package, AlertTriangle } from "lucide-react";
 import { productApi, type Product } from "../api/catalogApi";
 import { NotificationBell } from './notifications/NotificationBell';
 
@@ -25,7 +25,7 @@ const formatPrice = (n: number) =>
   n.toLocaleString("fr-MA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: ContentHeaderProps) {
-  const [isDark, setIsDark] = useState(false);
+  // const [isDark, setIsDark] = useState(false);
 //   const [isDark, setIsDark] = useState(
 //   () => document.documentElement.classList.contains('dark')
 // );

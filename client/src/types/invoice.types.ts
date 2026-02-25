@@ -14,12 +14,21 @@ export type LineType = {
 }
 
 export const PaymentMethod = {
-  CASH : "CASH",
-  CHECK : "CHECK",
-  BANK_TRANSFER : "TRANSFERT BANCAIRE",
-  CREDIT_CARD : "CREDIT CARD",
-  MOBILE_PAYMENT : "MOBILE PAYMENT",
-  OTHER : "OTHER",
+  CASH: "CASH",
+  CHECK: "CHECK",
+  BANK_TRANSFER: "BANK_TRANSFER",
+  CREDIT_CARD: "CREDIT_CARD",
+  MOBILE_PAYMENT: "MOBILE_PAYMENT",
+  OTHER: "OTHER",
+}
+
+export const PaymentMethodLabels: Record<string, string> = {
+  CASH: "Espèces",
+  CHECK: "Chèque",
+  BANK_TRANSFER: "Transfert bancaire",
+  CREDIT_CARD: "Carte bancaire",
+  MOBILE_PAYMENT: "Paiement mobile",
+  OTHER: "Autre",
 }
 
 export interface Invoice {
@@ -75,7 +84,6 @@ export interface InvoiceLine {
         }
     },
 }
-
 export interface CreateInvoiceData {
     customerId: string,
     customerName?: string,

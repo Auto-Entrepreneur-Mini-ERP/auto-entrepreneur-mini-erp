@@ -9,11 +9,11 @@ async function main() {
   const sql = fs.readFileSync(sqlFile, "utf8");
 
    const statements = sql
-    .split(";")
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0 && !s.startsWith("--"));
-
+     .split(";")
+     .map((s) => s.trim())
+     .filter((s) => s.length > 0);
   for (const statement of statements) {
+ 
     await prisma.$executeRawUnsafe(statement);
   }
 }

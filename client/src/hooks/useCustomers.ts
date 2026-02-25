@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState , useCallback} from "react";
 import { customerApis } from "../api/customers.api";
 import type { Customer, UpdateCustomerInput , CreateCustomerInput} from "../types/customers.types";
 
@@ -28,15 +28,25 @@ export function useGetAllCustomers() {
   const [allCustomers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchCustomers = useCallback(() => {
     customerApis
       .getAllCutomers()
       .then(setCustomers)
       .finally(() => setLoading(false));
   }, []);
 
-  return { allCustomers, loading };
+  const refetch = useCallback(() => {
+    setLoading(true);
+    fetchCustomers();
+  }, [fetchCustomers]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
+
+  return { allCustomers, loading, refetch };
 }
+
 
 export function useUpdateCustomer() {
   const [loading, setLoading] = useState(false);
