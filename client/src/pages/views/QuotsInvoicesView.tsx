@@ -33,10 +33,10 @@ const [highlightedInvoice, setHighlightedInvoice] = useState<Invoice | null>(nul
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const quoteDocuments=[
-    { id: "QT-2024-001", type: "Devis", client: "Société XYZ", date: "15/01/2024", amount: "2,450.00", status: "En attente" },
-    { id: "QT-2024-002", type: "Devis", client: "Transport ABC", date: "10/01/2024", amount: "1,200.00", status: "Accepté" },
-  ];
+  // const quoteDocuments=[
+  //   { id: "QT-2024-001", type: "Devis", client: "Société XYZ", date: "15/01/2024", amount: "2,450.00", status: "En attente" },
+  //   { id: "QT-2024-002", type: "Devis", client: "Transport ABC", date: "10/01/2024", amount: "1,200.00", status: "Accepté" },
+  // ];
 
   // Highlight invoice from URL
   useEffect(() => {
@@ -132,7 +132,8 @@ const [highlightedInvoice, setHighlightedInvoice] = useState<Invoice | null>(nul
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="flex flex-col items-center gap-2 mb-2 mt-2 w-full">
-              <TableQuote documents={quoteDocuments} />
+              {/* <TableQuote documents={quoteDocuments} /> */}
+              <TableQuote />
             </CollapsibleContent>
           </Collapsible>
         </CardContent>

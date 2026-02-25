@@ -15,7 +15,7 @@ import {
 } from "../../components/ui/table";
 import { CircleArrowDown, CircleArrowUp, CircleX, HandCoins, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { PaymentMethod } from "../../types/invoice.types";
+import { PaymentMethod, PaymentMethodLabels } from "../../types/invoice.types";
 import { useInvoice } from "../../hooks/useInvoice";
 
 type ModalInvoiceProps = {
@@ -65,7 +65,6 @@ function ModalCreateInvoice({
 
   const handleInvoiceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // api all create invoice and invoice lines
     await createInvoice(invoiceFormData as CreateInvoiceData, invoiceLineFormData as CreateInvoiceLineData[]);
     console.log(errors);
     
@@ -83,7 +82,6 @@ function ModalCreateInvoice({
       customerName: e.target.value,
     } as CreateInvoiceData);
     const customerName = invoiceFormData?.customerName;
-    // call cusomers api
     const res = await getCustomersNames(customerName as string);
     if (res.length > 0) {
       setCustomerSearch(res);
@@ -103,9 +101,7 @@ function ModalCreateInvoice({
   const handleArticleNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setArticle(e.target.value);
     const searchTerm = article;
-    // call articles api
     const res = await getArticlesNames(searchTerm as string);
-
     if (res.length > 0) {
       setArticleSearch(res);
       setShowArticleSearch(true);
@@ -130,7 +126,6 @@ function ModalCreateInvoice({
 
   return (
     <>
-      {/* Invoice Modal */}
       <Modal
         maxWidth="max-w-7xl"
         title="Créer une facture"
@@ -154,7 +149,7 @@ function ModalCreateInvoice({
                 {showCustomerSearch && (
                   <div className="absolute w-full border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-10 bg-white">
                     {customerSearch.length > 0 && customerSearch?.map((customer) => (
-                      <div onClick={handleSelectSuggestedCustomer(customer.id, customer.user.firstName +" "+ customer.user.lastName)} key={customer.id} className="p-2 hover:bg-gray-100 cursor-pointer">
+                      <div onClick={handleSelectSuggestedCustomer(customer.id, customer.user.firstName + " " + customer.user.lastName)} key={customer.id} className="p-2 hover:bg-gray-100 cursor-pointer">
                         {customer.user.firstName} {customer.user.lastName}
                       </div>
                     ))}
@@ -167,9 +162,9 @@ function ModalCreateInvoice({
                   type="date"
                   id="date"
                   value={
-                    new Date(invoiceFormData?.dueDate || new Date())
-                      .toISOString()
-                      .split("T")[0] || ""
+                    invoiceFormData?.dueDate
+                      ? new Date(invoiceFormData.dueDate).toISOString().split("T")[0]
+                      : ""
                   }
                   onChange={(e) =>
                     setInvoiceFormData({
@@ -178,6 +173,7 @@ function ModalCreateInvoice({
                     } as CreateInvoiceData)
                   }
                   className="h-10 mt-1 border-gray-200 rounded-xl"
+                  required
                 />
               </div>
               <div>
@@ -197,21 +193,29 @@ function ModalCreateInvoice({
               </div>
 
               <div className="relative">
-                <Label htmlFor="items">Methode de paiement</Label>
+                <Label htmlFor="paymentMethod">Methode de paiement</Label>
                 <HandCoins className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 mt-2" />
-                <Select value={invoiceFormData?.payementMethod} onValueChange={(value: string) => setInvoiceFormData({ ...invoiceFormData, payementMethod: value } as CreateInvoiceData)} required>
-                  <SelectTrigger className=" mt-1 pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl">
+                <Select
+                  value={invoiceFormData?.payementMethod}
+                  onValueChange={(value: string) =>
+                    setInvoiceFormData({ ...invoiceFormData, payementMethod: value } as CreateInvoiceData)
+                  }
+                  required
+                >
+                  <SelectTrigger className="mt-1 pl-10 h-11 border-gray-300 focus:border-[#2D3194] focus:ring-[#2D3194] rounded-xl">
                     <SelectValue placeholder="Selectionnez la methode de paiement" />
                   </SelectTrigger>
                   <SelectContent>
-                    {PaymentMethod && Object.values(PaymentMethod).map((method) => (
-                      <SelectItem key={method} value={method}>{method}</SelectItem>
+                    {Object.entries(PaymentMethod).map(([key, value]) => (
+                      <SelectItem key={key} value={value}>
+                        {PaymentMethodLabels[key]}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="number">Réduction</Label>
+                <Label htmlFor="discount">Réduction</Label>
                 <Input
                   type="number"
                   id="discount"

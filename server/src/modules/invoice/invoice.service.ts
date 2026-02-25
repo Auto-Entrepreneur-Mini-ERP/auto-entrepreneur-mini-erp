@@ -129,6 +129,9 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
         }
     });
     if (!customerExist) throw new AppError("Customer does not exist!", 404);
+    if (!data.invoice.dueDate) throw new AppError("Due date is required", 400);
+    const dueDate = new Date(data.invoice.dueDate);
+    if (isNaN(dueDate.getTime())) throw new AppError("Due date is invalid", 400);
 
     const lastInvoice = await prisma.invoice.findFirst({
         select: {
@@ -170,8 +173,7 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
     const InvoiceCreateData: Prisma.InvoiceCreateInput = {
         invoiceNumber: newInvoiceNumber,
         issueDate: new Date(),
-        dueDate: new Date(data.invoice.dueDate),
-        status: data.invoice.status,
+        dueDate: dueDate,        status: data.invoice.status,
         subtotal: invoiceSubTotal,
         discount: data.invoice.discount as number,
         totalAmount: data.invoice.totalAmount,
@@ -260,8 +262,11 @@ const updateInvoice = async (autoentrepreneurId: string, invoiceId: string, data
     if (payementExist.length > 0) throw new AppError("You cant't update an Invoice with payement related to it!", 400);
 
     const InvoiceUpdateData: Prisma.InvoiceUpdateInput = {}
-    if (data.invoice.dueDate) InvoiceUpdateData.dueDate = new Date(data.invoice.dueDate);
-    if (data.invoice.status) InvoiceUpdateData.status = data.invoice.status;
+if (data.invoice.dueDate) {
+    const dueDate = new Date(data.invoice.dueDate);
+    if (isNaN(dueDate.getTime())) throw new AppError("Due date is invalid", 400);
+    InvoiceUpdateData.dueDate = dueDate;
+}    if (data.invoice.status) InvoiceUpdateData.status = data.invoice.status;
     // if(data.invoice.discount) InvoiceUpdateData.discount = data.invoice.discount;
     if (data.invoice.notes) InvoiceUpdateData.notes = data.invoice.notes;
 
