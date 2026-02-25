@@ -5,15 +5,15 @@ import { useEffect, useState } from "react";
 import TablePayment from "../../components/payment/TablePayment";
 import ModalCreatePayment from "../../components/payment/ModalCreatePayment";
 // import ModalViewPayment from "../../components/payment/ModalViewPayment";
-import { usePayment } from "../../hooks/usePayment";
-import type { Payment } from "../../types/payment.types";
+// import { usePayment } from "../../hooks/usePayment";
+// import type { Payment } from "../../types/payment.types";
 import { useSearchParams } from "react-router";
 
 export function PaymentsView() {
 
   const [searchParams] = useSearchParams();
 
-  const { payments} = usePayment();
+  // const { payments} = usePayment();
 
 const [highlightId, setHighlightId] = useState<string | null>(null);  
 const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -90,8 +90,7 @@ const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
       {/* Table */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm">
-        <TablePayment payments={payments as Payment[]} initialHighlightId={highlightId} /> {/* ✅ */}
-      </div>
+<TablePayment initialHighlightId={highlightId} />      </div>
 
       <ModalCreatePayment
         isPaymentModalOpen={isPaymentModalOpen}

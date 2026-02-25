@@ -13,15 +13,12 @@ import {
 } from "../ui/pagination";
 
 type TablePaymentProps = {
-  payments: Payment[];
   initialHighlightId?: string | null;
 }
 
 function TablePayment({
-  payments,
   initialHighlightId,
 }: TablePaymentProps) {
-
   const { errors, onePayment, payments, paymentsCount, fetchPayments, getOnePayment, reconsiliatePayment } = usePayment();
   const [page, setPage] = useState<number>(1);
   const limit = 10;
