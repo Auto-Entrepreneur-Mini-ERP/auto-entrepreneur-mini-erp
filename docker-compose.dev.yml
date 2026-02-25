@@ -10,6 +10,7 @@ services:
     ports:
       - "3001:3001" 
       - "9229:9229" # this port is for debugging 
+      - "5555:5555" # this port is for hot reload with tsx
                 
     volumes:
       - ./server:/app                      # Mount your project folder for live reload

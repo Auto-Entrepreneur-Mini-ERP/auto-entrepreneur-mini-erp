@@ -38,8 +38,8 @@ export const useInvoice = () => {
     const createInvoice = async (invoiceData: CreateInvoiceData, invoiceLinesData: CreateInvoiceLineData[]) => {
         const response = await invoiceApi.createInvoice(invoiceData, invoiceLinesData);
 
-        if(response.data.statusCode && response.data.statusCode !== 200){
-            return setErrors(response.data.message);
+        if( response.data && response.data.statusCode && response.data.statusCode !== 200){
+            setErrors(response.data.message);
         }
         return response;
     }
@@ -47,7 +47,7 @@ export const useInvoice = () => {
     const updateInvoice = async (invoiceId: string, invoiceData: UpdateInvoiceData, invoiceLinesData: UpdateInvoiceLineData[]) => {
         const response = await invoiceApi.updateInvoice(invoiceId, invoiceData, invoiceLinesData);
         
-        if(response.data.statusCode && response.data.statusCode !== 200){
+        if(response.data && response.data.statusCode && response.data.statusCode !== 200){
             setErrors(response.message);
             return;
         }

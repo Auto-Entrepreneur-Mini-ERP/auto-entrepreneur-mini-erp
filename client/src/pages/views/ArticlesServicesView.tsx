@@ -1,19 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+//ArticlesServicesView.tsx
 import {
   Package,
   Plus,
   Search,
-  Edit,
+  Edit2,
   Trash2,
   AlertTriangle,
   RefreshCw,
-  Boxes,
   Wrench,
+  TrendingDown,
+  DollarSign,
+  BarChart2,
+  Clock,
+  Tag,
+  ChevronRight,
+  X,
+  CheckCircle2,
+  ShieldAlert,
+  ArrowUpRight,
 } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
 import { Modal } from "../../components/ui/modal";
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -25,11 +31,24 @@ import {
   type CreateServicePayload,
   type UpdateProductPayload,
   type UpdateServicePayload,
+  type StockAdjustReason,
 } from "../../api/catalogApi";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Color tokens ─────────────────────────────────────────────────────────────
+// Blue   #2563EB / blue-600   → primary actions, active states, navigation
+// Green  #16A34A / green-600  → in-stock success, positive financial values
+// Red    #DC2626 / red-600    → stock alerts, critical warnings, destructive
+// Orange #EA580C / orange-600 → low-stock warnings, secondary emphasis
 
-type TabType = "all" | "products" | "services";
+// ─── Spacing system ──────────────────────────────────────────────────────────
+// Section gaps:  space-y-5 (20px)
+// Card padding:  p-5 (20px) — all cards
+// Modal padding: px-6 pb-6 (24px)
+// Form gap:      gap-4 (16px)
+// Inline gap:    gap-3 (12px) standard, gap-2 (8px) tight
+// Border radius: rounded-xl (12px) cards/inputs/buttons — uniform
+
+type TabType = "products" | "services";
 type ItemType = "product" | "service";
 
 interface ProductFormData {
@@ -42,18 +61,26 @@ interface ProductFormData {
   stockQuantity: string;
   alertThreshold: string;
 }
-
 interface ServiceFormData {
   name: string;
   description: string;
   unit: string;
   category: string;
+  rateType: "hourly" | "fixed";
   hourlyRate: string;
   fixedRate: string;
   estimatedDuration: string;
 }
 
-const UNIT_OPTIONS = ["piece", "kilogram", "liter", "meter", "hour", "day"];
+const UNIT_OPTIONS = [
+  "piece",
+  "kilogram",
+  "liter",
+  "meter",
+  "hour",
+  "day",
+  "forfait",
+];
 const UNIT_LABELS: Record<string, string> = {
   piece: "Pièce",
   kilogram: "Kilogramme",
@@ -61,7 +88,18 @@ const UNIT_LABELS: Record<string, string> = {
   meter: "Mètre",
   hour: "Heure",
   day: "Jour",
+  forfait: "Forfait",
 };
+const STOCK_REASONS: {
+  value: StockAdjustReason;
+  label: string;
+  icon: string;
+}[] = [
+  { value: "inventaire", label: "Inventaire", icon: "📋" },
+  { value: "vente", label: "Vente", icon: "💸" },
+  { value: "perte", label: "Perte / Casse", icon: "📉" },
+  { value: "autre", label: "Autre", icon: "✏️" },
+];
 
 const emptyProductForm = (): ProductFormData => ({
   name: "",
@@ -73,87 +111,534 @@ const emptyProductForm = (): ProductFormData => ({
   stockQuantity: "0",
   alertThreshold: "10",
 });
-
 const emptyServiceForm = (): ServiceFormData => ({
   name: "",
   description: "",
   unit: "hour",
   category: "",
+  rateType: "hourly",
   hourlyRate: "",
   fixedRate: "",
   estimatedDuration: "",
 });
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const stockStatus = (p: Product): "low" | "ok" | "empty" => {
-  const qty = p.product.stockQuantity;
-  const thresh = p.product.alertThreshold;
-  if (qty === 0) return "empty";
-  if (qty <= thresh) return "low";
+type StockLevel = "ok" | "low" | "empty";
+const stockStatus = (p: Product): StockLevel => {
+  if (p.product.stockQuantity === 0) return "empty";
+  if (p.product.stockQuantity <= p.product.alertThreshold) return "low";
   return "ok";
 };
+const fmt = (n: number) =>
+  n.toLocaleString("fr-MA", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
-const formatPrice = (n: number) =>
-  n.toLocaleString("fr-MA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// ─── Stock Status Badge ───────────────────────────────────────────────────────
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function StockBadge({ status }: { status: "low" | "ok" | "empty" }) {
-  if (status === "ok")
-    return (
-      <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-        En stock
-      </span>
-    );
-  if (status === "low")
-    return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
-        <AlertTriangle className="w-3 h-3" /> Stock faible
-      </span>
-    );
+function StockBadge({ status }: { status: StockLevel }) {
+  const cfg = {
+    ok: {
+      label: "En stock",
+      cls: "bg-green-50 text-green-700 border-green-200",
+      dot: "bg-green-500",
+    },
+    low: {
+      label: "Stock faible",
+      cls: "bg-orange-50 text-orange-700 border-orange-200",
+      dot: "bg-orange-500",
+    },
+    empty: {
+      label: "Rupture",
+      cls: "bg-red-50 text-red-700 border-red-200",
+      dot: "bg-red-500",
+    },
+  }[status];
   return (
-    <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-      Rupture
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${cfg.cls}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
+      {cfg.label}
     </span>
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Product Card ─────────────────────────────────────────────────────────────
+
+function ProductCard({
+  product,
+  onEdit,
+  onDelete,
+  onStock,
+}: {
+  product: Product;
+  onEdit: () => void;
+  onDelete: () => void;
+  onStock: () => void;
+}) {
+  const st = stockStatus(product);
+  const pct =
+    product.product.alertThreshold > 0
+      ? Math.min(
+          100,
+          (product.product.stockQuantity /
+            (product.product.alertThreshold * 4)) *
+            100,
+        )
+      : product.product.stockQuantity > 0
+        ? 100
+        : 0;
+
+  // Status-aware styles
+  const stripeColor = {
+    ok: "bg-blue-500",
+    low: "bg-orange-400",
+    empty: "bg-red-400",
+  }[st];
+  const iconWrap = {
+    ok: "bg-blue-50 border-blue-100 text-blue-600",
+    low: "bg-orange-50 border-orange-100 text-orange-600",
+    empty: "bg-red-50 border-red-100 text-red-600",
+  }[st];
+  const cardBorder = {
+    ok: "border-slate-200 hover:border-slate-300",
+    low: "border-orange-200 hover:border-orange-300",
+    empty: "border-red-200 hover:border-red-300",
+  }[st];
+  const gaugeColor = {
+    ok: "bg-blue-500",
+    low: "bg-orange-400",
+    empty: "bg-red-400",
+  }[st];
+
+  return (
+  <div
+    className={`group bg-white border rounded-2xl overflow-hidden flex flex-col
+    transition-all duration-200 hover:shadow-md shadow-sm ${cardBorder}`}
+  >
+    {/* Top accent stripe */}
+    <div className={`h-[3px] w-full ${stripeColor}`} />
+
+    <div className="p-6 flex-1 flex flex-col gap-4">
+      
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div
+            className={`shrink-0 w-9 h-9 rounded-xl border flex items-center justify-center ${iconWrap}`}
+          >
+            <Package className="w-4 h-4" strokeWidth={1.8} />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-slate-800 text-sm leading-snug truncate">
+              {product.name}
+            </h3>
+
+            {product.product.reference && (
+              <p className="text-[11px] text-slate-400 font-mono tracking-wide mt-1">
+                {product.product.reference}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <StockBadge status={st} />
+      </div>
+
+      {/* Tags */}
+      {(product.category || product.unit) && (
+        <div className="flex flex-wrap gap-2">
+          {product.category && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1
+              bg-slate-50 border border-slate-200 rounded-lg
+              text-[11px] font-medium text-slate-500">
+              <Tag className="w-3 h-3" />
+              {product.category}
+            </span>
+          )}
+
+          <span className="inline-flex items-center px-2.5 py-1
+            bg-slate-50 border border-slate-200 rounded-lg
+            text-[11px] font-medium text-slate-500">
+            {UNIT_LABELS[product.unit] ?? product.unit}
+          </span>
+        </div>
+      )}
+
+      {/* Pricing */}
+      <div className="pt-4 border-t border-slate-100">
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">
+              Prix unitaire
+            </p>
+            <p className="text-lg font-bold text-slate-900 tabular-nums leading-tight">
+              {fmt(product.product.unitPrice)}
+              <span className="text-xs font-normal text-slate-400 ml-1">
+                MAD
+              </span>
+            </p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">
+              Valeur stock
+            </p>
+            <p className="text-sm font-semibold text-slate-600 tabular-nums leading-tight">
+              {fmt(product.product.unitPrice * product.product.stockQuantity)}
+              <span className="text-xs font-normal text-slate-400 ml-1">
+                MAD
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Stock Gauge */}
+      <div className="pt-4 border-t border-slate-100">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
+            Stock actuel
+          </span>
+          <span className="text-xs font-semibold text-slate-700 tabular-nums">
+            {product.product.stockQuantity}
+            <span className="text-slate-300 font-normal">
+              {" "} / {product.product.alertThreshold}
+            </span>
+          </span>
+        </div>
+
+        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-700 ${gaugeColor}`}
+            style={{ width: st === "empty" ? "2%" : `${Math.max(2, pct)}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-2 pt-4 mt-auto border-t border-slate-100">
+        <button
+          onClick={onStock}
+          className="flex-1 flex items-center justify-center gap-2 h-9
+            rounded-xl bg-blue-50 hover:bg-blue-100
+            text-blue-700 text-xs font-semibold
+            border border-blue-100 hover:border-blue-200
+            transition-all duration-150"
+        >
+          <BarChart2 className="w-4 h-4" />
+          Ajuster
+        </button>
+
+        <button
+          onClick={onEdit}
+          className="w-9 h-9 rounded-xl border border-slate-200 text-slate-400
+            hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600
+            flex items-center justify-center transition-all duration-150"
+        >
+          <Edit2 className="w-4 h-4" />
+        </button>
+
+        <button
+          onClick={onDelete}
+          className="w-9 h-9 rounded-xl border border-slate-200 text-slate-400
+            hover:border-red-200 hover:bg-red-50 hover:text-red-500
+            flex items-center justify-center transition-all duration-150"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  </div>
+);
+}
+
+// ─── Form primitives ──────────────────────────────────────────────────────────
+
+const inputCls =
+  "w-full h-10 border border-slate-200 rounded-xl px-3.5 text-sm text-slate-800 " +
+  "placeholder:text-slate-300 bg-white pl-2 " +
+  "focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 " +
+  "transition-colors duration-150";
+
+const selectCls =
+  "w-full h-10 border border-slate-200 rounded-xl px-3.5 text-sm text-slate-800 bg-white " +
+  "focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 " +
+  "transition-colors duration-150";
+
+const textareaCls =
+  "w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 " +
+  "placeholder:text-slate-300 bg-white leading-relaxed pl-2 " +
+  "focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 " +
+  "resize-none transition-colors duration-150";
+
+function Field({
+  label,
+  required,
+  hint,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+        {label}
+        {required && (
+          <span className="text-red-500 ml-0.5 normal-case tracking-normal font-medium">
+            {" "}
+            *
+          </span>
+        )}
+      </label>
+      {children}
+      {hint && (
+        <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+          {hint}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Product Form ─────────────────────────────────────────────────────────────
+
+function ProductForm({
+  form,
+  onChange,
+}: {
+  form: ProductFormData;
+  onChange: (f: ProductFormData) => void;
+}) {
+  const set = (k: keyof ProductFormData, v: string) =>
+    onChange({ ...form, [k]: v });
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      <div className="col-span-2">
+        <Field label="Nom du produit" required>
+          <input
+            required
+            value={form.name}
+            onChange={(e) => set("name", e.target.value)}
+            placeholder="Ex: Câble HDMI 2m"
+            className={inputCls} required
+          />
+        </Field>
+      </div>
+      <Field label="Référence">
+        <input
+          value={form.reference}
+          onChange={(e) => set("reference", e.target.value)}
+          placeholder="REF-001"
+          className={inputCls} required
+        />
+      </Field>
+      <Field label="Catégorie">
+        <input
+          value={form.category}
+          onChange={(e) => set("category", e.target.value)}
+          placeholder="Électronique..."
+          className={inputCls} required
+        />
+      </Field>
+      <Field label="Unité" required>
+        <select
+          value={form.unit}
+          onChange={(e) => set("unit", e.target.value)}
+          className={selectCls}
+        >
+          {UNIT_OPTIONS.map((u) => (
+            <option key={u} value={u}>
+              {UNIT_LABELS[u] ?? u}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Prix unitaire (MAD)" required>
+        <input
+          required
+          type="number"
+          min={0}
+          step="0.01"
+          value={form.unitPrice}
+          onChange={(e) => set("unitPrice", e.target.value)}
+          placeholder="0.00"
+          className={inputCls} required
+        />
+      </Field>
+      <Field label="Stock initial">
+        <input
+          type="number"
+          min={0}
+          value={form.stockQuantity}
+          onChange={(e) => set("stockQuantity", e.target.value)}
+          className={inputCls} required
+        />
+      </Field>
+      <Field
+        label="Seuil d'alerte"
+        hint="Alerte déclenchée si stock ≤ ce seuil"
+      >
+        <input
+          type="number"
+          min={0}
+          value={form.alertThreshold}
+          onChange={(e) => set("alertThreshold", e.target.value)}
+          className={inputCls} 
+        />
+      </Field>
+      <div className="col-span-2">
+        <Field label="Description">
+          <textarea
+            value={form.description}
+            onChange={(e) => set("description", e.target.value)}
+            placeholder="Description optionnelle..."
+            rows={2}
+            className={textareaCls}
+          />
+        </Field>
+      </div>
+    </div>
+  );
+}
+
+// ─── Service Form ─────────────────────────────────────────────────────────────
+
+function ServiceForm({
+  form,
+  onChange,
+}: {
+  form: ServiceFormData;
+  onChange: (f: ServiceFormData) => void;
+}) {
+  const set = (k: keyof ServiceFormData, v: string) =>
+    onChange({ ...form, [k]: v });
+
+  return (
+    <div className="grid grid-cols-2 gap-3.5">
+      <div className="col-span-2">
+        <Field label="Nom du service" required>
+          <input
+            required
+            value={form.name}
+            onChange={(e) => set("name", e.target.value)}
+            placeholder="Ex: Transport express"
+            className={inputCls} required
+          />
+        </Field>
+      </div>
+
+      <Field label="Catégorie">
+        <input
+          value={form.category}
+          onChange={(e) => set("category", e.target.value)}
+          placeholder="Ex: Transport"
+          className={inputCls} required
+        />
+      </Field>
+
+      <Field label="Unité">
+        <select
+          value={form.unit}
+          onChange={(e) => set("unit", e.target.value)}
+          className={selectCls}
+        >
+          {UNIT_OPTIONS.map((u) => (
+            <option key={u} value={u}>
+              {UNIT_LABELS[u] ?? u}
+            </option>
+          ))}
+        </select>
+      </Field>
+
+      <Field label="Tarif horaire (MAD/h)">
+        <input
+          type="number"
+          step="0.01"
+          min={0}
+          value={form.hourlyRate}
+          onChange={(e) => set("hourlyRate", e.target.value)}
+          placeholder="0.00"
+          className={inputCls}
+        />
+      </Field>
+
+      <Field label="Tarif fixe (MAD)">
+        <input
+          type="number"
+          step="0.01"
+          min={0}
+          value={form.fixedRate}
+          onChange={(e) => set("fixedRate", e.target.value)}
+          placeholder="0.00"
+          className={inputCls}
+        />
+      </Field>
+
+      <Field label="Durée estimée (min)">
+        <input
+          type="number"
+          min={0}
+          value={form.estimatedDuration}
+          onChange={(e) => set("estimatedDuration", e.target.value)}
+          placeholder="60"
+          className={inputCls}
+        />
+      </Field>
+
+      <div className="col-span-2">
+        <Field label="Description">
+          <textarea
+            value={form.description}
+            onChange={(e) => set("description", e.target.value)}
+            placeholder="Description optionnelle..."
+            rows={2}
+            className={textareaCls}
+          />
+        </Field>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main View ────────────────────────────────────────────────────────────────
 
 export function ArticlesServicesView() {
-  // ── State ──
-  const [tab, setTab] = useState<TabType>("all");
+  const [tab, setTab] = useState<TabType>("products");
   const [products, setProducts] = useState<Product[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [modalItemType, setModalItemType] = useState<ItemType>("product");
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  const [productForm, setProductForm] = useState<ProductFormData>(emptyProductForm());
-  const [serviceForm, setServiceForm] = useState<ServiceFormData>(emptyServiceForm());
+  const [productForm, setProductForm] =
+    useState<ProductFormData>(emptyProductForm());
+  const [serviceForm, setServiceForm] =
+    useState<ServiceFormData>(emptyServiceForm());
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Stock modal
   const [stockModalOpen, setStockModalOpen] = useState(false);
   const [stockProductId, setStockProductId] = useState<string | null>(null);
   const [stockDelta, setStockDelta] = useState("");
+  const [stockReason, setStockReason] =
+    useState<StockAdjustReason>("inventaire");
 
-  // Delete confirm
   const [deleteConfirm, setDeleteConfirm] = useState<{
     id: string;
     type: ItemType;
     name: string;
   } | null>(null);
 
-  // ── Fetch ──
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -176,29 +661,13 @@ export function ArticlesServicesView() {
     return () => clearTimeout(t);
   }, [fetchAll]);
 
-  // ── Derived data ──
-  const lowStockCount = products.filter((p) => stockStatus(p) !== "ok").length;
+  const alertCount = products.filter((p) => stockStatus(p) !== "ok").length;
   const stockValue = products.reduce(
-    (acc, p) => acc + p.product.unitPrice * p.product.stockQuantity,
-    0
+    (a, p) => a + p.product.unitPrice * p.product.stockQuantity,
+    0,
   );
 
-  const visibleItems: Array<{ item: Product | Service; type: ItemType }> =
-    tab === "products"
-      ? products.map((p) => ({ item: p, type: "product" as ItemType }))
-      : tab === "services"
-      ? services.map((s) => ({ item: s, type: "service" as ItemType }))
-      : [
-          ...products.map((p) => ({ item: p, type: "product" as ItemType })),
-          ...services.map((s) => ({ item: s, type: "service" as ItemType })),
-        ].sort(
-          (a, b) =>
-            new Date(b.item.creationDate).getTime() -
-            new Date(a.item.creationDate).getTime()
-        );
-
-  // ── Open modal ──
-  const openCreateModal = (type: ItemType) => {
+  const openCreate = (type: ItemType) => {
     setModalMode("create");
     setModalItemType(type);
     setProductForm(emptyProductForm());
@@ -208,14 +677,14 @@ export function ArticlesServicesView() {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (id: string, type: ItemType) => {
+  const openEdit = (id: string, type: ItemType) => {
     setModalMode("edit");
     setModalItemType(type);
     setEditingId(id);
     setFormError(null);
     if (type === "product") {
       const p = products.find((x) => x.id === id);
-      if (p) {
+      if (p)
         setProductForm({
           name: p.name,
           description: p.description ?? "",
@@ -226,17 +695,21 @@ export function ArticlesServicesView() {
           stockQuantity: String(p.product.stockQuantity),
           alertThreshold: String(p.product.alertThreshold),
         });
-      }
     } else {
       const s = services.find((x) => x.id === id);
       if (s) {
+        const hasHourly =
+          s.service?.hourlyRate != null && Number(s.service.hourlyRate) > 0;
         setServiceForm({
           name: s.name,
           description: s.description ?? "",
           unit: s.unit,
           category: s.category ?? "",
-          hourlyRate: s.service?.hourlyRate != null ? String(s.service.hourlyRate) : "",
-          fixedRate: s.service?.fixedRate != null ? String(s.service.fixedRate) : "",
+          rateType: hasHourly ? "hourly" : "fixed",
+          hourlyRate:
+            s.service?.hourlyRate != null ? String(s.service.hourlyRate) : "",
+          fixedRate:
+            s.service?.fixedRate != null ? String(s.service.fixedRate) : "",
           estimatedDuration:
             s.service?.estimatedDuration != null
               ? String(s.service.estimatedDuration)
@@ -247,58 +720,81 @@ export function ArticlesServicesView() {
     setIsModalOpen(true);
   };
 
-  // ── Submit ──
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
     setSubmitting(true);
-
+    setFormError(null);
     try {
       if (modalItemType === "product") {
         const payload: CreateProductPayload = {
-          name: productForm.name,
-          description: productForm.description || undefined,
+          name: productForm.name.trim(),
+          description: productForm.description.trim() || undefined,
           unit: productForm.unit,
-          category: productForm.category || undefined,
+          category: productForm.category.trim() || undefined,
           unitPrice: parseFloat(productForm.unitPrice),
-          reference: productForm.reference || undefined,
+          reference: productForm.reference.trim() || undefined,
           stockQuantity: parseInt(productForm.stockQuantity, 10) || 0,
           alertThreshold: parseInt(productForm.alertThreshold, 10) || 0,
         };
-
-        if (modalMode === "create") {
-          await productApi.create(payload);
-        } else if (editingId) {
-          const upd: UpdateProductPayload = { ...payload };
-          await productApi.update(editingId, upd);
+        if (!payload.name) {
+          setFormError("Le nom est requis.");
+          setSubmitting(false);
+          return;
         }
+        if (isNaN(payload.unitPrice) || payload.unitPrice < 0) {
+          setFormError("Prix invalide.");
+          setSubmitting(false);
+          return;
+        }
+        modalMode === "create"
+          ? await productApi.create(payload)
+          : editingId &&
+            (await productApi.update(
+              editingId,
+              payload as UpdateProductPayload,
+            ));
       } else {
+        const isHourly = serviceForm.rateType === "hourly";
         const payload: CreateServicePayload = {
-          name: serviceForm.name,
-          description: serviceForm.description || undefined,
+          name: serviceForm.name.trim(),
+          description: serviceForm.description.trim() || undefined,
           unit: serviceForm.unit,
-          category: serviceForm.category || undefined,
-          hourlyRate: serviceForm.hourlyRate ? parseFloat(serviceForm.hourlyRate) : undefined,
-          fixedRate: serviceForm.fixedRate ? parseFloat(serviceForm.fixedRate) : undefined,
+          category: serviceForm.category.trim() || undefined,
+          hourlyRate:
+            isHourly && serviceForm.hourlyRate
+              ? parseFloat(serviceForm.hourlyRate)
+              : undefined,
+          fixedRate:
+            !isHourly && serviceForm.fixedRate
+              ? parseFloat(serviceForm.fixedRate)
+              : undefined,
           estimatedDuration: serviceForm.estimatedDuration
             ? parseInt(serviceForm.estimatedDuration, 10)
             : undefined,
         };
-
-        if (!payload.hourlyRate && !payload.fixedRate) {
-          setFormError("Au moins un tarif (horaire ou fixe) est requis.");
+        if (!payload.name) {
+          setFormError("Le nom est requis.");
           setSubmitting(false);
           return;
         }
-
-        if (modalMode === "create") {
-          await serviceApi.create(payload);
-        } else if (editingId) {
-          const upd: UpdateServicePayload = { ...payload };
-          await serviceApi.update(editingId, upd);
+        if (isHourly && (!payload.hourlyRate || payload.hourlyRate <= 0)) {
+          setFormError("Le taux horaire est requis.");
+          setSubmitting(false);
+          return;
         }
+        if (!isHourly && (!payload.fixedRate || payload.fixedRate <= 0)) {
+          setFormError("Le tarif forfait est requis.");
+          setSubmitting(false);
+          return;
+        }
+        modalMode === "create"
+          ? await serviceApi.create(payload)
+          : editingId &&
+            (await serviceApi.update(
+              editingId,
+              payload as UpdateServicePayload,
+            ));
       }
-
       setIsModalOpen(false);
       fetchAll();
     } catch (e: any) {
@@ -306,322 +802,527 @@ export function ArticlesServicesView() {
         e?.response?.data?.error ??
           e?.response?.data?.message ??
           e.message ??
-          "Une erreur est survenue"
+          "Erreur inattendue",
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  // ── Delete ──
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     try {
-      if (deleteConfirm.type === "product") {
-        await productApi.delete(deleteConfirm.id);
-      } else {
-        await serviceApi.delete(deleteConfirm.id);
-      }
+      deleteConfirm.type === "product"
+        ? await productApi.delete(deleteConfirm.id)
+        : await serviceApi.delete(deleteConfirm.id);
       setDeleteConfirm(null);
       fetchAll();
     } catch (e: any) {
-      alert(e?.response?.data?.error ?? "Impossible de supprimer cet élément.");
+      alert(e?.response?.data?.error ?? "Impossible de supprimer.");
     }
   };
 
-  // ── Update stock ──
   const handleUpdateStock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stockProductId) return;
+    const qty = parseInt(stockDelta, 10);
+    if (isNaN(qty)) {
+      alert("Quantité invalide");
+      return;
+    }
     try {
-      await productApi.updateStock(stockProductId, parseInt(stockDelta, 10));
+      await productApi.updateStock(stockProductId, {
+        quantity: qty,
+        reason: stockReason,
+      });
       setStockModalOpen(false);
       setStockDelta("");
+      setStockReason("inventaire");
       fetchAll();
     } catch (e: any) {
-      alert(e?.response?.data?.error ?? "Erreur lors de la mise à jour du stock.");
+      alert(e?.response?.data?.error ?? "Erreur de mise à jour.");
     }
   };
 
-  // ── Render ──
+  const stockProduct = products.find((p) => p.id === stockProductId);
+  const newStockQty = stockProduct
+    ? stockProduct.product.stockQuantity + (parseInt(stockDelta, 10) || 0)
+    : 0;
+
+  // KPI card definitions
+  const kpis = [
+    {
+      label: "Produits actifs",
+      value: products.length,
+      sub: "références",
+      icon: Package,
+      stripe: "bg-blue-500",
+      iconCls: "bg-blue-50 border-blue-100 text-blue-600",
+      valCls: "text-slate-900",
+    },
+    {
+      label: "Services actifs",
+      value: services.length,
+      sub: "prestations",
+      icon: Wrench,
+      stripe: "bg-indigo-500",
+      iconCls: "bg-indigo-50 border-indigo-100 text-indigo-600",
+      valCls: "text-slate-900",
+    },
+    {
+      label: "Alertes stock",
+      value: alertCount,
+      sub: alertCount > 0 ? "à réapprovisionner" : "aucune alerte",
+      icon: ShieldAlert,
+      stripe: alertCount > 0 ? "bg-red-500" : "bg-slate-300",
+      iconCls:
+        alertCount > 0
+          ? "bg-red-50 border-red-200 text-red-600"
+          : "bg-slate-50 border-slate-200 text-slate-400",
+      valCls: alertCount > 0 ? "text-red-600" : "text-slate-900",
+    },
+    {
+      label: "Valeur du stock",
+      value: fmt(stockValue),
+      sub: "MAD total",
+      icon: DollarSign,
+      stripe: "bg-green-500",
+      iconCls: "bg-green-50 border-green-100 text-green-600",
+      valCls: "text-green-700",
+    },
+  ];
+
+  // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <div className="py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-[#2D3194]/10 rounded-xl flex items-center justify-center">
-            <Package className="w-5 h-5 text-[#2D3194]" />
+    <div className="py-6 space-y-5">
+      {/* ── Page Header ────────────────────────────────────────────────────────── */}
+      <div className="py-7">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-[#2D3194]/10 rounded-xl flex items-center justify-center">
+              <Package className="w-5 h-5 text-[#2D3194]" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-[#2D3194]">
+                Produits & Services
+              </h1>
+              <p className="text-gray-600">
+                Gérez votre catalogue de produits et services
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-[#2D3194]">Produits & Services</h1>
-            <p className="text-gray-600">Gérez votre catalogue de produits et services</p>
-          </div>
         </div>
-      </div>
 
-      {/* Action Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Rechercher un produit ou service..."
-            className="pl-10 h-12 border-gray-200 rounded-xl"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <button
-          onClick={fetchAll}
-          className="h-12 px-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-600"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          <span className="hidden sm:inline">Actualiser</span>
-        </button>
-        <div className="flex gap-2">
-          <Button
-            className="bg-[#2D3194] hover:bg-[#1f2266] text-white h-12 px-4 rounded-xl"
-            onClick={() => openCreateModal("product")}
-          >
-            <Plus className="w-5 h-5 mr-1" />
-            <span className="hidden sm:inline">Produit</span>
-            <Boxes className="w-4 h-4 ml-1 hidden sm:block" />
-          </Button>
-          <Button
-            className="bg-indigo-500 hover:bg-indigo-600 text-white h-12 px-4 rounded-xl"
-            onClick={() => openCreateModal("service")}
-          >
-            <Plus className="w-5 h-5 mr-1" />
-            <span className="hidden sm:inline">Service</span>
-            <Wrench className="w-4 h-4 ml-1 hidden sm:block" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-<div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-  <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-    <p className="text-gray-600 text-sm mb-2">Total Produits</p>
-    <p className="text-3xl font-bold text-[#2D3194]">{products.length}</p>
-    <p className="text-green-600 text-sm mt-2">
-      {products.filter(p => p.isActive).length} actifs
-    </p>
-  </div>
-
-  <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-    <p className="text-gray-600 text-sm mb-2">Total Services</p>
-    <p className="text-3xl font-bold text-[#2D3194]">{services.length}</p>
-    <p className="text-green-600 text-sm mt-2">
-      {services.filter(s => s.isActive).length} actifs
-    </p>
-  </div>
-
-  <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-    <p className="text-gray-600 text-sm mb-2">Stock Faible</p>
-    <p className="text-3xl font-bold text-orange-600">{lowStockCount}</p>
-    <p className="text-gray-600 text-sm mt-2">Nécessite réappro</p>
-  </div>
-
-  <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-    <p className="text-gray-600 text-sm mb-2">Valeur Stock</p>
-    <p className="text-3xl font-bold text-[#2D3194]">
-      {stockValue >= 1000
-        ? `${(stockValue / 1000).toFixed(1)}K MAD`
-        : `${stockValue.toFixed(0)} MAD`}
-    </p>
-    <p className="text-green-600 text-sm mt-2">Valeur totale</p>
-  </div>
-</div>
-
-
-      {/* Tabs */}
-      <div className="flex gap-1 mb-4 bg-gray-100 p-1 rounded-xl w-fit">
-        {(["all", "products", "services"] as TabType[]).map((t) => (
+        <div className="flex items-center gap-2">
+          {/* Secondary action */}
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              tab === t ? "bg-white text-[#2D3194] shadow-sm" : "text-gray-600 hover:text-gray-800"
-            }`}
+            onClick={() => openCreate("service")}
+            className="h-9 px-4 rounded-xl border border-slate-300 bg-white
+              text-slate-700 text-sm font-medium
+              hover:bg-slate-50 hover:border-slate-400
+              transition-colors duration-150 flex items-center gap-1.5"
           >
-            {t === "all" ? "Tout" : t === "products" ? "Produits" : "Services"}
+            <Plus className="w-4 h-4" strokeWidth={2} />
+            Nouveau service
           </button>
+          {/* Primary action */}
+          <button
+            onClick={() => openCreate("product")}
+            className="h-9 px-4 rounded-xl border border-slate-300 bg-white
+              text-slate-700 text-sm font-medium
+              hover:bg-slate-50 hover:border-slate-400
+              transition-colors duration-150 flex items-center gap-1.5"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2} />
+            Nouveau produit
+          </button>
+        </div>
+      </div>
+
+      {/* ── KPI Cards ──────────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        {kpis.map((kpi) => (
+          <div
+            key={kpi.label}
+            className="relative bg-white border border-slate-200 rounded-xl overflow-hidden
+              shadow-sm hover:shadow-md transition-shadow duration-200"
+          >
+            {/* Vertical left accent — 3px for intentional visual presence */}
+            <div
+              className={`absolute inset-y-0 left-0 w-[3px] ${kpi.stripe}`}
+            />
+            <div className="pl-5 pr-4 py-4 px-4 flex flex-col gap-1">
+              <div className="flex items-start justify-between mb-3">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide leading-none pt-0.5">
+                  {kpi.label}
+                </p>
+                <div
+                  className={`w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0 ${kpi.iconCls}`}
+                >
+                  <kpi.icon className="w-4 h-4" strokeWidth={1.8} />
+                </div>
+              </div>
+              <p
+                className={`text-2xl font-bold leading-none tabular-nums ${kpi.valCls}`}
+              >
+                {kpi.value}
+              </p>
+              <p className="text-xs text-slate-400 mt-1.5">{kpi.sub}</p>
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Error */}
+      {/* ── Stock Alert Banner ─────────────────────────────────────────────────── */}
+      {alertCount > 0 && !loading && (
+        <div
+          className="flex items-center gap-4 px-6 py-4
+          bg-red-50 border border-red-200 rounded-xl
+          border-l-4 border-l-red-500"
+        >
+          <div
+            className="w-8 h-8 rounded-lg bg-red-100 border border-red-200
+            flex items-center justify-center shrink-0"
+          >
+            <ShieldAlert className="w-4 h-4 text-red-600" strokeWidth={2} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-red-800 leading-snug">
+              {alertCount} produit{alertCount > 1 ? "s" : ""} en alerte de stock
+            </p>
+            <p className="text-xs text-red-600 mt-0.5 font-normal">
+              Approvisionnement requis — vérifiez vos niveaux d'inventaire.
+            </p>
+          </div>
+          {/* <button
+            onClick={() => setTab("products")}
+            className="shrink-0 flex items-center gap-1 text-xs font-semibold text-red-700
+              hover:text-red-900 transition-colors px-3 py-1.5 rounded-lg
+              hover:bg-red-100 border border-transparent hover:border-red-200"
+          >
+            Voir <ArrowUpRight className="w-3.5 h-3.5" />
+          </button> */}
+        </div>
+      )}
+
+      {/* ── Toolbar ────────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        {/* Search */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 inset-y-0 my-auto w-4 h-4 text-slate-400 pointer-events-none" />{" "}
+          <input
+            type="text"
+            placeholder={`Rechercher un ${tab === "products" ? "produit" : "service"}…`}
+            className="w-full pl-10 pr-8 h-10 border border-slate-200 rounded-xl text-sm
+              text-slate-800 placeholder:text-slate-400 bg-white
+              focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50
+              transition-colors duration-150"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded
+                flex items-center justify-center text-slate-400 hover:text-slate-600
+                hover:bg-slate-100 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Tabs */}
+        <div className="flex bg-slate-100 border border-slate-200 rounded-xl p-1 gap-0.5 shrink-0">
+          {(["products", "services"] as TabType[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`flex items-center gap-1.5 px-4 py-1 rounded-lg text-sm font-medium
+                transition-all duration-150
+                ${
+                  tab === t
+                    ? "bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/60"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-white/60"
+                }`}
+            >
+              {t === "products" ? (
+                <Package className="w-3.5 h-3.5" />
+              ) : (
+                <Wrench className="w-3.5 h-3.5" />
+              )}
+              {t === "products" ? "Produits" : "Services"}
+              <span
+                className={`px-1.5 py-px rounded text-[10px] font-semibold
+                ${tab === t ? "bg-blue-100 text-blue-600" : "bg-slate-200 text-slate-500"}`}
+              >
+                {t === "products" ? products.length : services.length}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Refresh */}
+        <button
+          onClick={fetchAll}
+          className="h-10 w-10 rounded-xl border border-slate-200 bg-white
+            hover:bg-slate-50 flex items-center justify-center
+            text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+          title="Actualiser"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+        </button>
+      </div>
+
+      {/* ── Error state ────────────────────────────────────────────────────────── */}
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 shrink-0" />
-          {error}
-          <button onClick={fetchAll} className="ml-auto text-sm underline">
+        <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
+          <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+          <span className="text-sm text-red-700 flex-1">{error}</span>
+          <button
+            onClick={fetchAll}
+            className="text-xs font-semibold text-red-600 hover:text-red-800 underline underline-offset-2 shrink-0"
+          >
             Réessayer
           </button>
         </div>
       )}
 
-      {/* Table */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center py-20 text-gray-400">
-            <RefreshCw className="w-6 h-6 animate-spin mr-2" />
-            Chargement...
+      {/* ── Products Grid ──────────────────────────────────────────────────────── */}
+      {tab === "products" &&
+        (loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="h-[272px] bg-slate-100 rounded-xl animate-pulse"
+              />
+            ))}
           </div>
-        ) : visibleItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-            <Package className="w-12 h-12 mb-3 opacity-30" />
-            <p className="text-lg font-medium">Aucun élément trouvé</p>
-            <p className="text-sm mt-1">
-              {searchQuery ? "Essayez d'autres mots-clés." : "Créez votre premier produit ou service."}
+        ) : products.length === 0 ? (
+          <div
+            className="flex flex-col items-center justify-center py-12
+  border border-dashed border-slate-200 rounded-xl bg-white"
+          >
+            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
+              <Package className="w-6 h-6 text-slate-300" strokeWidth={1.5} />
+            </div>
+
+            <p className="font-semibold text-slate-700">
+              Aucun produit{searchQuery ? ` pour "${searchQuery}"` : ""}
+            </p>
+
+            <p className="text-sm text-slate-400 mt-1">
+              {searchQuery
+                ? "Essayez d'autres termes de recherche"
+                : "Créez votre premier produit pour commencer"}
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {products.map((p) => (
+              <ProductCard
+                key={p.id}
+                product={p}
+                onEdit={() => openEdit(p.id, "product")}
+                onDelete={() =>
+                  setDeleteConfirm({ id: p.id, type: "product", name: p.name })
+                }
+                onStock={() => {
+                  setStockProductId(p.id);
+                  setStockDelta("");
+                  setStockReason("inventaire");
+                  setStockModalOpen(true);
+                }}
+              />
+            ))}
+          </div>
+        ))}
+
+      {/* ── Services Table ─────────────────────────────────────────────────────── */}
+      {tab === "services" &&
+        (loading ? (
+          <div className="space-y-2">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="h-[60px] bg-slate-100 rounded-xl animate-pulse"
+              />
+            ))}
+          </div>
+        ) : services.length === 0 ? (
+          <div
+            className="flex flex-col items-center justify-center py-12
+  border border-dashed border-slate-200 rounded-xl bg-white"
+          >
+            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
+              <Wrench className="w-6 h-6 text-slate-300" strokeWidth={1.5} />
+            </div>
+
+            <p className="font-semibold text-slate-700">
+              Aucun service{searchQuery ? ` pour "${searchQuery}"` : ""}
+            </p>
+
+            <p className="text-sm text-slate-400 mt-1">
+              {searchQuery
+                ? "Essayez d'autres termes de recherche"
+                : "Créez votre premier service pour commencer"}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
             <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Nom</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Type</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Catégorie</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Prix / Tarif</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Stock</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Statut</th>
-                  <th className="text-right px-6 py-4 text-sm font-semibold text-gray-700">Actions</th>
+              <thead className="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Service
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">
+                    Catégorie
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Tarif
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide hidden md:table-cell">
+                    Durée
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">
+                    Statut
+                  </th>
+                  <th className="w-24" />
                 </tr>
               </thead>
-              <tbody>
-                {visibleItems.map(({ item, type }) => {
-                  const isProduct = type === "product";
-                  const p = isProduct ? (item as Product) : null;
-                  const s = !isProduct ? (item as Service) : null;
-                  const status = p ? stockStatus(p) : null;
-
+              <tbody className="divide-y divide-slate-100">
+                {services.map((s) => {
+                  const hr = s.service?.hourlyRate
+                    ? Number(s.service.hourlyRate)
+                    : null;
+                  const fr = s.service?.fixedRate
+                    ? Number(s.service.fixedRate)
+                    : null;
+                  const dur = s.service?.estimatedDuration;
                   return (
                     <tr
-                      key={item.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                      key={s.id}
+                      className="hover:bg-slate-50/80 transition-colors group"
                     >
-                      {/* Name */}
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                              isProduct ? "bg-purple-50" : "bg-blue-50"
-                            }`}
+                            className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200
+                            flex items-center justify-center shrink-0"
                           >
-                            {isProduct ? (
-                              <Boxes className="w-4 h-4 text-purple-600" />
-                            ) : (
-                              <Wrench className="w-4 h-4 text-blue-600" />
-                            )}
+                            <Wrench
+                              className="w-3.5 h-3.5 text-slate-500"
+                              strokeWidth={1.8}
+                            />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">{item.name}</p>
-                            {item.description && (
-                              <p className="text-xs text-gray-400 truncate max-w-[180px]">
-                                {item.description}
+                            <p className="text-sm font-semibold text-slate-800">
+                              {s.name}
+                            </p>
+                            {s.description && (
+                              <p className="text-xs text-slate-400 truncate max-w-[180px] mt-0.5">
+                                {s.description}
                               </p>
                             )}
                           </div>
                         </div>
                       </td>
-
-                      {/* Type */}
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5 hidden sm:table-cell">
+                        {s.category ? (
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5
+                              bg-slate-50 border border-slate-200 rounded-md
+                              text-[11px] font-medium text-slate-600"
+                          >
+                            <Tag className="w-2.5 h-2.5 text-slate-400" />{" "}
+                            {s.category}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 text-sm">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div>
+                          {hr && hr > 0 && (
+                            <p className="text-sm font-semibold text-slate-800 tabular-nums">
+                              {fmt(hr)}
+                              <span className="text-xs font-normal text-slate-400 ml-1">
+                                MAD/h
+                              </span>
+                            </p>
+                          )}
+                          {fr && fr > 0 && (
+                            <p
+                              className={`tabular-nums ${hr ? "text-xs text-slate-500 mt-0.5" : "text-sm font-semibold text-slate-800"}`}
+                            >
+                              {fmt(fr)}
+                              <span className="text-xs font-normal text-slate-400 ml-1">
+                                MAD forfait
+                              </span>
+                            </p>
+                          )}
+                          {!hr && !fr && (
+                            <span className="text-slate-300 text-sm">—</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 hidden md:table-cell">
+                        {dur ? (
+                          <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
+                            <Clock className="w-3.5 h-3.5 text-slate-400" />
+                            {dur >= 60
+                              ? `${Math.floor(dur / 60)}h${dur % 60 > 0 ? `${dur % 60}m` : ""}`
+                              : `${dur} min`}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 text-sm">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5 hidden sm:table-cell">
                         <span
-                          className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                            isProduct
-                              ? "bg-purple-100 text-purple-700"
-                              : "bg-blue-100 text-blue-700"
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1
+                          rounded-full text-[11px] font-medium border
+                          ${
+                            s.isActive
+                              ? "bg-green-50 text-green-700 border-green-200"
+                              : "bg-slate-50 text-slate-500 border-slate-200"
                           }`}
                         >
-                          {isProduct ? "Produit" : "Service"}
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full flex-shrink-0
+                            ${s.isActive ? "bg-green-500" : "bg-slate-300"}`}
+                          />
+                          {s.isActive ? "Actif" : "Inactif"}
                         </span>
                       </td>
-
-                      {/* Category */}
-                      <td className="px-6 py-4 text-gray-600 text-sm">
-                        {item.category ?? <span className="text-gray-300">—</span>}
-                      </td>
-
-                      {/* Price */}
-                      <td className="px-6 py-4 font-semibold text-gray-900 text-sm">
-                        {isProduct && p ? (
-                          <>{formatPrice(p.product.unitPrice)} MAD</>
-                        ) : s?.service ? (
-                          <div className="space-y-0.5">
-                            {s.service.hourlyRate != null && s.service.hourlyRate > 0 && (
-                              <p>{formatPrice(Number(s.service.hourlyRate))} MAD/h</p>
-                            )}
-                            {s.service.fixedRate != null && s.service.fixedRate > 0 && (
-                              <p className="text-gray-500 text-xs">
-                                Fixe: {formatPrice(Number(s.service.fixedRate))} MAD
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
-
-                      {/* Stock */}
-                      <td className="px-6 py-4 text-sm">
-                        {isProduct && p ? (
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
-                            onClick={() => {
-                              setStockProductId(p.id);
-                              setStockDelta("");
-                              setStockModalOpen(true);
-                            }}
-                            className="flex items-center gap-1.5 hover:text-[#2D3194] transition-colors group"
-                            title="Ajuster le stock"
-                          >
-                            <span className="font-medium">{p.product.stockQuantity}</span>
-                            <span className="text-gray-400 text-xs">
-                              {UNIT_LABELS[p.unit] ?? p.unit}
-                            </span>
-                            <Edit className="w-3 h-3 text-gray-300 group-hover:text-[#2D3194]" />
-                          </button>
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-6 py-4">
-                        {isProduct && p ? (
-                          <StockBadge status={status!} />
-                        ) : (
-                          <span
-                            className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                              item.isActive
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-500"
-                            }`}
-                          >
-                            {item.isActive ? "Actif" : "Inactif"}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => openEditModal(item.id, type)}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            onClick={() => openEdit(s.id, "service")}
                             title="Modifier"
+                            className="w-7 h-7 rounded-lg border border-slate-200 text-slate-400
+                              hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600
+                              flex items-center justify-center transition-all"
                           >
-                            <Edit className="w-4 h-4 text-gray-600" />
+                            <Edit2 className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() =>
-                              setDeleteConfirm({ id: item.id, type, name: item.name })
+                              setDeleteConfirm({
+                                id: s.id,
+                                type: "service",
+                                name: s.name,
+                              })
                             }
-                            className="p-2 hover:bg-red-50 rounded-lg transition-colors"
                             title="Supprimer"
+                            className="w-7 h-7 rounded-lg border border-slate-200 text-slate-400
+                              hover:border-red-200 hover:bg-red-50 hover:text-red-500
+                              flex items-center justify-center transition-all"
                           >
-                            <Trash2 className="w-4 h-4 text-red-500" />
+                            <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
                       </td>
@@ -631,317 +1332,302 @@ export function ArticlesServicesView() {
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+        ))}
 
-      {/* ─── Create / Edit Modal ─── */}
+      {/* ── Create / Edit Modal ────────────────────────────────────────────────── */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={
-          modalMode === "create"
-            ? `Ajouter un ${modalItemType === "product" ? "Produit" : "Service"}`
-            : `Modifier le ${modalItemType === "product" ? "Produit" : "Service"}`
-        }
+        title={`${modalMode === "create" ? "Nouveau" : "Modifier"} ${
+          modalItemType === "product" ? "produit" : "service"
+        }`}
       >
-        <div className="p-6 max-h-[80vh] overflow-y-auto">
-          {modalMode === "create" && (
-            <div className="flex gap-2 mb-5 p-1 bg-gray-100 rounded-xl">
-              {(["product", "service"] as ItemType[]).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setModalItemType(t)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    modalItemType === t
-                      ? "bg-white text-[#2D3194] shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {t === "product" ? "Produit" : "Service"}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Form Content */}
             {modalItemType === "product" ? (
               <ProductForm form={productForm} onChange={setProductForm} />
             ) : (
               <ServiceForm form={serviceForm} onChange={setServiceForm} />
             )}
 
+            {/* Error Message */}
             {formError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-                {formError}
+              <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                <p className="text-sm text-red-700 leading-relaxed">
+                  {formError}
+                </p>
               </div>
             )}
 
-            <div className="flex gap-3 pt-4 border-t border-gray-100">
-              <Button
+            {/* Footer Actions */}
+            <div className="flex gap-3 pt-4 border-t border-slate-100">
+              <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 h-12 rounded-xl font-medium"
+                className="flex-1 h-11 rounded-xl border border-slate-200 bg-white
+            text-sm font-medium text-slate-600
+            hover:bg-slate-50 hover:border-slate-300
+            transition-all duration-200"
               >
                 Annuler
-              </Button>
-              <Button
+              </button>
+
+              <button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 bg-[#2D3194] hover:bg-[#1f2266] text-white h-12 rounded-xl font-medium"
+                className="flex-1 h-11 rounded-xl border border-slate-200 bg-white
+            text-sm font-medium text-slate-600
+            hover:bg-slate-50 hover:border-slate-300
+            transition-all duration-200"
               >
-                {submitting ? (
-                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <Plus className="w-5 h-5 mr-2" />
-                )}
-                {modalMode === "create" ? "Ajouter" : "Enregistrer"}
-              </Button>
+                {submitting && <RefreshCw className="w-4 h-4 animate-spin" />}
+                {modalMode === "create" ? "Créer" : "Enregistrer"}
+              </button>
             </div>
           </form>
         </div>
       </Modal>
 
-      {/* ─── Stock Modal ─── */}
+      {/* ── Stock Adjustment Modal ─────────────────────────────────────────────── */}
       <Modal
-        isOpen={stockModalOpen}
-        onClose={() => setStockModalOpen(false)}
-        title="Ajuster le stock"
+  isOpen={stockModalOpen}
+  onClose={() => setStockModalOpen(false)}
+  title="Ajustement de stock"
+>
+  <div className="px-4 sm:px-6 pb-6 space-y-5">
+    {/* Product context */}
+    {stockProduct && (
+      <div
+        className="flex items-center gap-3 p-4
+        bg-slate-50 border border-slate-200 rounded-xl"
       >
-        <div className="p-6">
-          {stockProductId && (
-            <div className="mb-4 p-3 bg-blue-50 rounded-xl text-sm text-blue-700">
-              Stock actuel :{" "}
-              <strong>
-                {products.find((p) => p.id === stockProductId)?.product.stockQuantity ?? 0}
-              </strong>{" "}
-              unités
-            </div>
-          )}
-          <form onSubmit={handleUpdateStock} className="space-y-4">
-            <div>
-              <Label className="text-gray-700 font-medium mb-2 block">
-                Quantité à ajouter / retirer
-              </Label>
-              <Input
-                type="number"
-                required
-                value={stockDelta}
-                onChange={(e) => setStockDelta(e.target.value)}
-                placeholder="Ex : +50 ou -10"
-                className="h-12 border-gray-200 rounded-xl"
-              />
-              <p className="text-xs text-gray-400 mt-1">
-                Entrez un nombre positif pour ajouter, négatif pour retirer.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                onClick={() => setStockModalOpen(false)}
-                className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 h-12 rounded-xl"
-              >
-                Annuler
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1 bg-[#2D3194] hover:bg-[#1f2266] text-white h-12 rounded-xl"
-              >
-                Confirmer
-              </Button>
-            </div>
-          </form>
+        <div
+          className="w-10 h-10 rounded-lg bg-white border border-slate-200
+          flex items-center justify-center shrink-0"
+        >
+          <Package className="w-4 h-4 text-slate-600" strokeWidth={1.8} />
         </div>
-      </Modal>
 
-      {/* ─── Delete Confirm ─── */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-red-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Confirmer la suppression</h3>
-                <p className="text-sm text-gray-500">Cette action est irréversible</p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-6">
-              Voulez-vous vraiment désactiver{" "}
-              <strong>« {deleteConfirm.name} »</strong> ?
-            </p>
-            <div className="flex gap-3">
-              <Button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 h-11 rounded-xl"
-              >
-                Annuler
-              </Button>
-              <Button
-                onClick={handleDelete}
-                className="flex-1 bg-red-500 hover:bg-red-600 text-white h-11 rounded-xl"
-              >
-                Supprimer
-              </Button>
-            </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-slate-800 text-sm truncate">
+            {stockProduct.name}
+          </p>
+
+          <div className="flex items-center gap-2 mt-1">
+            <StockBadge status={stockStatus(stockProduct)} />
+
+            <span className="text-xs text-slate-400">
+              {stockProduct.product.stockQuantity} unités · seuil{" "}
+              {stockProduct.product.alertThreshold}
+            </span>
           </div>
         </div>
-      )}
+      </div>
+    )}
+
+    <form onSubmit={handleUpdateStock} className="space-y-5">
+      {/* Quantity */}
+      <div>
+        <label
+          className="block text-xs font-semibold uppercase tracking-wide
+          text-slate-500 mb-3"
+        >
+          Ajustement de quantité
+        </label>
+
+        <div className="flex gap-2 items-center">
+          <button
+            type="button"
+            onClick={() =>
+              setStockDelta((v) => String((parseInt(v, 10) || 0) - 1))
+            }
+            className="w-10 h-10 rounded-xl border border-slate-200 bg-white
+              text-slate-600 font-bold text-lg flex items-center justify-center
+              hover:bg-slate-50 transition-colors"
+          >
+            −
+          </button>
+
+          <input
+            type="number"
+            required
+            value={stockDelta}
+            onChange={(e) => setStockDelta(e.target.value)}
+            placeholder="ex: +20 ou −5"
+            className="flex-1 h-10 border border-slate-200 rounded-xl px-3 text-center
+              text-base font-bold text-slate-800 bg-white
+              focus:outline-none focus:border-blue-500 focus:ring-2
+              focus:ring-blue-200/50 transition-colors"
+          />
+
+          <button
+            type="button"
+            onClick={() =>
+              setStockDelta((v) => String((parseInt(v, 10) || 0) + 1))
+            }
+            className="w-10 h-10 rounded-xl border border-slate-200 bg-white
+              text-slate-600 font-bold text-lg flex items-center justify-center
+              hover:bg-slate-50 transition-colors"
+          >
+            +
+          </button>
+        </div>
+
+        {/* Live preview */}
+        {stockDelta && stockProduct && (
+          <div
+            className={`mt-3 flex items-center gap-2.5 px-3.5 py-2.5
+            rounded-xl text-sm font-medium border
+            ${
+              newStockQty <= 0
+                ? "bg-red-50 border-red-200 text-red-700"
+                : newStockQty <= stockProduct.product.alertThreshold
+                  ? "bg-orange-50 border-orange-200 text-orange-700"
+                  : "bg-green-50 border-green-200 text-green-700"
+            }`}
+          >
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+
+            <span>
+              Nouveau stock :
+              <strong className="tabular-nums ml-1">
+                {newStockQty} unités
+              </strong>
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Reason */}
+      <div>
+  <label
+    className="block text-xs font-semibold uppercase tracking-wide
+    text-slate-500 mb-4"
+  >
+    Motif de l'ajustement
+  </label>
+
+  <div className="grid grid-cols-2 gap-3">
+    {STOCK_REASONS.map((r) => (
+      <label
+        key={r.value}
+        className={`flex items-center gap-3 p-4 rounded-xl border-2
+          cursor-pointer transition-colors duration-150 select-none
+          ${
+            stockReason === r.value
+              ? "border-blue-500 bg-blue-50"
+              : "border-slate-200 hover:border-slate-300 bg-white"
+          }`}
+      >
+        <input
+          type="radio"
+          name="stockReason"
+          value={r.value}
+          checked={stockReason === r.value}
+          onChange={() => setStockReason(r.value)}
+          className="sr-only"
+        />
+
+        <span className="text-base">{r.icon}</span>
+
+        <span
+          className={`text-sm font-medium
+          ${
+            stockReason === r.value
+              ? "text-blue-700"
+              : "text-slate-600"
+          }`}
+        >
+          {r.label}
+        </span>
+      </label>
+    ))}
+  </div>
+</div>
+
+      {/* Actions */}
+      <div className="flex gap-3 pt-2 pb-4">
+        <button
+          type="button"
+          onClick={() => setStockModalOpen(false)}
+          className="flex-1 h-10 rounded-xl border border-slate-200 bg-white
+            text-sm font-medium text-slate-600
+            hover:bg-slate-50 hover:border-slate-300 transition-colors"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          className="flex-1 h-10 rounded-xl border border-slate-200 bg-white
+            text-sm font-medium text-slate-600
+            hover:bg-slate-50 hover:border-slate-300 transition-colors"
+        >
+          Confirmer
+        </button>
+      </div>
+    </form>
+  </div>
+</Modal>
+
+      {/* ── Delete Confirmation Modal ──────────────────────────────────────────── */}
+      <Modal
+  isOpen={!!deleteConfirm}
+  onClose={() => setDeleteConfirm(null)}
+  title="Confirmer la suppression"
+>
+  <div className="p-6 space-y-6">
+
+    {/* Warning Block */}
+    <div className="flex items-start gap-4 p-5 bg-red-50 border border-red-200 rounded-2xl">
+      
+      <div
+        className="w-10 h-10 rounded-xl bg-red-100 border border-red-200
+        flex items-center justify-center shrink-0"
+      >
+        <Trash2 className="w-4 h-4 text-red-600 " strokeWidth={1.8} />
+      </div>
+
+      <div className="space-y-2">
+        <p className="font-semibold text-slate-800 text-sm">
+          Supprimer «{deleteConfirm?.name}» ?
+        </p>
+
+        <p className="text-sm text-slate-500 leading-relaxed">
+          Cette action est irréversible. L'élément sera retiré définitivement
+          du catalogue et ne pourra pas être restauré.
+        </p>
+      </div>
     </div>
-  );
-}
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
+    {/* Footer */}
+    <div className="flex gap-3 pt-4 border-t border-slate-100">
+      
+      <button
+        onClick={() => setDeleteConfirm(null)}
+        className="flex-1 h-11 rounded-xl border border-slate-200 bg-white
+          text-sm font-medium text-slate-600
+          hover:bg-slate-50 hover:border-slate-300
+          transition-all duration-200"
+      >
+        Annuler
+      </button>
 
-function StatCard({
-  label,
-  value,
-  sub,
-  valueColor = "text-[#2D3194]",
-  isString = false,
-}: {
-  label: string;
-  value: number | string;
-  sub: string;
-  valueColor?: string;
-  isString?: boolean;
-}) {
-  return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-      <p className="text-gray-500 text-sm mb-1">{label}</p>
-      <p className={`text-3xl font-bold ${valueColor}`}>{value}</p>
-      <p className="text-gray-400 text-xs mt-1">{sub}</p>
+      <button
+        onClick={handleDelete}
+        className="flex-1 h-11 rounded-xl border border-slate-200 bg-white
+          text-sm font-medium text-slate-600
+          hover:bg-slate-50 hover:border-slate-300
+          transition-all duration-200"
+      >
+        Supprimer définitivement
+      </button>
+
     </div>
-  );
-}
-
-// ─── Product Form ─────────────────────────────────────────────────────────────
-
-function ProductForm({
-  form,
-  onChange,
-}: {
-  form: ProductFormData;
-  onChange: (f: ProductFormData) => void;
-}) {
-  const set = (key: keyof ProductFormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-    onChange({ ...form, [key]: e.target.value });
-
-  return (
-    <>
-      <FormField label="Nom" required>
-        <Input value={form.name} onChange={set("name")} required placeholder="Ex: Palette bois" className="h-11 border-gray-200 rounded-xl" />
-      </FormField>
-
-      <div className="grid grid-cols-2 gap-4">
-        <FormField label="Unité" required>
-          <select value={form.unit} onChange={set("unit")} required className="w-full h-11 px-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D3194] bg-white text-sm">
-            {UNIT_OPTIONS.map((u) => (
-              <option key={u} value={u}>{UNIT_LABELS[u]}</option>
-            ))}
-          </select>
-        </FormField>
-        <FormField label="Catégorie">
-          <Input value={form.category} onChange={set("category")} placeholder="Ex: Emballage" className="h-11 border-gray-200 rounded-xl" />
-        </FormField>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <FormField label="Prix unitaire (MAD)" required>
-          <Input type="number" step="0.01" min="0.01" value={form.unitPrice} onChange={set("unitPrice")} required placeholder="0.00" className="h-11 border-gray-200 rounded-xl" />
-        </FormField>
-        <FormField label="Référence">
-          <Input value={form.reference} onChange={set("reference")} placeholder="REF-001" className="h-11 border-gray-200 rounded-xl" />
-        </FormField>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <FormField label="Stock initial">
-          <Input type="number" min="0" value={form.stockQuantity} onChange={set("stockQuantity")} className="h-11 border-gray-200 rounded-xl" />
-        </FormField>
-        <FormField label="Seuil d'alerte">
-          <Input type="number" min="0" value={form.alertThreshold} onChange={set("alertThreshold")} className="h-11 border-gray-200 rounded-xl" />
-        </FormField>
-      </div>
-
-      <FormField label="Description">
-        <textarea value={form.description} onChange={(e) => onChange({ ...form, description: e.target.value })} rows={3} placeholder="Description optionnelle..." className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2D3194] resize-none" />
-      </FormField>
-    </>
-  );
-}
-
-// ─── Service Form ─────────────────────────────────────────────────────────────
-
-function ServiceForm({
-  form,
-  onChange,
-}: {
-  form: ServiceFormData;
-  onChange: (f: ServiceFormData) => void;
-}) {
-  const set = (key: keyof ServiceFormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-    onChange({ ...form, [key]: e.target.value });
-
-  return (
-    <>
-      <FormField label="Nom" required>
-        <Input value={form.name} onChange={set("name")} required placeholder="Ex: Transport express" className="h-11 border-gray-200 rounded-xl" />
-      </FormField>
-
-      <div className="grid grid-cols-2 gap-4">
-        <FormField label="Unité" required>
-          <select value={form.unit} onChange={set("unit")} required className="w-full h-11 px-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D3194] bg-white text-sm">
-            {UNIT_OPTIONS.map((u) => (
-              <option key={u} value={u}>{UNIT_LABELS[u]}</option>
-            ))}
-          </select>
-        </FormField>
-        <FormField label="Catégorie">
-          <Input value={form.category} onChange={set("category")} placeholder="Ex: Transport" className="h-11 border-gray-200 rounded-xl" />
-        </FormField>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <FormField label="Tarif horaire (MAD/h)">
-          <Input type="number" step="0.01" min="0" value={form.hourlyRate} onChange={set("hourlyRate")} placeholder="0.00" className="h-11 border-gray-200 rounded-xl" />
-        </FormField>
-        <FormField label="Tarif fixe (MAD)">
-          <Input type="number" step="0.01" min="0" value={form.fixedRate} onChange={set("fixedRate")} placeholder="0.00" className="h-11 border-gray-200 rounded-xl" />
-        </FormField>
-      </div>
-
-      <FormField label="Durée estimée (minutes)">
-        <Input type="number" min="0" value={form.estimatedDuration} onChange={set("estimatedDuration")} placeholder="Ex: 60" className="h-11 border-gray-200 rounded-xl" />
-      </FormField>
-
-      <FormField label="Description">
-        <textarea value={form.description} onChange={(e) => onChange({ ...form, description: e.target.value })} rows={3} placeholder="Description optionnelle..." className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2D3194] resize-none" />
-      </FormField>
-    </>
-  );
-}
-
-// ─── Field wrapper ────────────────────────────────────────────────────────────
-
-function FormField({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <Label className="text-gray-700 font-medium mb-1.5 block text-sm">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </Label>
-      {children}
+  </div>
+</Modal>
     </div>
   );
 }

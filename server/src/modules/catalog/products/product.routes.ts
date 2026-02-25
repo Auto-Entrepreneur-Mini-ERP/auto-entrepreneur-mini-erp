@@ -7,7 +7,8 @@ const router = Router();
 router.use(isAthenticated);
 
 router.get("/", productController.getProducts);
-router.get("/search", productController.getProductByName); // must be before /:id
+router.get("/alertes", productController.getAlerts);   // ← NEW: must be before /:id
+router.get("/search", productController.getProductByName);
 router.get("/:id", productController.getProduct);
 router.post("/", productController.createProduct);
 router.put("/:id", productController.updateProduct);

@@ -38,6 +38,11 @@ export interface Service {
   } | null;
 }
 
+/** Combined article type for selectors (invoices / quotes) */
+export type Article =
+  | (Product & { typeLigne: 'PRODUCT' })
+  | (Service & { typeLigne: 'SERVICE' });
+
 export interface CreateProductPayload {
   name: string;
   description?: string;
@@ -63,7 +68,14 @@ export interface CreateServicePayload {
   estimatedDuration?: number;
 }
 
-export type UpdateServicePayload = Partial<CreateServicePayload>
+export type UpdateServicePayload = Partial<CreateServicePayload>;
+
+export type StockAdjustReason = 'vente' | 'inventaire' | 'perte' | 'autre';
+
+export interface UpdateStockPayload {
+  quantity: number;
+  reason?: StockAdjustReason;
+}
 
 export interface ProductFilters {
   name?: string;
@@ -98,6 +110,11 @@ export const productApi = {
     return res.data.data;
   },
 
+  getAlerts: async (): Promise<Product[]> => {
+    const res = await api.get('/products/alertes');
+    return res.data.data ?? [];
+  },
+
   create: async (payload: CreateProductPayload): Promise<Product> => {
     const res = await api.post('/products', payload);
     return res.data.data;
@@ -108,8 +125,8 @@ export const productApi = {
     return res.data.data;
   },
 
-  updateStock: async (id: string, quantity: number): Promise<Product> => {
-    const res = await api.patch(`/products/${id}/stock`, { quantity });
+  updateStock: async (id: string, payload: UpdateStockPayload): Promise<Product> => {
+    const res = await api.patch(`/products/${id}/stock`, payload);
     return res.data.data;
   },
 
@@ -147,5 +164,21 @@ export const serviceApi = {
 
   delete: async (id: string): Promise<void> => {
     await api.delete(`/services/${id}`);
+  },
+};
+
+// ─── Article (combined) helper ────────────────────────────────────────────────
+
+export const articleApi = {
+  /** Fetch all products AND services, merged into a unified Article list */
+  getAll: async (name?: string): Promise<Article[]> => {
+    const [products, services] = await Promise.all([
+      productApi.getAll(name ? { name } : undefined),
+      serviceApi.getAll(name ? { name } : undefined),
+    ]);
+    return [
+      ...products.map((p) => ({ ...p, typeLigne: 'PRODUCT' as const })),
+      ...services.map((s) => ({ ...s, typeLigne: 'SERVICE' as const })),
+    ];
   },
 };

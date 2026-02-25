@@ -19,7 +19,7 @@ function ModalCreatePayment({
 }: ModalCreatePaymentProps) {
 
 
-  const { errors, getInvoicesByNumber, createPayment } = usePayment();
+  const { getInvoicesByNumber, createPayment } = usePayment();
 
   const [paymentFormData, setPaymentFormData] = useState<PaymentCreateInput>();
 
@@ -30,8 +30,7 @@ function ModalCreatePayment({
     e.preventDefault();
     console.log("paymentData", paymentFormData);
     
-    createPayment(paymentFormData as PaymentCreateInput);
-    
+    await createPayment(paymentFormData as PaymentCreateInput);
     if (!errors) {
       setIsPaymentModalOpen(false);
       setPaymentFormData(undefined);

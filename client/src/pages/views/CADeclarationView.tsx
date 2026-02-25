@@ -16,18 +16,18 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Modal } from "../../components/ui/modal";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router";
 
 import {
   useGetAllTaxDeclaration,
   useGetCurrentDeclarationData,
   useDeleteDeclarationData,
   useCreateDeclarationData,
-  useUpdateDeclarationData
+  useUpdateDeclarationData,
 } from "../../hooks/useTaxDeclaration";
 import type { TaxDeclaration } from "../../types/taxDeclaration.types";
 import { DeclarationStatus } from "../../types/taxDeclaration.types";
- 
 
 export function CADeclarationView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,6 +35,8 @@ export function CADeclarationView() {
   const [selectedDeclaration, setSelectedDeclaration] =
     useState<TaxDeclaration | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [searchParams] = useSearchParams();
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -66,48 +68,57 @@ export function CADeclarationView() {
 const { currentTaxDeclaration, fetchCurrentDeclaration, loadingCurrent } =
   useGetCurrentDeclarationData();
 
-   const { deleteTaxDeclaration } = useDeleteDeclarationData();
+  const { deleteTaxDeclaration } = useDeleteDeclarationData();
   const { createTaxDeclaration } = useCreateDeclarationData();
   const { updateTaxDeclaration } = useUpdateDeclarationData();
 
- 
-const handleSubmit = async () => {
-  await createTaxDeclaration(currentTaxDeclaration!);
-  setIsModalOpen(false);
-  refetch(); 
-  await fetchCurrentDeclaration();
+  useEffect(() => {
+  const run = () => {
+    const highlight = searchParams.get("highlight");
+    const id = searchParams.get("id");
+
+    if (highlight === "declaration" && id && allTaxDeclaration?.length) {
+      const found = allTaxDeclaration.find((d) => d.id === id);
+      if (found) {
+        setSelectedDeclaration(found);
+        setIsDetailModalOpen(true);
+      }
+    }
+  };
+  setTimeout(run, 0); 
+}, [searchParams, allTaxDeclaration]);
+
+  const handleSubmit = async () => {
+    await createTaxDeclaration(currentTaxDeclaration!);
+    setIsModalOpen(false);
+    refetch();
+    await fetchCurrentDeclaration();
+  };
+
+  const handleViewDetails = (declaration: TaxDeclaration) => {
+  setSelectedDeclaration(declaration);
+  setIsDetailModalOpen(true);
 };
- 
+
   const handleDeclarationStatusChang = async () => {
     if (currentTaxDeclaration?.id) {
       await updateTaxDeclaration(
-        // ← await the call
         currentTaxDeclaration.id,
         currentTaxDeclaration?.status === DeclarationStatus.DRAFT
           ? "SUBMITTED"
           : "PAID",
       );
-      refetch(); await fetchCurrentDeclaration();
+      refetch();
+      await fetchCurrentDeclaration();
     }
     setIsModalOpen(false);
   };
 
-  const handleViewDetails = (declaration: TaxDeclaration) => {
-    setSelectedDeclaration(declaration);
-    setIsDetailModalOpen(true);
-  };
-
-
-  
   const handleDeletTax = async (id: string) => {
-   
-   await deleteTaxDeclaration(id);
-
+    await deleteTaxDeclaration(id);
     refetch();
     await fetchCurrentDeclaration();
-
-};
- 
+  };
 
   const filteredDeclarations = useMemo(() => {
     if (!allTaxDeclaration?.length) return [];
@@ -132,7 +143,6 @@ const handleSubmit = async () => {
   const handlCreateDeclaration = () => {
     setIsModalOpen(true);
   };
-            
 
   return (
     <div className="py-8">
@@ -155,7 +165,7 @@ const handleSubmit = async () => {
 
       {currentTaxDeclaration?.id && (
         <>
-          {/* ───── DRAFT ───── */}
+          {/* DRAFT */}
           {currentTaxDeclaration.status === DeclarationStatus.DRAFT && (
             <div className="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-xl mb-6">
               <div className="flex items-start gap-4">
@@ -169,15 +179,15 @@ const handleSubmit = async () => {
                       Brouillon
                     </span>
                   </div>
-                  <p className="text -sm text-orange-800 mb-4">
+                  <p className="text-sm text-orange-800 mb-4">
                     La déclaration pour{" "}
                     <strong>{currentTaxDeclaration.periode}</strong> doit être
                     soumise avant le{" "}
                     <strong>
                       {currentTaxDeclaration.dueDate
-                        ? new Date(
-                            currentTaxDeclaration.dueDate,
-                          ).toLocaleDateString("fr-FR")
+                        ? new Date(currentTaxDeclaration.dueDate).toLocaleDateString(
+                            "fr-FR"
+                          )
                         : "—"}
                     </strong>
                   </p>
@@ -193,7 +203,7 @@ const handleSubmit = async () => {
             </div>
           )}
 
-          {/* ───── SUBMITTED ───── */}
+          {/* SUBMITTED */}
           {currentTaxDeclaration.status === DeclarationStatus.SUBMITTED && (
             <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-xl mb-6">
               <div className="flex items-start gap-4">
@@ -213,9 +223,9 @@ const handleSubmit = async () => {
                     soumise. Le paiement doit être effectué avant le{" "}
                     <strong>
                       {currentTaxDeclaration.dueDate
-                        ? new Date(
-                            currentTaxDeclaration.dueDate,
-                          ).toLocaleDateString("fr-FR")
+                        ? new Date(currentTaxDeclaration.dueDate).toLocaleDateString(
+                            "fr-FR"
+                          )
                         : "—"}
                     </strong>
                   </p>
@@ -241,12 +251,6 @@ const handleSubmit = async () => {
                     onClick={handleDeclarationStatusChang}
                     style={{ backgroundColor: "#3a86f7" }}
                     className="text-white h-10 px-6 rounded-xl transition-all"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#3279e2";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "#0d9488";
-                    }}
                   >
                     <CreditCard className="w-4 h-4 mr-2" />
                     Payer la déclaration
@@ -256,7 +260,7 @@ const handleSubmit = async () => {
             </div>
           )}
 
-          {/* ───── PAID ───── */}
+          {/* PAID */}
           {currentTaxDeclaration.status === DeclarationStatus.PAID && (
             <div className="bg-green-50 border-l-4 border-green-500 p-6 rounded-xl mb-6">
               <div className="flex items-start gap-4">
@@ -275,7 +279,7 @@ const handleSubmit = async () => {
                     <strong>{currentTaxDeclaration.periode}</strong> a été
                     réglée avec succès. Aucune action requise.
                   </p>
-                  <div className="grid grid-cols-3 gap-4">
+                  {/* <div className="grid grid-cols-3 gap-4">
                     <div className="bg-green-100 rounded-xl p-3">
                       <p className="text-xs text-green-700 mb-1">
                         Chiffre d'affaires
@@ -297,18 +301,15 @@ const handleSubmit = async () => {
                       </p>
                     </div>
                   </div>
-                  {/* NO action button — read-only for PAID status */}
+                  NO action button — read-only for PAID status */}
                 </div>
               </div>
             </div>
           )}
         </>
       )}
-
-      {/* Current Period Card */}
-
-      {console.log(currentTaxDeclaration)}
-
+ 
+ 
       {!loadingCurrent &&
         (currentTaxDeclaration?.id == null ||
           allTaxDeclaration.length <= 0) && (

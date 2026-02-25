@@ -3,7 +3,7 @@ import { invoicesService } from "./invoice.service.js";
 import type { InvoiceCreateSchemaInput } from "./invoice.types.js";
 import { log } from "node:console";
 
-const getInvoices = async (req: Request, res: Response) =>{
+const getInvoices = async (req: Request, res: Response) => {
     const autoentrepreneurId = req.AutoEntrepreneurID;
 
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
@@ -13,7 +13,7 @@ const getInvoices = async (req: Request, res: Response) =>{
     return res.status(200).json(invoices);
 };
 
-const getOneInvoice = async (req: Request, res: Response) =>{
+const getOneInvoice = async (req: Request, res: Response) => {
     const autoentrepreneurId = req.AutoEntrepreneurID;
     const { invoiceId } = req.params;
 
@@ -21,7 +21,7 @@ const getOneInvoice = async (req: Request, res: Response) =>{
     return res.status(200).json(invoice);
 };
 
-const getInvoicesByNumber = async (req: Request, res: Response) =>{
+const getInvoicesByNumber = async (req: Request, res: Response) => {
     const autoentrepreneurId = req.AutoEntrepreneurID;
     const { invoiceNumber } = req.params;
 
@@ -33,7 +33,7 @@ const createInvoice = async (req: Request, res: Response) => {
     const autoentrepreneurId = req.AutoEntrepreneurID;
 
     const data = req.body;
-    
+
     const newInvoice = await invoicesService.addInvoice(autoentrepreneurId as string, data as InvoiceCreateSchemaInput);
     return res.status(200).json(newInvoice);
 };
@@ -42,7 +42,7 @@ const editInvoice = async (req: Request, res: Response) => {
     const autoentrepreneurId = req.AutoEntrepreneurID;
     const { invoiceId } = req.params;
     const data = req.body;
-        console.log(data);
+    console.log(data);
 
 
     const updatedInvoice = await invoicesService.updateInvoice(autoentrepreneurId as string, invoiceId as string, data as InvoiceCreateSchemaInput);
@@ -65,6 +65,20 @@ const deleteInvoice = async (req: Request, res: Response) => {
     return res.status(200).json(newInvoice);
 };
 
+const downloadInvoice = async (req: Request, res: Response) => {
+    const autoentrepreneurId = req.AutoEntrepreneurID;
+    const { invoiceId } = req.params;
+
+    const { pdf, invoiceNumber} = await invoicesService.generatePdf(autoentrepreneurId as string, invoiceId as string);
+
+    res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename=${invoiceNumber}.pdf`,
+    });
+
+    return res.send(pdf);
+}
+
 export const invoiceController = {
     getInvoices,
     getOneInvoice,
@@ -73,4 +87,5 @@ export const invoiceController = {
     editInvoice,
     cancelInvoice,
     deleteInvoice,
+    downloadInvoice
 };

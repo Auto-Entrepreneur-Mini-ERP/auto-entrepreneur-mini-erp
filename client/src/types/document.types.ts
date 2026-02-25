@@ -4,7 +4,9 @@ export interface Document {
     name: string,
     type: string,
     category?: string,
-    creationDate?: string,
+    description: string,
+    fileUrl?: string,
+    uploadDate?: string,
 }
 
 export interface DocumentCreateData {

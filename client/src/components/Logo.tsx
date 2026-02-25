@@ -1,11 +1,12 @@
+import { Link } from 'react-router'
 import LogoImage from '../assets/logo.png'
 
 function Logo() {
     return (
         <>
-            <div>
+            <Link to='/'>
                 <img src={LogoImage} alt="logo" width='250px' />
-            </div>
+            </Link>
         </>
     )
 }

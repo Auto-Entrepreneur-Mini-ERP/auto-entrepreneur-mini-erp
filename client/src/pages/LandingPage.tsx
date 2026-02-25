@@ -17,9 +17,15 @@ import {
   TrendingUp,
   Award,
   Clock,
-  HeadphonesIcon
+  HeadphonesIcon,
+  Box,
+  Receipt,
+  User,
+  Banknote
 } from "lucide-react";
 import { Button } from "../components/ui/button";
+import Logo from "../components/Logo";
+import LogoWhite from "../components/LogoWhite";
 
 export function LandingPage() {
   const modules = [
@@ -29,40 +35,40 @@ export function LandingPage() {
       description: "Vue d'ensemble complète avec KPIs en temps réel et analytics avancées"
     },
     {
+      icon: Box,
+      title: "Gestion des Produits/Services",
+      description: "Gestion des Produits intégrée avec suivi des quantités et inventaires"
+    },
+    {
+      icon: User,
+      title: "Gestion des Clients",
+      description: "Gestion des Client intégrée avec suivi des factures et paiements"
+    },
+    {
       icon: Wallet,
-      title: "Comptabilité",
-      description: "Gestion financière intégrée avec suivi des factures et paiements"
+      title: "Gestion des Devis et Factures",
+      description: "Gestion des Devis, et conversion en Factures"
+    },
+    {
+      icon: Banknote,
+      title: "Gestion des Paiements",
+      description: "Gestion des Paiements, et suivie avec les factures"
     },
     {
       icon: UserCog,
-      title: "Ressources Humaines",
-      description: "Gestion du personnel, congés et évaluations de performance"
+      title: "Déclaration de Chiffre d'affaire",
+      description: "Gestion du Chiffre d'affaire, Déclaration et évaluations de performance"
     },
     {
-      icon: Briefcase,
-      title: "Développement Commercial",
-      description: "CRM et pipeline de ventes pour optimiser vos opportunités"
-    },
-    {
-      icon: Truck,
-      title: "Opérations",
-      description: "Suivi logistique et gestion des opérations en temps réel"
+      icon: Receipt,
+      title: "Dépenses et CNSS",
+      description: "Suivi des Dépenses et gestion des opérations en temps réel"
     },
     {
       icon: FileBarChart,
-      title: "Rapports & Analytics",
-      description: "Rapports personnalisables et insights data-driven"
+      title: "Archive des Document",
+      description: "Archive sécurisée pour votre fichiers"
     },
-    {
-      icon: Settings,
-      title: "Administration",
-      description: "Configuration système et gestion des utilisateurs"
-    },
-    {
-      icon: Globe,
-      title: "Intégration Globale",
-      description: "Connectivité avec vos outils et systèmes existants"
-    }
   ];
 
   const features = [
@@ -73,7 +79,7 @@ export function LandingPage() {
     },
     {
       icon: Shield,
-      title: "Sécurité Enterprise",
+      title: "Sécurité des Données",
       description: "Protection des données avec chiffrement de niveau bancaire"
     },
     {
@@ -89,7 +95,7 @@ export function LandingPage() {
   ];
 
   const stats = [
-    { number: "94+", label: "Années d'Excellence" },
+    { number: "5+", label: "Années d'Excellence" },
     { number: "50K+", label: "Transactions/Mois" },
     { number: "99.9%", label: "Uptime Garanti" },
     { number: "24/7", label: "Support Client" }
@@ -102,7 +108,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
+            {/* <Link to="/" className="flex items-center gap-3">
               <div className="w-12 h-12 bg-[#2D3194] rounded-2xl flex items-center justify-center shadow-sm">
                 <span className="text-white font-bold text-lg">IC</span>
               </div>
@@ -110,7 +116,8 @@ export function LandingPage() {
                 <h2 className="text-[#2D3194] font-bold text-xl">ICSA Group</h2>
                 <p className="text-[#7A7A7A] text-xs">Enterprise Portal</p>
               </div>
-            </Link>
+            </Link> */}
+            <Logo />
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-8">
@@ -157,17 +164,17 @@ export function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 bg-[#F8BC00]/10 text-[#2D3194] px-4 py-2 rounded-full mb-6">
                 <Award className="w-4 h-4" />
-                <span className="text-sm font-semibold">94 Ans d'Excellence en Logistique</span>
+                <span className="text-sm font-semibold">5 Ans d'Excellence</span>
               </div>
 
               <h1 className="text-5xl lg:text-6xl font-bold text-[#2D3194] mb-6 leading-tight">
-                Votre Portail d'Entreprise
+                Votre Portail d'Auto Entrepreneur
                 <span className="block text-[#F8BC00] mt-2">Tout-en-Un</span>
               </h1>
 
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Gérez l'ensemble de vos opérations commerciales avec une plateforme ERP moderne, 
-                intuitive et conçue pour les entreprises de logistique de classe mondiale.
+                Gérez l'ensemble de vos opérations commerciales avec une plateforme moderne, 
+                intuitive et conçue pour les auto entrepreneurs.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
@@ -191,7 +198,7 @@ export function LandingPage() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-6 h-6 text-[#F8BC00]" />
-                  <span className="text-gray-700 font-medium">Installation Rapide</span>
+                  <span className="text-gray-700 font-medium">Initialisation Rapide</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-6 h-6 text-[#F8BC00]" />
@@ -277,7 +284,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-[#2D3194] mb-4">
-              Pourquoi Choisir ICSA ERP ?
+              Pourquoi Choisir AUTO MANAGER ?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Une plateforme complète conçue pour transformer votre entreprise avec des outils puissants et intuitifs
@@ -343,15 +350,15 @@ export function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 bg-[#F8BC00]/10 text-[#2D3194] px-4 py-2 rounded-full mb-6">
                 <TrendingUp className="w-4 h-4" />
-                <span className="text-sm font-semibold">Leader du Secteur depuis 1932</span>
+                <span className="text-sm font-semibold">Leader du Secteur depuis 2020</span>
               </div>
 
               <h2 className="text-4xl font-bold text-[#2D3194] mb-6">
-                94 Années d'Excellence et d'Innovation
+                5 Années d'Excellence et d'Innovation
               </h2>
 
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                ICSA Group est un pilier de l'industrie logistique depuis près d'un siècle. 
+                AUTO MANAGER est un pilier de l'industrie logistique depuis près d'un siècle. 
                 Notre plateforme ERP combine notre expertise légendaire avec les technologies les plus avancées.
               </p>
 
@@ -416,7 +423,7 @@ export function LandingPage() {
 
               <div className="bg-[#2D3194] rounded-2xl p-8 text-white">
                 <Award className="w-10 h-10 text-[#F8BC00] mb-4" />
-                <div className="text-3xl font-bold mb-2">94</div>
+                <div className="text-3xl font-bold mb-2">5+</div>
                 <p className="text-white/80">Années d'Excellence</p>
               </div>
             </div>
@@ -433,10 +440,10 @@ export function LandingPage() {
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-            Prêt à Transformer Votre Entreprise ?
+            Prêt à Transformer Votre Activité ?
           </h2>
           <p className="text-xl text-white/90 mb-10 leading-relaxed">
-            Rejoignez des centaines d'entreprises qui font confiance à ICSA ERP pour gérer leurs opérations quotidiennes
+            Rejoignez des centaines d'auto entrepreneurs qui font confiance à AUTO MANAGER pour gérer leurs opérations quotidiennes
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -448,7 +455,7 @@ export function LandingPage() {
             </Link>
             <Button 
               variant="outline" 
-              className="border-2 border-white text-white hover:bg-white hover:text-[#2D3194] rounded-xl px-8 h-14 text-lg font-semibold w-full sm:w-auto"
+              className="border-2 border-white text-[#2D3194] hover:bg-white hover:text-[#2D3194] rounded-xl px-8 h-14 text-lg font-semibold w-full sm:w-auto"
             >
               <HeadphonesIcon className="mr-2 w-5 h-5" />
               Contacter un Expert
@@ -467,7 +474,7 @@ export function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             {/* Company Info */}
             <div className="md:col-span-1">
-              <div className="flex items-center gap-3 mb-4">
+              {/* <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-[#F8BC00] rounded-xl flex items-center justify-center">
                   <span className="text-[#2D3194] font-bold">IC</span>
                 </div>
@@ -475,9 +482,10 @@ export function LandingPage() {
                   <h3 className="font-bold">ICSA Group</h3>
                   <p className="text-xs text-gray-400">Enterprise Portal</p>
                 </div>
-              </div>
+              </div> */}
+              <LogoWhite />
               <p className="text-sm text-gray-400 leading-relaxed">
-                Leader en solutions logistiques depuis 1932
+                Leader en solutions logistiques depuis 2020
               </p>
             </div>
 
@@ -517,7 +525,7 @@ export function LandingPage() {
 
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-400">
-              © 2026 ICSA Group. Tous droits réservés.
+              © 2026 AUTO MANAGER. Tous droits réservés.
             </p>
             <div className="flex gap-6">
               <a href="#" className="text-gray-400 hover:text-[#F8BC00] transition-colors">

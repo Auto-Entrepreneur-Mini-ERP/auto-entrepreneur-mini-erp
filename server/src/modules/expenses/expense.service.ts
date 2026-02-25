@@ -3,8 +3,6 @@ import { prisma } from "../../lib/prisma.js";
 import type { Prisma } from "../../../generated/prisma/browser.js";
 import * as fs from "fs";
 import * as path from "path";
-// ✅ Correct import for ExcelJS with "module": "nodenext" + verbatimModuleSyntax
-// ExcelJS is a CJS package — use createRequire or import the default export this way
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const ExcelJS = require("exceljs") as typeof import("exceljs");
@@ -22,11 +20,15 @@ const CATEGORY_LABELS: Record<string, string> = {
   FOURNITURES: "Fournitures",
   TRANSPORT: "Transport",
   COMMUNICATION: "Communication",
+  ABONNEMENT: "Abonnement",
   FORMATION: "Formation",
   LOGICIEL: "Logiciel",
+  EQUIPEMENT: "Équipement",
+  HÉBERGEMENT: "Hébergement",
   REPAS: "Repas",
   LOYER: "Loyer / Bureau",
   MATERIEL: "Matériel",
+  MAINTENANCE: "Maintenance",
   PUBLICITE: "Publicité",
   ASSURANCE: "Assurance",
   AUTRE: "Autre",

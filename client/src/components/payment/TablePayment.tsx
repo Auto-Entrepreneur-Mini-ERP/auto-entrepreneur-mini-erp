@@ -1,21 +1,54 @@
 import { Download, Eye, Handshake } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePayment } from "../../hooks/usePayment";
 import ModalViewPayment from "./ModalViewPayment";
 import type { Payment } from "../../types/payment.types";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../ui/pagination";
 
 type TablePaymentProps = {
-  payments: Payment[]
+  initialHighlightId?: string | null;
 }
 
 function TablePayment({
-  payments,
+  initialHighlightId,
 }: TablePaymentProps) {
-
-  const { errors, onePayment, getOnePayment, reconsiliatePayment } = usePayment();
+  const { errors, onePayment, payments, paymentsCount, fetchPayments, getOnePayment, reconsiliatePayment } = usePayment();
+  const [page, setPage] = useState<number>(1);
+  const limit = 10;
 
   const [isViewPaymentModalOpen, setIsViewPaymentModalOpen] = useState(false);
-  // const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchPayments(page, limit);
+  }, []);
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    fetchPayments(newPage, limit)
+  }
+
+//  useEffect(() => {
+//     if (initialHighlightId) {
+//       getOnePayment(initialHighlightId);
+//       setIsViewPaymentModalOpen(true);
+//     }
+//   }, [initialHighlightId]);
+useEffect(() => {
+  const run = async () => {
+    if (initialHighlightId) {
+      await getOnePayment(initialHighlightId);
+      setIsViewPaymentModalOpen(true);
+    }
+  };
+  run();
+}, [initialHighlightId, getOnePayment]);
 
   const handleViewPayment = (id: string) => {
     getOnePayment(id);
@@ -67,7 +100,7 @@ function TablePayment({
               </tr>
             </thead>
             <tbody>
-              {payments?.length > 0 && payments?.map((transaction: Payment) => (
+              {payments && payments?.length > 0 && payments?.map((transaction: Payment) => (
                 <tr
                   key={transaction.id}
                   className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
@@ -139,13 +172,54 @@ function TablePayment({
               ))}
             </tbody>
           </table>
-          {payments?.length === 0 && (
+          {payments && payments?.length === 0 && (
             <div className="p-3 text-center text-gray-500">
               Aucune Paiement trouvée.
             </div>
           )}
         </div>
+        {paymentsCount > limit && (
+        <div className="mt-6 mb-2 flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                size='default'
+                  onClick={() => page > 1 && handlePageChange(page - 1)}
+                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  href="#"
+                />
+              </PaginationItem>
+
+              {Array.from({ length: Math.ceil(paymentsCount / limit) }, (_, i) => i + 1).map((pageNum) => (
+                <PaginationItem key={pageNum}>
+                  <PaginationLink
+                  size='default'
+                    onClick={() => handlePageChange(pageNum)}
+                    isActive={page === pageNum}
+                    href="#"
+                    className="cursor-pointer"
+                  >
+                    {pageNum}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                size='default' 
+                  onClick={() => page < Math.ceil(paymentsCount / limit) && handlePageChange(page + 1)}
+                  className={page === Math.ceil(paymentsCount / limit) ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  href="#"
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
       </div>
+
+      
 
       <ModalViewPayment payment={onePayment as Payment} isPaymentModalOpen={isViewPaymentModalOpen} setIsPaymentModalOpen={setIsViewPaymentModalOpen}/>
     </>

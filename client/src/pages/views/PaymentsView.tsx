@@ -4,27 +4,37 @@ import { Input } from "../../components/ui/input";
 import { useEffect, useState } from "react";
 import TablePayment from "../../components/payment/TablePayment";
 import ModalCreatePayment from "../../components/payment/ModalCreatePayment";
-import { usePayment } from "../../hooks/usePayment";
-import type { Payment } from "../../types/payment.types";
+// import ModalViewPayment from "../../components/payment/ModalViewPayment";
+// import { usePayment } from "../../hooks/usePayment";
+// import type { Payment } from "../../types/payment.types";
+import { useSearchParams } from "react-router";
 
 export function PaymentsView() {
 
-  const { payments, fetchPayments } = usePayment();
+  const [searchParams] = useSearchParams();
 
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  // const { payments} = usePayment();
+
+const [highlightId, setHighlightId] = useState<string | null>(null);  
+const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    fetchPayments();
-  }, []);
+  const run = () => {
+    const id = searchParams.get("highlight");
+    if (id) setHighlightId(id);
+  };
+  run();
+}, [searchParams]);
 
   const handlePaymentSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
   };
 
-  const handleExcelExport = () => {
-
-  };
+  const handleExcelExport = () => {};
 
   return (
     <div className="py-8">
@@ -68,7 +78,10 @@ export function PaymentsView() {
             <FileDown className="w-4 h-4" />
             <span className="hidden sm:inline text-sm">Export Excel</span>
           </button>
-          <Button className="bg-white hover:bg-gray-50 text-green-600 border-2 border-green-600 h-12 px-6 rounded-xl" onClick={() => setIsPaymentModalOpen(true)}>
+         <Button
+            className="bg-white hover:bg-gray-50 text-green-600 border-2 border-green-600 h-12 px-6 rounded-xl"
+            onClick={() => setIsPaymentModalOpen(true)}
+          >
             <ArrowDownRight className="w-5 h-5 mr-2" />
             Enregistrer un Paiement
           </Button>
@@ -77,11 +90,12 @@ export function PaymentsView() {
 
       {/* Table */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm">
-        <TablePayment payments={payments as Payment[]} />
-      </div>
+<TablePayment initialHighlightId={highlightId} />      </div>
 
-      {/* Payment Modal */}
-      <ModalCreatePayment isPaymentModalOpen={isPaymentModalOpen} setIsPaymentModalOpen={setIsPaymentModalOpen} />
+      <ModalCreatePayment
+        isPaymentModalOpen={isPaymentModalOpen}
+        setIsPaymentModalOpen={setIsPaymentModalOpen}
+      />
     </div>
   );
 }

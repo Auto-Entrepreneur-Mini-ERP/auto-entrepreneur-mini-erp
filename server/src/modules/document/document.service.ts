@@ -70,6 +70,9 @@ const updateDocument = async (autoentrepreneurId: string, documentId: string,  d
         category: data.category || null,
         description: data.description || null
     };
+    console.log(data);
+    console.log(DocumentUpdateData);
+    
 
     const updatedDoc = await prisma.document.update({
         where: {
@@ -89,7 +92,6 @@ const deleteDocument = async (autoentrepreneurId: string, documentId: string) =>
     await prisma.document.delete({
         where:{
             id: documentId,
-            AutoEntrepreneurId: autoentrepreneurId
         }
     });
 

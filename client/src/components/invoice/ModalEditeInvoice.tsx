@@ -104,7 +104,7 @@ function ModalEditInvoice({
       {/* Invoice Modal */}
       <Modal
         maxWidth="max-w-7xl"
-        title="Créer une facture"
+        title="Modifier une facture"
         isOpen={isInvoiceModalOpen}
         onClose={() => setIsInvoiceModalOpen(false)}
       >

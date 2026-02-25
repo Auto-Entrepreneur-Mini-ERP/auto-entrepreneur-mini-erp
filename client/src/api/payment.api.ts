@@ -1,8 +1,8 @@
 import type { PaymentCreateInput } from "../types/payment.types";
 import { api } from "./axios";
 
-const getAllPayment = async () => {
-    const resposne = await api.get("/payment");
+const getAllPayment = async (page: number, limit: number) => {
+    const resposne = await api.get("/payment", { params: { page, limit } });
     return resposne;
 }
 

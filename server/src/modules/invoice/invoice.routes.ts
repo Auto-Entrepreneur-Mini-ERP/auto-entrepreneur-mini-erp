@@ -36,8 +36,8 @@ router.delete('/invoice/:invoiceId',
     invoiceController.deleteInvoice
 );
 
-router.get('/invoice/:invoiceId/pdf',
-    invoiceController.getOneInvoice
+router.get('/invoice/:invoiceId/download',
+    invoiceController.downloadInvoice
 );
 
 router.get('/invoice/:invoiceId/export-excel',

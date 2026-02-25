@@ -14,12 +14,21 @@ export type LineType = {
 }
 
 export const PaymentMethod = {
-  CASH : "CASH",
-  CHECK : "CHECK",
-  BANK_TRANSFER : "TRANSFERT BANCAIRE",
-  CREDIT_CARD : "CREDIT CARD",
-  MOBILE_PAYMENT : "MOBILE PAYMENT",
-  OTHER : "OTHER",
+  CASH: "CASH",
+  CHECK: "CHECK",
+  BANK_TRANSFER: "BANK_TRANSFER",
+  CREDIT_CARD: "CREDIT_CARD",
+  MOBILE_PAYMENT: "MOBILE_PAYMENT",
+  OTHER: "OTHER",
+}
+
+export const PaymentMethodLabels: Record<string, string> = {
+  CASH: "Espèces",
+  CHECK: "Chèque",
+  BANK_TRANSFER: "Transfert bancaire",
+  CREDIT_CARD: "Carte bancaire",
+  MOBILE_PAYMENT: "Paiement mobile",
+  OTHER: "Autre",
 }
 
 export interface Invoice {
@@ -75,7 +84,6 @@ export interface InvoiceLine {
         }
     },
 }
-
 export interface CreateInvoiceData {
     customerId: string,
     customerName?: string,
@@ -89,7 +97,10 @@ export interface CreateInvoiceData {
 export interface CreateInvoiceLineData{
     order: number,
     lineType: LineType,
-    name: string,
+    // `name` is only used client‑side for display and auto‑complete purposes,
+    // it is stripped before payloads are sent to the server because the
+    // Prisma `InvoiceLine` model does not have a `name` column.
+    name?: string,
     quantity: number,
     unitPrice: number,
     productId?: string,
@@ -104,6 +115,7 @@ export interface UpdateInvoiceData {
 export interface UpdateInvoiceLineData{
     order: number,
     lineType: LineType,
+    // client-only display field; removed before sending to back-end
     name?: string,
     quantity: number,
     unitPrice: number,

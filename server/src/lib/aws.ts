@@ -4,7 +4,7 @@ import { v4 as uuid } from "uuid";
 
 // const s3 = new S3Client();
 const s3 = new S3Client({
-  region: process.env.AWS_REGION || 'global',
+  region: process.env.AWS_REGION as string,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
@@ -36,9 +36,6 @@ const s3Upload = async (file: Express.Multer.File) => {
   return fileUrl;
 };
 
-const s3GetObj = async (name: string) => {
-
-};
 
 export const aws = {
   s3Upload

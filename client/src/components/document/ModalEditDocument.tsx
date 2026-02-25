@@ -1,7 +1,7 @@
 import { Modal } from "../ui/modal"
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { type Document, type DocumentUpdateData } from "../../types/document.types"
 import { useDocument } from "../../hooks/useDocument"
 import { Label } from "../ui/label"
@@ -20,10 +20,19 @@ function ModalEditDocument({
 
   const { errors, editDocument } = useDocument();
 
-  const [documentFormData, setDocumentFormData] = useState<DocumentUpdateData>(document);
+  const [documentFormData, setDocumentFormData] = useState<DocumentUpdateData>();
+
+  useEffect(()=>{
+    setDocumentFormData({
+    name: document?.name,
+    category: document?.category,
+    description: document?.description,
+  })
+  }, [document])
   
-  const handleDocumentSubmit = async () => {
-    editDocument(document.id as string, documentFormData as DocumentUpdateData);
+  const handleDocumentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await editDocument(document.id as string, documentFormData as DocumentUpdateData);
     if(!errors){
       setIsDocumentModalOpen(false);
       window.location.reload();
@@ -43,7 +52,7 @@ function ModalEditDocument({
             <div className="mb-4">
               <Label htmlFor="docName" className="mb-2">Nom du Document</Label>
               <Input
-                type="number"
+                type="text"
                 id="docName"
                 value={documentFormData?.name}
                 onChange={(e) =>

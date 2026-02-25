@@ -20,6 +20,7 @@ import { CNSSPaymentView } from "./pages/views/CNSSPaymentView";
 import { DocumentsView } from "./pages/views/DocumentsView";
 import { CustomersView } from "./pages/views/CustomersView";
 // import { AnalyticsView } from "./pages/views/AnalyticsView";
+import { NotificationsView } from './pages/views/NotificationsView';
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +63,8 @@ export const router = createBrowserRouter([
       { path: "customers", Component: CustomersView },
       // { path: "analytics", Component: AnalyticsView },
       { path: "profile", Component: ProfilePage },
+      { path: 'notifications', Component: NotificationsView },
+      
     ],
   },
 ]);
