@@ -56,7 +56,7 @@ const createDocument = async (autoentrepreneurId: string, data: DocumentCreateIn
 
     const newDoc = await prisma.document.create({
         data: DocumentInputData
-    }) as DocumentOutput;
+    }) as unknown as DocumentOutput;
 
     return newDoc;
 };

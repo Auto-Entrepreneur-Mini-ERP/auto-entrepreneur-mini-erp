@@ -43,7 +43,7 @@ const createCustomer = async (authID : string,customerData: customer) => {
   return newCustomer;
 };
  
-const updateCustomer = async (id: string, customerData: Partial<Customer>) => {
+const updateCustomer = async (id: string, customerData: Partial<customer>) => {
   const data: any = {};
 
   // Customer fields

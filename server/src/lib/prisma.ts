@@ -9,12 +9,17 @@ const adapter = new PrismaMariaDb({
   database: process.env.DATABASE_NAME || '',
   connectionLimit: 5
 });
-const prisma = new PrismaClient({adapter});
+
+const prisma = new PrismaClient({ adapter });
 
 prisma.$connect()
   .then(() => console.log('✅ Prisma connected to database'))
-  .catch((error) => {
-    console.error('❌ Failed to connect to database:', error.message);
+  .catch((error: unknown) => {
+    if (error instanceof Error) {
+      console.error('❌ Failed to connect to database:', error.message);
+    } else {
+      console.error('❌ Failed to connect to database:', error);
+    }
   });
 
 export { prisma }

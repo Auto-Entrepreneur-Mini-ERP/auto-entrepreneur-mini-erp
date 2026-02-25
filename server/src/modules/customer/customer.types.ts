@@ -7,14 +7,13 @@ export interface User {
   phone?: string;
   address?: string; 
 }
- export interface customer {
-  userId          :string     
-  ice             :string     
-  city            :string 
-  country         :string    
-  AutoEntrepreneurId: string
-   user: User;
-  
-  
-   
-}
+
+export interface customer {
+  userId: string;
+  ice: string;
+  city?: string;
+  country?: string;
+  AutoEntrepreneurId: string;
+  isActive?: boolean;
+  user: User;
+} 

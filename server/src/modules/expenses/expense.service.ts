@@ -152,10 +152,10 @@ export class ExpenseService {
     }
 
     const expenses = await prisma.expense.findMany({ where });
-    const totalAmount = expenses.reduce((s, e) => s + Number(e.amount), 0);
+    const totalAmount = expenses.reduce((s: number, e: any) => s + Number(e.amount), 0);
     const deductibleAmount = expenses
-      .filter((e) => e.isDeductible)
-      .reduce((s, e) => s + Number(e.amount), 0);
+      .filter((e: any) => e.isDeductible)
+      .reduce((s: number, e: any) => s + Number(e.amount), 0);
 
     const categoryMap = new Map<string, { total: number; count: number }>();
     for (const e of expenses) {
@@ -207,7 +207,7 @@ export class ExpenseService {
 
     // ── Header row styling
     const headerRow = sheet.getRow(1);
-    headerRow.eachCell((cell: { fill: { type: string; pattern: string; fgColor: { argb: string; }; }; font: { bold: boolean; color: { argb: string; }; size: number; }; alignment: { vertical: string; horizontal: string; }; border: { bottom: { style: string; color: { argb: string; }; }; }; }) => {
+    headerRow.eachCell((cell: any) => {
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF2D3194" } };
       cell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 11 };
       cell.alignment = { vertical: "middle", horizontal: "center" };
@@ -229,7 +229,7 @@ export class ExpenseService {
       });
 
       const bgColor = idx % 2 === 0 ? "FFFAFAFA" : "FFFFFFFF";
-      row.eachCell((cell: { fill: { type: string; pattern: string; fgColor: { argb: string; }; }; alignment: { vertical: string; }; border: { bottom: { style: string; color: { argb: string; }; }; }; }) => {
+      row.eachCell((cell: any) => {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: bgColor } };
         cell.alignment = { vertical: "middle" };
         cell.border = { bottom: { style: "hair", color: { argb: "FFE8E8E8" } } };
@@ -252,9 +252,9 @@ export class ExpenseService {
       sheet.addRow({});
       const totalRow = sheet.addRow({
         description: "TOTAL",
-        amount: expenses.reduce((s, e) => s + Number(e.amount), 0),
+        amount: expenses.reduce((s: number, e: any) => s + Number(e.amount), 0),
       });
-      totalRow.eachCell((cell: { fill: { type: string; pattern: string; fgColor: { argb: string; }; }; font: { bold: boolean; size: number; }; alignment: { vertical: string; }; }) => {
+      totalRow.eachCell((cell: any) => {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8BC00" } };
         cell.font = { bold: true, size: 11 };
         cell.alignment = { vertical: "middle" };
