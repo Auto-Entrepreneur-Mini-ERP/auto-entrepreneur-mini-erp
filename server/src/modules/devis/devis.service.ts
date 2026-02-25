@@ -3,6 +3,8 @@ import type { CreateQuoteInput, UpdateQuoteInput } from './devis.types.js';
 import { Prisma, PrismaClient } from '../../../generated/prisma/client.js';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { quoteNumberGenerator } from './utils/quoteNumberGenerator.js';
+import { generateQuoteHTML } from './utils/quoteTemplate.js';
+import puppeteer from 'puppeteer'
 
 const adapter = new PrismaMariaDb({
   host: process.env.DATABASE_HOST || '',
@@ -164,5 +166,47 @@ export class DevisService {
       data: { status },
     });
   }
+
+  async generatePdf(id: string) {
+    const quote = await prisma.quote.findUnique({
+    where: { id },
+    include: {
+      quoteLines: {
+        include: {
+          product: {
+            include: { item: true },
+          },
+          service: true,
+        },
+      },
+      customer: {
+        include: { user: true },
+      },
+    },
+  });
+
+  const browser = await puppeteer.launch({
+    headless: true,
+  });
+
+  const page = await browser.newPage();
+
+  const html = generateQuoteHTML(quote);
+
+  await page.setContent(html, { waitUntil: "domcontentloaded" });
+
+  const pdf = await page.pdf({
+    format: "A4",
+    printBackground: true,
+  });
+
+  await browser.close();
+    return {
+      pdf,
+      quoteNumber: quote?.quoteNumber
+    }
+  }
+
+
 }
 

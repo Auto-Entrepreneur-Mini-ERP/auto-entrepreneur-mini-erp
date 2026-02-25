@@ -12,11 +12,8 @@ import {
     TableHeader,
     TableRow,
 } from "../ui/table";
-import { CircleArrowDown, CircleArrowUp, CircleX, HandCoins, Search } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { PaymentMethod } from "../../types/invoice.types";
+import { CircleArrowDown, CircleArrowUp, CircleX, Search } from "lucide-react";
 import { useQuote } from "../../hooks/useQuote";
-import { useNavigate } from "react-router";
 import type { CreateQuoteInput, QuoteLineInput } from "../../types/quote.types";
 
 type ModalQuoteProps = {
@@ -51,7 +48,6 @@ function ModalCreateQuote({
     isQuoteModalOpen,
     setIsQuoteModalOpen,
 }: ModalQuoteProps) {
-    const navigate = useNavigate();
 
     const { errors, getCustomersNames, getArticlesNames, createQuote } = useQuote();
 
@@ -67,11 +63,9 @@ function ModalCreateQuote({
 
     const handleQuoteSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(quoteFormData, quoteLineFormData);
-        
         await createQuote(quoteFormData as CreateQuoteInput, quoteLineFormData as QuoteLineInput[]);
         if (!errors) {
-            navigate("/quots-invoices");
+            window.location.reload();
             setIsQuoteModalOpen(false);
             setQuoteFormData(undefined);
             setQuoteLineFormData([]);
@@ -152,7 +146,7 @@ function ModalCreateQuote({
                                 {showCustomerSearch && (
                                     <div className="absolute w-full border border-gray-200 rounded-xl mt-1 max-h-40 overflow-y-auto z-10 bg-white">
                                         {customerSearch.length > 0 && customerSearch?.map((customer) => (
-                                            <div onClick={handleSelectSuggestedCustomer(customer.id, customer.user.firstName +" "+ customer.user.lastName)} key={customer.id} className="p-2 hover:bg-gray-100 cursor-pointer">
+                                            <div onClick={handleSelectSuggestedCustomer(customer.id, customer.user.firstName + " " + customer.user.lastName)} key={customer.id} className="p-2 hover:bg-gray-100 cursor-pointer">
                                                 {customer.user.firstName} {customer.user.lastName}
                                             </div>
                                         ))}
@@ -178,7 +172,7 @@ function ModalCreateQuote({
                                     className="h-10 mt-1 border-gray-200 rounded-xl"
                                 />
                             </div>
-                            
+
                             <div>
                                 <Label htmlFor="notes">Notes</Label>
                                 <Input

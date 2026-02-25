@@ -39,6 +39,7 @@
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.12",
     "otp-generator": "^4.0.1",
+    "puppeteer": "^24.37.5",
     "uuid": "^13.0.0",
     "zod": "^4.3.5"
   },

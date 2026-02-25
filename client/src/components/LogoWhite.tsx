@@ -1,14 +1,14 @@
 import { Link } from 'react-router'
-import LogoImage from '../assets/logo.png'
+import LogoImage from '../assets/logo_white.png'
 
-function Logo() {
-    return (
-        <>
+function LogoWhite() {
+  return (
+    <><>
             <Link to='/'>
                 <img src={LogoImage} alt="logo" width='250px' />
             </Link>
-        </>
-    )
+        </></>
+  )
 }
 
-export default Logo
+export default LogoWhite

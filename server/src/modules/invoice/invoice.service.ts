@@ -11,6 +11,9 @@ import { PaymentMethod, Prisma } from '../../../generated/prisma/browser.js';
 import { paymentService } from '../payment/payment.service.js';
 import type { PaymentCreateInput } from '../payment/payment.types.js';
 import { paymentNumberGenerator } from '../payment/utils/paymentNumberGenerator.js';
+import { generateInvoiceHTML } from './utils/invoiceTemplate.js';
+import puppeteer from "puppeteer";
+
 
 const getAllInvoices = async (autoentrepreneurId: string, page: number, limit: number) => {
 
@@ -200,7 +203,9 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
     }) as unknown as InvoiceOutput;
     if (!newCompleteInvoice) throw new Error();
     //create payment based on status
-    if (newCompleteInvoice.paidAmount) {
+    console.log(newCompleteInvoice.paidAmount);
+    
+    if (newCompleteInvoice.paidAmount > 0) {
         const lastPayment = await prisma.payment.findFirst({
             select: {
                 reference: true
@@ -333,6 +338,53 @@ const deleteInvoice = async (autoentrepreneurId: string, invoiceId: string) => {
     return true;
 };
 
+const generatePdf = async (autoentrepreneurId: string, invoiceId: string) => {
+
+    const invoice = await prisma.invoice.findUnique({
+        where: {
+            id: invoiceId
+        },
+        include: {
+            invoiceLines: {
+                include: {
+                    product: {
+                        include: {
+                            item: true,
+                        },
+                    },
+                    service: true,
+                },
+            },
+            customer: {
+                include: {
+                    user: true,
+                },
+            },
+        },
+    });
+
+    const browser = await puppeteer.launch({
+        headless: true,
+    });
+
+    const page = await browser.newPage();
+
+    const html = generateInvoiceHTML(invoice);
+
+    await page.setContent(html, { waitUntil: "domcontentloaded" });
+
+    const pdf = await page.pdf({
+        format: "A4",
+        printBackground: true,
+    });
+
+    await browser.close();
+    return {
+        pdf,
+        invoiceNumber: invoice?.invoiceNumber
+    }
+}
+
 
 export const invoicesService = {
     getAllInvoices,
@@ -342,4 +394,5 @@ export const invoicesService = {
     updateInvoice,
     cancelInvoice,
     deleteInvoice,
+    generatePdf,
 };
