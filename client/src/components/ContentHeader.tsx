@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Bell, User, Sun, Moon, Calendar, Menu, X, Package, AlertTriangle } from "lucide-react";
+import { User, Sun, Moon, Calendar, Menu, X, Package, AlertTriangle } from "lucide-react";
 import { productApi, type Product } from "../api/catalogApi";
+import { NotificationBell } from './notifications/NotificationBell';
 
 interface ContentHeaderProps {
   onMenuClick: () => void;
@@ -25,6 +26,21 @@ const formatPrice = (n: number) =>
 
 export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: ContentHeaderProps) {
   const [isDark, setIsDark] = useState(false);
+//   const [isDark, setIsDark] = useState(
+//   () => document.documentElement.classList.contains('dark')
+// );
+
+// const toggleTheme = () => {
+//   const newDark = !isDark;
+//   setIsDark(newDark);
+//   if (newDark) {
+//     document.documentElement.classList.add('dark');
+//     localStorage.setItem('theme', 'dark');
+//   } else {
+//     document.documentElement.classList.remove('dark');
+//     localStorage.setItem('theme', 'light');
+//   }
+// };
   const [showNotifications, setShowNotifications] = useState(false);
   const [alertProducts, setAlertProducts] = useState<Product[]>([]);
 
@@ -103,7 +119,7 @@ export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: Content
               className="w-10 h-10 rounded-[12px] bg-gray-50 hover:bg-[#2D3194]/5 flex items-center justify-center transition-all duration-300 hover:border hover:border-[#2D3194] relative"
               aria-label="Notifications"
             >
-              <Bell className="w-5 h-5 text-[#7A7A7A]" strokeWidth={2} />
+              <Package className="w-5 h-5 text-[#7A7A7A]" strokeWidth={2} />
               {/* Dynamic stock alert badge */}
               {alertCount > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full flex items-center justify-center px-1">
@@ -130,7 +146,7 @@ export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: Content
                 <div className="max-h-72 overflow-y-auto">
                   {alertCount === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 px-4 text-gray-400">
-                      <Bell className="w-8 h-8 mb-2 opacity-30" />
+                      <Package className="w-8 h-8 mb-2 opacity-30" />
                       <p className="text-sm text-center">Aucune alerte de stock</p>
                       <p className="text-xs text-center mt-1">Tous vos produits sont bien approvisionnés</p>
                     </div>
@@ -195,6 +211,7 @@ export function ContentHeader({ onMenuClick, isSidebarOpen, autoEData }: Content
           </div>
 
           {/* Profile */}
+          <NotificationBell />
           <div className="flex items-center gap-3">
             <div className="hidden sm:block text-right">
               <p className="text-[#1A1A1A] font-medium text-sm">
