@@ -203,7 +203,9 @@ const addInvoice = async (autoentrepreneurId: string, data: InvoiceCreateSchemaI
     }) as unknown as InvoiceOutput;
     if (!newCompleteInvoice) throw new Error();
     //create payment based on status
-    if (newCompleteInvoice.paidAmount) {
+    console.log(newCompleteInvoice.paidAmount);
+    
+    if (newCompleteInvoice.paidAmount > 0) {
         const lastPayment = await prisma.payment.findFirst({
             select: {
                 reference: true

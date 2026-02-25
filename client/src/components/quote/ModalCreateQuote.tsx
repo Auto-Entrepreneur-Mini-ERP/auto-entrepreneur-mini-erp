@@ -12,11 +12,8 @@ import {
     TableHeader,
     TableRow,
 } from "../ui/table";
-import { CircleArrowDown, CircleArrowUp, CircleX, HandCoins, Search } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { PaymentMethod } from "../../types/invoice.types";
+import { CircleArrowDown, CircleArrowUp, CircleX, Search } from "lucide-react";
 import { useQuote } from "../../hooks/useQuote";
-import { useNavigate } from "react-router";
 import type { CreateQuoteInput, QuoteLineInput } from "../../types/quote.types";
 
 type ModalQuoteProps = {
@@ -51,7 +48,6 @@ function ModalCreateQuote({
     isQuoteModalOpen,
     setIsQuoteModalOpen,
 }: ModalQuoteProps) {
-    const navigate = useNavigate();
 
     const { errors, getCustomersNames, getArticlesNames, createQuote } = useQuote();
 
@@ -67,11 +63,9 @@ function ModalCreateQuote({
 
     const handleQuoteSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(quoteFormData, quoteLineFormData);
-
         await createQuote(quoteFormData as CreateQuoteInput, quoteLineFormData as QuoteLineInput[]);
         if (!errors) {
-            navigate("/quots-invoices");
+            window.location.reload();
             setIsQuoteModalOpen(false);
             setQuoteFormData(undefined);
             setQuoteLineFormData([]);

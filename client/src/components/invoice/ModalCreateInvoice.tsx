@@ -17,7 +17,6 @@ import { CircleArrowDown, CircleArrowUp, CircleX, HandCoins, Search } from "luci
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { PaymentMethod } from "../../types/invoice.types";
 import { useInvoice } from "../../hooks/useInvoice";
-import { useNavigate } from "react-router";
 
 type ModalInvoiceProps = {
   isInvoiceModalOpen: boolean;
@@ -51,7 +50,6 @@ function ModalCreateInvoice({
   isInvoiceModalOpen,
   setIsInvoiceModalOpen,
 }: ModalInvoiceProps) {
-  const navigate = useNavigate();
 
   const { errors, getCustomersNames, getArticlesNames, createInvoice } = useInvoice();
 
@@ -69,11 +67,13 @@ function ModalCreateInvoice({
     e.preventDefault();
     // api all create invoice and invoice lines
     await createInvoice(invoiceFormData as CreateInvoiceData, invoiceLineFormData as CreateInvoiceLineData[]);
+    console.log(errors);
+    
     if (!errors) {
+      window.location.reload()
       setIsInvoiceModalOpen(false);
       setInvoiceFormData(undefined);
       setInvoiceLineFormData([]);
-      window.location.reload()
     }
   };
 

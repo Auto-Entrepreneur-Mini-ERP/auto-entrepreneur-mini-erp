@@ -31,12 +31,11 @@ function ModalCreatePayment({
     console.log("paymentData", paymentFormData);
     
     await createPayment(paymentFormData as PaymentCreateInput);
-    
-    // if (!errors) {
-    //   setIsPaymentModalOpen(false);
-    //   setPaymentFormData(undefined);
-    //   window.location.reload();
-    // }
+    if (!errors) {
+      setIsPaymentModalOpen(false);
+      setPaymentFormData(undefined);
+      window.location.reload();
+    }
   };
 
   const handleInvoiceNumberChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
