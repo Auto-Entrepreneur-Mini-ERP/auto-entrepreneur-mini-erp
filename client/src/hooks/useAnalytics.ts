@@ -62,7 +62,7 @@ export const useAnalytics = () => {
         recents,
         getKpisData,
         getMonthlyRevenuesData,
-        getMonthlyDepensesData,
+        getMonthlyDepencesData,
         getRecentsData,
     };
 };

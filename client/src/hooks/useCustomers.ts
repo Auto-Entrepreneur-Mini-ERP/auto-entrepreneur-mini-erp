@@ -74,7 +74,7 @@ export function useUpdateCustomer() {
 export function useCreateCustomer() {
   const [error, setError] = useState<Error | null>(null);
 
-  const createtCustomer = async ( data: CreateCustomerInput) => {
+  const createCustomer = async ( data: CreateCustomerInput) => {
     setError(null);
 
     try {
@@ -86,7 +86,7 @@ export function useCreateCustomer() {
     }  
   };
 
-  return { createtCustomer, error };
+  return { createCustomer, error };
 }
  
 export function useDeleteCustomer() {

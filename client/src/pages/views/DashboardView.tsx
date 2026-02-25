@@ -12,7 +12,7 @@ export function DashboardView() {
     recents,
     getKpisData, 
     getMonthlyRevenuesData,
-    getMonthlyDepensesData,
+    getMonthlyDepencesData,
     getRecentsData
   } = useAnalytics();
 
@@ -20,7 +20,7 @@ export function DashboardView() {
     (async () => {
       await getKpisData();
       await getMonthlyRevenuesData();
-      await getMonthlyDepensesData();
+      await getMonthlyDepencesData();
       await getRecentsData();
     })();
   },[]);  

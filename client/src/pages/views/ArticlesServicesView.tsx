@@ -9,16 +9,13 @@ import {
   AlertTriangle,
   RefreshCw,
   Wrench,
-  TrendingDown,
   DollarSign,
   BarChart2,
   Clock,
   Tag,
-  ChevronRight,
   X,
   CheckCircle2,
   ShieldAlert,
-  ArrowUpRight,
 } from "lucide-react";
 import { Modal } from "../../components/ui/modal";
 import { useState, useEffect, useCallback } from "react";
@@ -426,7 +423,7 @@ function ProductForm({
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
             placeholder="Ex: Câble HDMI 2m"
-            className={inputCls} required
+            className={inputCls}
           />
         </Field>
       </div>
@@ -435,7 +432,7 @@ function ProductForm({
           value={form.reference}
           onChange={(e) => set("reference", e.target.value)}
           placeholder="REF-001"
-          className={inputCls} required
+          className={inputCls}
         />
       </Field>
       <Field label="Catégorie">
@@ -443,7 +440,7 @@ function ProductForm({
           value={form.category}
           onChange={(e) => set("category", e.target.value)}
           placeholder="Électronique..."
-          className={inputCls} required
+          className={inputCls}
         />
       </Field>
       <Field label="Unité" required>
@@ -468,7 +465,7 @@ function ProductForm({
           value={form.unitPrice}
           onChange={(e) => set("unitPrice", e.target.value)}
           placeholder="0.00"
-          className={inputCls} required
+          className={inputCls}
         />
       </Field>
       <Field label="Stock initial">
@@ -477,7 +474,7 @@ function ProductForm({
           min={0}
           value={form.stockQuantity}
           onChange={(e) => set("stockQuantity", e.target.value)}
-          className={inputCls} required
+          className={inputCls}
         />
       </Field>
       <Field
@@ -528,7 +525,7 @@ function ServiceForm({
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
             placeholder="Ex: Transport express"
-            className={inputCls} required
+            className={inputCls}
           />
         </Field>
       </div>
@@ -538,7 +535,7 @@ function ServiceForm({
           value={form.category}
           onChange={(e) => set("category", e.target.value)}
           placeholder="Ex: Transport"
-          className={inputCls} required
+          className={inputCls}
         />
       </Field>
 
