@@ -67,7 +67,8 @@ const loginAutoEntrepreneur = async (data: loginSchemaInput) => {
         where:{
             email: data.email
         },
-    }) ;
+    });
+    console.log(user)
     if(!user) throw new AppError("Invalid Credentials", 400);
 
     const autoEntrepreneur = await prisma.autoEntrepreneur.findFirst({
