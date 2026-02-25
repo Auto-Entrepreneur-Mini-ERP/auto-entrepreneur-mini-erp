@@ -1,6 +1,6 @@
- import { api } from "./axios";
- import { PaymentStatus } from "../types/contribution.types";
- import type { Contribution } from "../types/contribution.types";
+import { api } from "./axios";
+import { PaymentStatus } from "../types/contribution.types";
+import type { Contribution, CurrentContribution } from "../types/contribution.types";
  
  // ── types ──────────────────────────────────────────────────────────────────
  
@@ -66,7 +66,7 @@
 const getCurrentContribution = async (): Promise<CurrentContribution> => {
   const response = await api.get("/contributions/current");
 
-  return (response.data);
+  return response.data as CurrentContribution;
 };
  
 export const contributionApi = {
