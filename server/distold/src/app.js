@@ -1,0 +1,38 @@
+import express from "express";
+import helmet from "helmet";
+import morgan from "morgan";
+import bodyParser from "body-parser";
+import cors from 'cors';
+import { errorHandler } from "./utils/errorHandler.js";
+import router from "./routes.js";
+import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
+import { env } from "./config/env.js";
+const app = express();
+app.get('/api', async (req, res) => {
+    return res.status(200).json({
+        message: 'Hello',
+    });
+});
+app.use(cors({
+    "origin": env.FRONT_END_URL || "http://localhost:5173",
+    "credentials": true
+}));
+app.use(helmet());
+app.use(rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100000000, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+    standardHeaders: 'draft-8'
+}));
+app.use(morgan('common'));
+app.use(bodyParser.json());
+app.use(cookieParser());
+// to avoid 304 not modified(cache prblms)
+app.use((req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+});
+app.use("/api", router);
+app.use(errorHandler);
+export default app;
+//# sourceMappingURL=app.js.map

@@ -1,0 +1,96 @@
+import type { TaxDeclaration } from "./taxDeclaration.types.js";
+import type { PatchTaxDeclarationDTO } from "./taxDeclaration.schema.js";
+import { DeclarationStatus } from "../../../generated/prisma/enums.js";
+export declare const taxDeclarationService: {
+    getAllTaxDeclarations: (autoEntrepreneurId: string) => Promise<{
+        year: number;
+        id: string;
+        taxRate: number;
+        creationDate: Date;
+        period: string;
+        dueDate: Date | null;
+        paymentDate: Date | null;
+        status: DeclarationStatus;
+        AutoEntrepreneurId: string;
+        pdfUrl: string | null;
+        taxAmount: import("@prisma/client-runtime-utils").Decimal;
+        month: number | null;
+        totalRevenue: import("@prisma/client-runtime-utils").Decimal;
+    }[]>;
+    createTaxDeclaration: (data: TaxDeclaration) => Promise<{
+        year: number;
+        id: string;
+        taxRate: number;
+        creationDate: Date;
+        period: string;
+        dueDate: Date | null;
+        paymentDate: Date | null;
+        status: DeclarationStatus;
+        AutoEntrepreneurId: string;
+        pdfUrl: string | null;
+        taxAmount: import("@prisma/client-runtime-utils").Decimal;
+        month: number | null;
+        totalRevenue: import("@prisma/client-runtime-utils").Decimal;
+    }>;
+    updateTaxDeclaration: (id: string, data: PatchTaxDeclarationDTO) => Promise<{
+        year: number;
+        id: string;
+        taxRate: number;
+        creationDate: Date;
+        period: string;
+        dueDate: Date | null;
+        paymentDate: Date | null;
+        status: DeclarationStatus;
+        AutoEntrepreneurId: string;
+        pdfUrl: string | null;
+        taxAmount: import("@prisma/client-runtime-utils").Decimal;
+        month: number | null;
+        totalRevenue: import("@prisma/client-runtime-utils").Decimal;
+    }>;
+    getTaxDeclaration: (id: string) => Promise<{
+        year: number;
+        id: string;
+        taxRate: number;
+        creationDate: Date;
+        period: string;
+        dueDate: Date | null;
+        paymentDate: Date | null;
+        status: DeclarationStatus;
+        AutoEntrepreneurId: string;
+        pdfUrl: string | null;
+        taxAmount: import("@prisma/client-runtime-utils").Decimal;
+        month: number | null;
+        totalRevenue: import("@prisma/client-runtime-utils").Decimal;
+    }>;
+    deleteTaxDeclaration: (id: string) => Promise<{
+        year: number;
+        id: string;
+        taxRate: number;
+        creationDate: Date;
+        period: string;
+        dueDate: Date | null;
+        paymentDate: Date | null;
+        status: DeclarationStatus;
+        AutoEntrepreneurId: string;
+        pdfUrl: string | null;
+        taxAmount: import("@prisma/client-runtime-utils").Decimal;
+        month: number | null;
+        totalRevenue: import("@prisma/client-runtime-utils").Decimal;
+    }>;
+    getCurrentTaxDeclaration: (autoEntrepreneurId: string, currentMonth: number, currentYear: number) => Promise<{
+        year: number;
+        id: string;
+        taxRate: number;
+        creationDate: Date;
+        period: string;
+        dueDate: Date | null;
+        paymentDate: Date | null;
+        status: DeclarationStatus;
+        AutoEntrepreneurId: string;
+        pdfUrl: string | null;
+        taxAmount: import("@prisma/client-runtime-utils").Decimal;
+        month: number | null;
+        totalRevenue: import("@prisma/client-runtime-utils").Decimal;
+    } | null>;
+};
+//# sourceMappingURL=taxDeclaration.service.d.ts.map

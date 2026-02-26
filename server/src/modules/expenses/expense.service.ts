@@ -1,6 +1,6 @@
 // expenses/expense.service.ts
 import { prisma } from "../../lib/prisma.js";
-import type { Prisma } from "../../../generated/prisma/browser.js";
+import type { Prisma, Expense } from "../../../generated/prisma/browser.js";
 import * as fs from "fs";
 import * as path from "path";
 import { createRequire } from "module";
@@ -216,7 +216,7 @@ export class ExpenseService {
     headerRow.height = 28;
 
     // ── Data rows
-    expenses.forEach((e, idx) => {
+    expenses.forEach((e: Expense, idx: number) => {
       const row = sheet.addRow({
         date: new Date(e.date).toLocaleDateString("fr-MA"),
         category: CATEGORY_LABELS[e.category] ?? e.category,
