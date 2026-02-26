@@ -17,7 +17,9 @@ function ModalCreatePayment({
   setIsPaymentModalOpen,
   isPaymentModalOpen,
 }: ModalCreatePaymentProps) {
-  const { getInvoicesByNumber, createPayment, errors } = usePayment();
+
+
+  const { errors, getInvoicesByNumber, createPayment } = usePayment();
 
   const [paymentFormData, setPaymentFormData] = useState<PaymentCreateInput>();
 
