@@ -19,7 +19,7 @@ function ModalCreatePayment({
 }: ModalCreatePaymentProps) {
 
 
-  const { getInvoicesByNumber, createPayment } = usePayment();
+  const { errors, getInvoicesByNumber, createPayment } = usePayment();
 
   const [paymentFormData, setPaymentFormData] = useState<PaymentCreateInput>();
 
