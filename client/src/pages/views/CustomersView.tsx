@@ -1,5 +1,4 @@
 import {
-  ArrowDownRight,
   Users,
   RefreshCw,
   MapPin,
@@ -80,7 +79,7 @@ export function CustomerProfile({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { updateCustomer } = useUpdateCustomer();
-  const { createtCustomer } = useCreateCustomer();
+  const { createCustomer } = useCreateCustomer();
 
   const handleUserChange = (field: keyof Customer["user"], value: string) => {
     setProfile((prev) => ({
@@ -112,7 +111,8 @@ export function CustomerProfile({
       setErrors({});
       console.log(mode);
       if (mode === "ADD") {
-        const created = await createtCustomer(result.data);
+        const payload = { ...result.data, AutoEntrepreneurId: "" };
+        const created = await createCustomer(payload);
         if (created) {
           setShowSuccess(true);
         }

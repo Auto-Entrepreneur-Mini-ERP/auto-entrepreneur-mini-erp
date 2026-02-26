@@ -7,13 +7,15 @@ import {
 } from "./utils/prepareData.js";
 
 import { AppError } from "../../utils/errorHandler.js";
-import type { TaxDeclaration } from "../../../generated/prisma/browser.js";
-import { DeclarationStatus } from "../../../generated/prisma/browser.js";
-import type { currentTaxDeclaaration } from "./taxDeclaration.types.js";
+import type { TaxDeclaration, currentTaxDeclaaration } from "./taxDeclaration.types.js";
+import { DeclarationStatus } from "../../../generated/prisma/enums.js";
 
 const getAllTaxDeclartion = async (req: Request, res: Response) => {
   try {
     const id = req.AutoEntrepreneurID;
+    if (!id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     const TaxDeclartions =
       await taxDeclarationService.getAllTaxDeclarations(id);
 
@@ -32,8 +34,11 @@ const getAllTaxDeclartion = async (req: Request, res: Response) => {
 const createTaxDeclaration = async (req: Request, res: Response) => {
   try {
     const AutoEntrepreneurID = req.AutoEntrepreneurID;
+    if (!AutoEntrepreneurID) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-    let data = await PrepareTaxDeclarationData(req.body, AutoEntrepreneurID);
+    const data = await PrepareTaxDeclarationData(req.body, AutoEntrepreneurID);
 
     const customer = await taxDeclarationService.createTaxDeclaration(
       data as TaxDeclaration,
@@ -51,7 +56,7 @@ const createTaxDeclaration = async (req: Request, res: Response) => {
 
 const patchTaxDeclaration = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const tax = await taxDeclarationService.updateTaxDeclaration(id, {
       ...req.body,
@@ -69,7 +74,7 @@ const patchTaxDeclaration = async (req: Request, res: Response) => {
 
 const getTaxDeclaration = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const customer = await taxDeclarationService.getTaxDeclaration(id);
     return res.status(200).json(customer);
   } catch (error: any) {
@@ -83,7 +88,7 @@ const getTaxDeclaration = async (req: Request, res: Response) => {
 
 const deleteTaxDeclaration = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     console.log(id);
     await taxDeclarationService.deleteTaxDeclaration(id);
     return res.status(204).send();
@@ -99,32 +104,40 @@ const deleteTaxDeclaration = async (req: Request, res: Response) => {
 const getCurrentTaxDeclarationInfo = async (req: Request, res: Response) => {
   try {
     const AutoEntrepreneurID = req.AutoEntrepreneurID;
+    if (!AutoEntrepreneurID) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     const now = new Date();
 
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
 
-    let declaration = await taxDeclarationService.getCurrentTaxDeclaration(
+    const declaration = await taxDeclarationService.getCurrentTaxDeclaration(
       AutoEntrepreneurID,
       currentMonth,
       currentYear,
     );
+
+    let data: currentTaxDeclaaration;
+
     if (!declaration) {
-      declaration = await prepareCurrentTaxDeclarationInfo(AutoEntrepreneurID);
+      data = await prepareCurrentTaxDeclarationInfo(AutoEntrepreneurID);
+    } else {
+      data = {
+        id: declaration.id ?? null,
+        totalRevenue: Number(declaration.totalRevenue ?? 0),
+        taxAmount: Number(declaration.taxAmount ?? 0),
+        ramainDays: declaration.dueDate
+          ? Math.ceil(
+              (declaration.dueDate.getTime() - now.getTime()) /
+                (1000 * 60 * 60 * 24),
+            )
+          : 0,
+        periode: declaration.period,
+        dueDate: declaration.dueDate ?? now,
+        status: declaration.status ?? DeclarationStatus.DRAFT,
+      };
     }
-     const data: currentTaxDeclaaration = {
-       id: declaration.id ?? null,
-       totalRevenue: declaration.totalRevenue ?? 0,
-       taxAmount: declaration.taxAmount ?? 0,
-       ramainDays: Math.ceil(
-         (declaration.dueDate!.getTime() - now.getTime()) /
-           (1000 * 60 * 60 * 24),
-       ),
-      
-       periode: declaration.period,
-       dueDate: declaration.dueDate!,
-       status: declaration.status!,
-     };
 
     return res.status(200).json(data);
   } catch (error: any) {

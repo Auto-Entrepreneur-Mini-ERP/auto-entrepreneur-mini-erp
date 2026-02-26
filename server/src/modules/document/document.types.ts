@@ -7,7 +7,7 @@ export interface DocumentOutput {
     fileUrl: string,
     fileSize: number,
     description?: string,
-    uploadDate?: string,
+    uploadDate?: Date | string,
     AutoEntrepreneurId: string,
 };
 

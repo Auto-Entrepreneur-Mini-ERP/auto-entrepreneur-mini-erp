@@ -30,10 +30,11 @@ export const calculateTotalRevenue = async (
     },
   });
 
-  return result._sum.paidAmount || 0;
+  const paidAmount = result._sum.paidAmount ?? 0;
+  return Number(paidAmount);
 };
 
-const getTaxRate = async (autoId : string) => {
+const getTaxRate = async (autoId: string) => {
   const result = await prisma.autoEntrepreneur.findFirst({
     select: {
       taxRate: true,
@@ -43,7 +44,7 @@ const getTaxRate = async (autoId : string) => {
     },
   });
 
-  return result
+  return result;
 }
 export async function prepareCurrentTaxDeclarationInfo(autoId: string): Promise<currentTaxDeclaaration> {
   const now = new Date();
@@ -61,10 +62,11 @@ export async function prepareCurrentTaxDeclarationInfo(autoId: string): Promise<
     year: "numeric",
   });
 
-  const [totalRevenue, { taxRate }] = await Promise.all([
+  const [totalRevenue, taxInfo] = await Promise.all([
     calculateTotalRevenue(autoId, currentYear, currentMonth),
     getTaxRate(autoId),
   ]);
+  const taxRate = taxInfo?.taxRate ?? 0;
 
   const taxAmount = parseFloat(((totalRevenue * taxRate) / 100).toFixed(2));
 
@@ -72,7 +74,7 @@ export async function prepareCurrentTaxDeclarationInfo(autoId: string): Promise<
     totalRevenue,
     taxAmount,
     ramainDays: remainDays,
-    period,
+    periode: period,
     dueDate,
     status: "DRAFT",
   };
@@ -82,16 +84,18 @@ export async function prepareCurrentTaxDeclarationInfo(autoId: string): Promise<
 
 export const PrepareTaxDeclarationData = async (data : any, autoEID: string) =>
 {
-  let totalRevenue = await calculateTotalRevenue(autoEID, data.year, data.month);
-  let rate = await getTaxRate(autoEID);
-  let tax: TaxDeclaration = {
+  const totalRevenue = await calculateTotalRevenue(autoEID, data.year, data.month);
+  const rate = await getTaxRate(autoEID);
+  const taxRate = rate?.taxRate ?? 0;
+
+  const tax: TaxDeclaration = {
     period: data.period,
     year: data.year,
     month: data.month ?? null,
 
-    totalRevenue: totalRevenue,
-    taxRate: rate.taxRate,
-    taxAmount: (totalRevenue * rate.taxRate) / 100,
+    totalRevenue,
+    taxRate,
+    taxAmount: (totalRevenue * taxRate) / 100,
 
     status: "DRAFT",
     dueDate: new Date(data.year, data.month ?? 12, 30),

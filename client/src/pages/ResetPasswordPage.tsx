@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Lock, Eye, EyeOff, CheckCircle2, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -7,8 +7,6 @@ import { Label } from "../components/ui/label";
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const email = location.state?.email || "";
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

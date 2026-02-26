@@ -20,7 +20,7 @@ export class ServiceService {
     }
     console.log(data.unit);
     
-    return prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const item = await tx.item.create({
         data: {
           name: data.name as string,
@@ -119,7 +119,7 @@ export class ServiceService {
       throw new Error('At least one rate (hourly or fixed) must be provided');
     }
 
-    return prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const itemUpdateData: Prisma.ItemUpdateInput = {};
       if (data.name !== undefined) itemUpdateData.name = data.name;
       if (data.description !== undefined) itemUpdateData.description = data.description;
