@@ -57,7 +57,7 @@ const getOneContribution = async (req: Request, res: Response) => {
 
     const contribution = await contributionService.getOneContribution(
       autoEntrepreneurId,
-      contributionId,
+      contributionId as string,
     );
 
     return res.status(200).json(contribution);
@@ -108,7 +108,7 @@ const modifyContributionStatus = async (req: Request, res: Response) => {
 
     const contribution = await contributionService.modifyContributionStatus(
       autoEntrepreneurId,
-      contributionId,
+      contributionId as string,
       body,
     );
 

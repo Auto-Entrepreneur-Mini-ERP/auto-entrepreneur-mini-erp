@@ -1,6 +1,7 @@
+import type { Prisma } from "generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/errorHandler.js";
-import type { customer } from "./customer.types.js";
+import type { customer, updateCustomer } from "./customer.types.js";
 
 const getAllCustomers = async (autoentrepreneurId: string) => {
   const customers = await prisma.customer.findMany({
@@ -43,8 +44,8 @@ const createCustomer = async (authID : string,customerData: customer) => {
   return newCustomer;
 };
  
-const updateCustomer = async (id: string, customerData: Partial<Customer>) => {
-  const data: any = {};
+const updateCustomer = async (id: string, customerData: updateCustomer) => {
+  const data: Prisma.CustomerUpdateInput = {};
 
   // Customer fields
   if (customerData.ice !== undefined) data.ice = customerData.ice;
@@ -59,7 +60,7 @@ const updateCustomer = async (id: string, customerData: Partial<Customer>) => {
 
   // Nested user fields
   if (customerData.user) {
-    const userData: any = {};
+    const userData: Prisma.UserUpdateInput = {};
 
     if (customerData.user.email !== undefined)
       userData.email = customerData.user.email;

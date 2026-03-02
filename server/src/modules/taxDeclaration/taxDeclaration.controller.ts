@@ -7,15 +7,14 @@ import {
 } from "./utils/prepareData.js";
 
 import { AppError } from "../../utils/errorHandler.js";
-import type { TaxDeclaration } from "../../../generated/prisma/browser.js";
 import { DeclarationStatus } from "../../../generated/prisma/browser.js";
-import type { currentTaxDeclaaration } from "./taxDeclaration.types.js";
+import type { TaxDeclaration, currentTaxDeclaaration } from "./taxDeclaration.types.js";
 
 const getAllTaxDeclartion = async (req: Request, res: Response) => {
   try {
     const id = req.AutoEntrepreneurID;
     const TaxDeclartions =
-      await taxDeclarationService.getAllTaxDeclarations(id);
+      await taxDeclarationService.getAllTaxDeclarations(id as string);
 
     return res.status(200).json(TaxDeclartions);
   } catch (error: any) {
@@ -33,7 +32,7 @@ const createTaxDeclaration = async (req: Request, res: Response) => {
   try {
     const AutoEntrepreneurID = req.AutoEntrepreneurID;
 
-    let data = await PrepareTaxDeclarationData(req.body, AutoEntrepreneurID);
+    let data = await PrepareTaxDeclarationData(req.body, AutoEntrepreneurID as string);
 
     const customer = await taxDeclarationService.createTaxDeclaration(
       data as TaxDeclaration,
@@ -53,7 +52,7 @@ const patchTaxDeclaration = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const tax = await taxDeclarationService.updateTaxDeclaration(id, {
+    const tax = await taxDeclarationService.updateTaxDeclaration(id as string, {
       ...req.body,
       status: req.body.status,
     });
@@ -70,7 +69,7 @@ const patchTaxDeclaration = async (req: Request, res: Response) => {
 const getTaxDeclaration = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const customer = await taxDeclarationService.getTaxDeclaration(id);
+    const customer = await taxDeclarationService.getTaxDeclaration(id as string);
     return res.status(200).json(customer);
   } catch (error: any) {
     if (error instanceof AppError) {
@@ -85,7 +84,7 @@ const deleteTaxDeclaration = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     console.log(id);
-    await taxDeclarationService.deleteTaxDeclaration(id);
+    await taxDeclarationService.deleteTaxDeclaration(id as string);
     return res.status(204).send();
   } catch (error: any) {
     if (error instanceof AppError) {
@@ -105,25 +104,26 @@ const getCurrentTaxDeclarationInfo = async (req: Request, res: Response) => {
     const currentYear = now.getFullYear();
 
     let declaration = await taxDeclarationService.getCurrentTaxDeclaration(
-      AutoEntrepreneurID,
+      AutoEntrepreneurID as string,
       currentMonth,
       currentYear,
     );
     if (!declaration) {
-      declaration = await prepareCurrentTaxDeclarationInfo(AutoEntrepreneurID);
+      const preparedDeclaration = await prepareCurrentTaxDeclarationInfo(AutoEntrepreneurID as string);
+      declaration = preparedDeclaration as any;
     }
      const data: currentTaxDeclaaration = {
-       id: declaration.id ?? null,
-       totalRevenue: declaration.totalRevenue ?? 0,
-       taxAmount: declaration.taxAmount ?? 0,
+       id: declaration?.id ?? null,
+       totalRevenue: (declaration?.totalRevenue ?? 0) as number,
+       taxAmount: (declaration?.taxAmount ?? 0) as number,
        ramainDays: Math.ceil(
-         (declaration.dueDate!.getTime() - now.getTime()) /
+         ((declaration?.dueDate!.getTime()) as number - now.getTime()) /
            (1000 * 60 * 60 * 24),
        ),
       
-       periode: declaration.period,
-       dueDate: declaration.dueDate!,
-       status: declaration.status!,
+       periode: declaration?.period as string,
+       dueDate: declaration?.dueDate!,
+       status: declaration?.status!,
      };
 
     return res.status(200).json(data);

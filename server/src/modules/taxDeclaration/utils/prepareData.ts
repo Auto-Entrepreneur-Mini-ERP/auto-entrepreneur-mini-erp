@@ -61,18 +61,19 @@ export async function prepareCurrentTaxDeclarationInfo(autoId: string): Promise<
     year: "numeric",
   });
 
-  const [totalRevenue, { taxRate }] = await Promise.all([
+  const [totalRevenue, taxRateResult ] = await Promise.all([
     calculateTotalRevenue(autoId, currentYear, currentMonth),
     getTaxRate(autoId),
   ]);
 
-  const taxAmount = parseFloat(((totalRevenue * taxRate) / 100).toFixed(2));
+  const taxRate = taxRateResult?.taxRate || 0;
+  const taxAmount = parseFloat(((totalRevenue as number * taxRate ) / 100).toFixed(2));
 
   const current: currentTaxDeclaaration = {
-    totalRevenue,
+    totalRevenue: totalRevenue as number,
     taxAmount,
     ramainDays: remainDays,
-    period,
+    periode: period,
     dueDate,
     status: "DRAFT",
   };
@@ -89,9 +90,9 @@ export const PrepareTaxDeclarationData = async (data : any, autoEID: string) =>
     year: data.year,
     month: data.month ?? null,
 
-    totalRevenue: totalRevenue,
-    taxRate: rate.taxRate,
-    taxAmount: (totalRevenue * rate.taxRate) / 100,
+    totalRevenue: totalRevenue as number,
+    taxRate: rate?.taxRate as number,
+    taxAmount: (totalRevenue as number * (rate?.taxRate || 1)) / 100,
 
     status: "DRAFT",
     dueDate: new Date(data.year, data.month ?? 12, 30),
