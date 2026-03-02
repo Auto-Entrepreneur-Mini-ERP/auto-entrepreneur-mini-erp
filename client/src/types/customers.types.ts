@@ -49,7 +49,7 @@ export interface CreateCustomerInput {
   city: string;
   country: string;
   isActive: boolean;
-  AutoEntrepreneurId: string;
+  AutoEntrepreneurId?: string; // server may infer from session
   user: CreateUserInput;
 }
 

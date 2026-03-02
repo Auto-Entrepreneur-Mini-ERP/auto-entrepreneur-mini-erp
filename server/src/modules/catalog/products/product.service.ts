@@ -14,7 +14,7 @@ export class ProductService {
     data: CreateProductInput & { autoEntrepreneurId: string }
   ): Promise<ProductWithItem> {
 
-    return prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const item = await tx.item.create({
         data: {
           name: data.name,
@@ -217,7 +217,7 @@ export class ProductService {
     data: UpdateProductInput
   ): Promise<ProductWithItem | null> {
 
-    return prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
 
       const itemUpdateData: Prisma.ItemUpdateInput = {};
 

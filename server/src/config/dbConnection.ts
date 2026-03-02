@@ -5,12 +5,24 @@ import mysql from 'mysql2/promise';
 async function testDirectConnection() {
   try {
     await mysql.createConnection({
-      host: 'mysql',
+      // host: 'mysql',
+      // port: 3306,
+      // user: 'root',
+      // password: 'root',
+      // database: 'auto_entrepreneur_erp_db',
+      host: process.env.DATABASE_HOST as string,
+      user: process.env.DATABASE_USER as string,
+      password: process.env.DATABASE_PASSWORD as string,
+      database: process.env.DATABASE_NAME as string,
       port: 3306,
-      user: 'root',
-      password: 'root',
-      database: 'auto_entrepreneur_erp_db',
     });
+    // await mysql.createConnection({
+    //   host: 'mysql',
+    //   port: 3306,
+    //   user: 'root',
+    //   password: 'root',
+    //   database: 'auto_entrepreneur_erp_db',
+    // });
     // const adapter = new PrismaMariaDb({
     //   host: process.env.DATABASE_HOST || '',
     //   user: process.env.DATABASE_USER || '',

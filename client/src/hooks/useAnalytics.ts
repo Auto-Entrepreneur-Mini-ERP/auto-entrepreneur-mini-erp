@@ -2,6 +2,8 @@ import { useState } from "react";
 import { dashboardApi } from "../api/dashboard.api";
 import type { kpis, recentsTypes } from "../types/dashboard.types";
 
+type MonthlyPoint = { index: number; amount: number };
+
 export const useAnalytics = () => {
     const [kpis, setKpis] = useState<kpis>({
         CAmois: 0,
@@ -9,11 +11,11 @@ export const useAnalytics = () => {
         netRevenues: 0,
         depenses: 0
     });
-    const [monthlyRevenues, setMonthlyRevenues] = useState([]);
-    const [monthlyDepences, setMonthlyDepences] = useState([]);
+    const [monthlyRevenues, setMonthlyRevenues] = useState<MonthlyPoint[]>([]);
+    const [monthlyDepences, setMonthlyDepences] = useState<MonthlyPoint[]>([]);
     const [recents, setRecents] = useState<recentsTypes>({
-        recentInvoices: [],
-        recentPayments: [],
+        recentInvoices: { count: 0, invoices: [] },
+        recentPayments: { count: 0, payments: [] },
         unpaidInvoices: []
     });
 
@@ -34,22 +36,22 @@ export const useAnalytics = () => {
         const result = await dashboardApi.getMonthlyRevenues();
 
         if (result) {
-            setMonthlyRevenues(result.data);
+            setMonthlyRevenues(result.data as MonthlyPoint[]);
         };
     };
 
-    const getMonthlyDepensesData = async () => {
+    const getMonthlyDepencesData = async () => {
         const result = await dashboardApi.getMonthlyDepenses();
 
         if (result) {
-            setMonthlyDepences(result.data);
+            setMonthlyDepences(result.data as MonthlyPoint[]);
         };
     };
 
     const getRecentsData = async () => {
         const result = await dashboardApi.getRecents();
         if (result) {
-            setRecents(result.data);
+            setRecents(result.data as recentsTypes);
         };
     };
 
@@ -60,7 +62,7 @@ export const useAnalytics = () => {
         recents,
         getKpisData,
         getMonthlyRevenuesData,
-        getMonthlyDepensesData,
+        getMonthlyDepencesData,
         getRecentsData,
     };
 };

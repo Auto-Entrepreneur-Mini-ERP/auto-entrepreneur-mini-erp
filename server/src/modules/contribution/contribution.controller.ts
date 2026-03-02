@@ -53,7 +53,7 @@ const getOneContribution = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { contributionId } = req.params;
+    const contributionId = req.params.contributionId as string;
 
     const contribution = await contributionService.getOneContribution(
       autoEntrepreneurId,
@@ -103,7 +103,7 @@ const modifyContributionStatus = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { contributionId } = req.params;
+    const contributionId = req.params.contributionId as string;
     const body = req.body as ContributionUpdateStatusInput;
 
     const contribution = await contributionService.modifyContributionStatus(

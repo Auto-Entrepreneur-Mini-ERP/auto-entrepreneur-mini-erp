@@ -1,23 +1,27 @@
 export type ExpenseCategory =
-  | 'FOURNITURES'
-  | 'TRANSPORT'
-  | 'COMMUNICATION'
-  | 'FORMATION'
-  | 'LOGICIEL'
-  | 'REPAS'
-  | 'LOYER'
-  | 'MATERIEL'
-  | 'PUBLICITE'
-  | 'ASSURANCE'
-  | 'AUTRE';
+  | "FOURNITURES"
+  | "TRANSPORT"
+  | "COMMUNICATION"
+  | "FORMATION"
+  | "LOGICIEL"
+  | "REPAS"
+  | "LOYER"
+  | "MATERIEL"
+  | "PUBLICITE"
+  | "ASSURANCE"
+  | "AUTRE"
+  | "ABONNEMENT"
+  | "EQUIPEMENT"
+  | "HÉBERGEMENT"
+  | "MAINTENANCE";
 
 export type ExpensePaymentMethod =
-  | 'CASH'
-  | 'CHECK'
-  | 'BANK_TRANSFER'
-  | 'CREDIT_CARD'
-  | 'MOBILE_PAYMENT'
-  | 'OTHER';
+  | "CASH"
+  | "CHECK"
+  | "BANK_TRANSFER"
+  | "CREDIT_CARD"
+  | "MOBILE_PAYMENT"
+  | "OTHER";
 
 export interface Expense {
   id: string;

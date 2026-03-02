@@ -22,7 +22,6 @@ import type {
   ExpenseCategory,
   ExpenseFilters,
   ExpensePaymentMethod,
-  ExpenseStats,
   UpdateExpensePayload,
 } from "../../types/expense.types";
 
@@ -111,7 +110,6 @@ const emptyForm = (): FormState => ({
 export default function TableExpense() {
   // ── Data ────────────────────────────────────────────────────────────────────
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [stats, setStats] = useState<ExpenseStats | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -178,28 +176,16 @@ export default function TableExpense() {
     [catFilter, deductFilter, page, searchQuery],
   );
 
-  const fetchStats = useCallback(async () => {
-    try {
-      const res = await expenseApi.getStats();
-      setStats(res.data ?? res);
-    } catch {
-      /* non-blocking */
-    }
-  }, []);
-
   // Parallel silent refresh after mutations — no loading flash
   const refreshAll = useCallback(() => {
-    Promise.all([fetchExpenses(true), fetchStats()]);
-  }, [fetchExpenses, fetchStats]);
+    fetchExpenses(true);
+  }, [fetchExpenses]);
 
   useEffect(() => {
     const t = setTimeout(() => fetchExpenses(false), 300);
     return () => clearTimeout(t);
   }, [fetchExpenses]);
 
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
 
   // ── Open edit modal ──────────────────────────────────────────────────────────
   const openEdit = (expense: Expense) => {
@@ -390,7 +376,6 @@ export default function TableExpense() {
         <button
           onClick={() => {
             fetchExpenses();
-            fetchStats();
           }}
           className="h-11 px-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-600"
         >

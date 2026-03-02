@@ -13,6 +13,9 @@ import type { TaxDeclaration, currentTaxDeclaaration } from "./taxDeclaration.ty
 const getAllTaxDeclartion = async (req: Request, res: Response) => {
   try {
     const id = req.AutoEntrepreneurID;
+    if (!id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     const TaxDeclartions =
       await taxDeclarationService.getAllTaxDeclarations(id as string);
 
@@ -31,6 +34,9 @@ const getAllTaxDeclartion = async (req: Request, res: Response) => {
 const createTaxDeclaration = async (req: Request, res: Response) => {
   try {
     const AutoEntrepreneurID = req.AutoEntrepreneurID;
+    if (!AutoEntrepreneurID) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     let data = await PrepareTaxDeclarationData(req.body, AutoEntrepreneurID as string);
 
@@ -50,7 +56,7 @@ const createTaxDeclaration = async (req: Request, res: Response) => {
 
 const patchTaxDeclaration = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const tax = await taxDeclarationService.updateTaxDeclaration(id as string, {
       ...req.body,
@@ -82,7 +88,7 @@ const getTaxDeclaration = async (req: Request, res: Response) => {
 
 const deleteTaxDeclaration = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     console.log(id);
     await taxDeclarationService.deleteTaxDeclaration(id as string);
     return res.status(204).send();
@@ -98,6 +104,9 @@ const deleteTaxDeclaration = async (req: Request, res: Response) => {
 const getCurrentTaxDeclarationInfo = async (req: Request, res: Response) => {
   try {
     const AutoEntrepreneurID = req.AutoEntrepreneurID;
+    if (!AutoEntrepreneurID) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     const now = new Date();
 
     const currentMonth = now.getMonth() + 1;
@@ -108,23 +117,27 @@ const getCurrentTaxDeclarationInfo = async (req: Request, res: Response) => {
       currentMonth,
       currentYear,
     );
+
+    let data: currentTaxDeclaaration;
+
     if (!declaration) {
-      const preparedDeclaration = await prepareCurrentTaxDeclarationInfo(AutoEntrepreneurID as string);
-      declaration = preparedDeclaration as any;
+      data = await prepareCurrentTaxDeclarationInfo(AutoEntrepreneurID);
+    } else {
+      data = {
+        id: declaration.id ?? null,
+        totalRevenue: Number(declaration.totalRevenue ?? 0),
+        taxAmount: Number(declaration.taxAmount ?? 0),
+        ramainDays: declaration.dueDate
+          ? Math.ceil(
+              (declaration.dueDate.getTime() - now.getTime()) /
+                (1000 * 60 * 60 * 24),
+            )
+          : 0,
+        periode: declaration.period,
+        dueDate: declaration.dueDate ?? now,
+        status: declaration.status ?? DeclarationStatus.DRAFT,
+      };
     }
-     const data: currentTaxDeclaaration = {
-       id: declaration?.id ?? null,
-       totalRevenue: (declaration?.totalRevenue ?? 0) as number,
-       taxAmount: (declaration?.taxAmount ?? 0) as number,
-       ramainDays: Math.ceil(
-         ((declaration?.dueDate!.getTime()) as number - now.getTime()) /
-           (1000 * 60 * 60 * 24),
-       ),
-      
-       periode: declaration?.period as string,
-       dueDate: declaration?.dueDate!,
-       status: declaration?.status!,
-     };
 
     return res.status(200).json(data);
   } catch (error: any) {

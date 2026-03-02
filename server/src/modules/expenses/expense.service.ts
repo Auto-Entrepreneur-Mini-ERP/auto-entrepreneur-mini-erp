@@ -1,6 +1,6 @@
 // expenses/expense.service.ts
 import { prisma } from "../../lib/prisma.js";
-import type { Prisma } from "../../../generated/prisma/browser.js";
+import type { Prisma, Expense } from "../../../generated/prisma/browser.js";
 import * as fs from "fs";
 import * as path from "path";
 import { createRequire } from "module";
@@ -152,10 +152,10 @@ export class ExpenseService {
     }
 
     const expenses = await prisma.expense.findMany({ where });
-    const totalAmount = expenses.reduce((s, e) => s + Number(e.amount), 0);
+    const totalAmount = expenses.reduce((s: number, e: any) => s + Number(e.amount), 0);
     const deductibleAmount = expenses
-      .filter((e) => e.isDeductible)
-      .reduce((s, e) => s + Number(e.amount), 0);
+      .filter((e: any) => e.isDeductible)
+      .reduce((s: number, e: any) => s + Number(e.amount), 0);
 
     const categoryMap = new Map<string, { total: number; count: number }>();
     for (const e of expenses) {
@@ -216,7 +216,7 @@ export class ExpenseService {
     headerRow.height = 28;
 
     // ── Data rows
-    expenses.forEach((e, idx) => {
+    expenses.forEach((e: Expense, idx: number) => {
       const row = sheet.addRow({
         date: new Date(e.date).toLocaleDateString("fr-MA"),
         category: CATEGORY_LABELS[e.category] ?? e.category,
@@ -252,7 +252,7 @@ export class ExpenseService {
       sheet.addRow({});
       const totalRow = sheet.addRow({
         description: "TOTAL",
-        amount: expenses.reduce((s, e) => s + Number(e.amount), 0),
+        amount: expenses.reduce((s: number, e: any) => s + Number(e.amount), 0),
       });
       headerRow.eachCell((cell) => {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8BC00" } };

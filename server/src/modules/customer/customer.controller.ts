@@ -24,7 +24,7 @@ const getAllCustomers = async (req: Request, res: Response) => {
 };
 
 
-const createCustomer = async (req: Request<{}, {}, CreateCustomerInput>, res: Response) => {
+const createCustomer = async (req: Request, res: Response) => {
   try {
     let id = req.AutoEntrepreneurID;
      const customer = await customerService.createCustomer(id as string , req.body as customer);
@@ -68,8 +68,8 @@ const getCustomer = async (
   res: Response,
 ) => {
   try {
-    const { id } = req.params;
-    const customer = await customerService.getCustomer(id as string);
+    const id = req.params.id as string;
+    const customer = await customerService.getCustomer(id);
     return res.status(200).json(customer);
   } catch (error: any) {
     if (error instanceof AppError) {
@@ -100,8 +100,8 @@ const getCustomerByName = async (
 
 const deleteCustomer = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    await customerService.deleteCustomer(id as string);
+    const id = req.params.id as string;
+    await customerService.deleteCustomer(id);
     return res.status(204).send();
   } catch (error: any) {
     if (error instanceof AppError) {

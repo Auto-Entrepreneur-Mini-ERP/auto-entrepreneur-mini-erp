@@ -30,10 +30,11 @@ export const calculateTotalRevenue = async (
     },
   });
 
-  return result._sum.paidAmount || 0;
+  const paidAmount = result._sum.paidAmount ?? 0;
+  return Number(paidAmount);
 };
 
-const getTaxRate = async (autoId : string) => {
+const getTaxRate = async (autoId: string) => {
   const result = await prisma.autoEntrepreneur.findFirst({
     select: {
       taxRate: true,
@@ -43,7 +44,7 @@ const getTaxRate = async (autoId : string) => {
     },
   });
 
-  return result
+  return result;
 }
 export async function prepareCurrentTaxDeclarationInfo(autoId: string): Promise<currentTaxDeclaaration> {
   const now = new Date();
@@ -83,9 +84,11 @@ export async function prepareCurrentTaxDeclarationInfo(autoId: string): Promise<
 
 export const PrepareTaxDeclarationData = async (data : any, autoEID: string) =>
 {
-  let totalRevenue = await calculateTotalRevenue(autoEID, data.year, data.month);
-  let rate = await getTaxRate(autoEID);
-  let tax: TaxDeclaration = {
+  const totalRevenue = await calculateTotalRevenue(autoEID, data.year, data.month);
+  const rate = await getTaxRate(autoEID);
+  const taxRate = rate?.taxRate ?? 0;
+
+  const tax: TaxDeclaration = {
     period: data.period,
     year: data.year,
     month: data.month ?? null,
@@ -93,7 +96,6 @@ export const PrepareTaxDeclarationData = async (data : any, autoEID: string) =>
     totalRevenue: totalRevenue as number,
     taxRate: rate?.taxRate as number,
     taxAmount: (totalRevenue as number * (rate?.taxRate || 1)) / 100,
-
     status: "DRAFT",
     dueDate: new Date(data.year, data.month ?? 12, 30),
 

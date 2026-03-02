@@ -15,11 +15,11 @@ type ModalCreatePaymentProps = {
 
 function ModalCreatePayment({
   setIsPaymentModalOpen,
-  isPaymentModalOpen
+  isPaymentModalOpen,
 }: ModalCreatePaymentProps) {
 
 
-  const { getInvoicesByNumber, createPayment } = usePayment();
+  const { errors, getInvoicesByNumber, createPayment } = usePayment();
 
   const [paymentFormData, setPaymentFormData] = useState<PaymentCreateInput>();
 
@@ -29,7 +29,7 @@ function ModalCreatePayment({
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("paymentData", paymentFormData);
-    
+
     await createPayment(paymentFormData as PaymentCreateInput);
     if (!errors) {
       setIsPaymentModalOpen(false);
