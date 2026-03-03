@@ -20,10 +20,11 @@ app.get('/api', async (req: express.Request, res: express.Response) => {
 });
 
 app.use(cors({
-  "origin": env.FRONT_END_URL || "http://localhost:5173",
+  "origin": env.FRONT_END_URL as string,
   "credentials": true
 }));
 app.use(helmet());
+app.set("trust proxy", 1);
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
 	limit: 100000000, // Limit each IP to 100 requests per `window` (here, per 15 minutes).

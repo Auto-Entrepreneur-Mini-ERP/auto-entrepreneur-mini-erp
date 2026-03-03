@@ -12,7 +12,7 @@ export class AppError extends Error{
 }
 
 export const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunction) => {
-    console.log(err.message);
+    console.log(new Date(), " - Error for user: ", req.AutoEntrepreneurID || req.body?.email, "Message: ", err.message);
     
     const statusCode = err.statusCode || 500;
     if(statusCode === 500) err.message = "Something Went wrong!";

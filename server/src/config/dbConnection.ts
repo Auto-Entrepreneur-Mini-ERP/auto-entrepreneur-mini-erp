@@ -1,42 +1,31 @@
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import { PrismaClient } from '../../generated/prisma/client.js';
-import mysql from 'mysql2/promise';
+import "dotenv/config";
+import mysql from "mysql2/promise";
 
 async function testDirectConnection() {
-  try {
-    await mysql.createConnection({
-      // host: 'mysql',
-      // port: 3306,
-      // user: 'root',
-      // password: 'root',
-      // database: 'auto_entrepreneur_erp_db',
-      host: process.env.DATABASE_HOST as string,
-      user: process.env.DATABASE_USER as string,
-      password: process.env.DATABASE_PASSWORD as string,
-      database: process.env.DATABASE_NAME as string,
-      port: 3306,
-    });
-    // await mysql.createConnection({
-    //   host: 'mysql',
-    //   port: 3306,
-    //   user: 'root',
-    //   password: 'root',
-    //   database: 'auto_entrepreneur_erp_db',
-    // });
-    // const adapter = new PrismaMariaDb({
-    //   host: process.env.DATABASE_HOST || '',
-    //   user: process.env.DATABASE_USER || '',
-    //   password: process.env.DATABASE_PASSWORD || '',
-    //   database: process.env.DATABASE_NAME || '',
-    //   connectionLimit: 5
-    // });
-    // new PrismaClient({adapter});
-    
-    console.log('✅ Direct MySQL connection successful');
-  } catch (error) {
-    console.error('❌ Direct MySQL connection failed:', error);
-    return false;
+  const maxRetries = 10;
+  const delay = 3000; // 3 seconds
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const connection = await mysql.createConnection({
+        host: process.env.DATABASE_HOST as string,       // make sure names match docker-compose
+        user: process.env.DATABASE_USER as string,
+        password: process.env.DATABASE_PASSWORD as string,
+        database: process.env.DATABASE_NAME as string,
+        port: 3306,
+      });
+
+      await connection.end();
+
+      console.log("✅ Direct MySQL connection successful");
+      return true;
+    } catch (error) {
+      console.log(`⏳ Waiting for database... (${attempt}/${maxRetries})`);
+      await new Promise((res) => setTimeout(res, delay));
+    }
   }
+
+  console.error("❌ Could not connect to database after retries.");
 }
 
 export default testDirectConnection;

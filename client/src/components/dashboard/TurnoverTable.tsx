@@ -20,7 +20,7 @@ function TurnoverTable({ monthlyRevenues, monthlyDepences }: TurnoverTableProps)
             <div className="lg:col-span-7">
                 <div className="bg-white rounded-[20px] p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)] border border-gray-100 h-full flex flex-col">
                     <div className="mb-6">
-                        <h2 className="text-[#1A1A1A] mb-1">Aperçu du chiffre d’affaires et Dépenses</h2>
+                        <h2 className="text-[#1A1A1A] mb-1">Aperçu du Revenues et Dépenses</h2>
                         <p className="text-[#7A7A7A] text-sm">Tendance mensuel (en DHs)</p>
                     </div>
 
