@@ -207,7 +207,7 @@ export class ExpenseService {
 
     // ── Header row styling
     const headerRow = sheet.getRow(1);
-    headerRow.eachCell((cell: any) => {
+    headerRow.eachCell((cell) => {
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF2D3194" } };
       cell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 11 };
       cell.alignment = { vertical: "middle", horizontal: "center" };
@@ -229,7 +229,7 @@ export class ExpenseService {
       });
 
       const bgColor = idx % 2 === 0 ? "FFFAFAFA" : "FFFFFFFF";
-      row.eachCell((cell: any) => {
+      headerRow.eachCell((cell) => {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: bgColor } };
         cell.alignment = { vertical: "middle" };
         cell.border = { bottom: { style: "hair", color: { argb: "FFE8E8E8" } } };
@@ -254,7 +254,7 @@ export class ExpenseService {
         description: "TOTAL",
         amount: expenses.reduce((s: number, e: any) => s + Number(e.amount), 0),
       });
-      totalRow.eachCell((cell: any) => {
+      headerRow.eachCell((cell) => {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8BC00" } };
         cell.font = { bold: true, size: 11 };
         cell.alignment = { vertical: "middle" };

@@ -5,21 +5,11 @@ import { paymentService } from "../payment/payment.service.js";
 
 const overview = async (autoenretpreneurId: string)=>{
 
-    const currMonth = new Date().getMonth();
-    const currYear = new Date().getFullYear();
-
-    const startDate = currYear+'/'+(currMonth+1)+'/01';
-    const lastDate = currYear+'/'+(currMonth+1)+'/30';
-
-    // chiffre d'affaire mois actuel
+    // chiffre d'affaire
     const CAmois = await prisma.invoice.groupBy({
         by:['AutoEntrepreneurId'],
         where:{
             AutoEntrepreneurId: autoenretpreneurId,
-            issueDate: {
-                gte: new Date(startDate),
-                lte: new Date(lastDate)
-            }
         },
         _sum:{
             totalAmount: true,
@@ -31,10 +21,6 @@ const overview = async (autoenretpreneurId: string)=>{
         by:['AutoEntrepreneurId'],
         where:{
             AutoEntrepreneurId: autoenretpreneurId,
-            issueDate: {
-                gte: new Date(startDate),
-                lte: new Date(lastDate)
-            },
             status: {
                 in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIALLY_PAID]
             }
@@ -44,15 +30,11 @@ const overview = async (autoenretpreneurId: string)=>{
         }
     });
 
-    // revenus nett mois actuel
+    // revenus nett
     const netRevenues = await prisma.payment.groupBy({
         by:['AutoEntrepreneurId'],
         where:{
             AutoEntrepreneurId: autoenretpreneurId,
-            paymentDate: {
-                gte: new Date(startDate),
-                lte: new Date(lastDate)
-            }
         },
         _sum:{
             amount: true,
@@ -64,10 +46,6 @@ const overview = async (autoenretpreneurId: string)=>{
         by:['AutoEntrepreneurId'],
         where:{
             AutoEntrepreneurId: autoenretpreneurId,
-            date: {
-                gte: new Date(startDate),
-                lte: new Date(lastDate)
-            }
         },
         _sum:{
             amount: true,

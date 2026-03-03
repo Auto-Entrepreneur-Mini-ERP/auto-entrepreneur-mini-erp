@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auto_entrepreneur_erp_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mini-erp-network
+    expose:
+      - "3306"
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot"]
+      interval: 5s
+      retries: 10
+      timeout: 5s
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./server
+    environment:
+      NODE_ENV: production
+      DATABASE_HOST: mysql
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: auto_entrepreneur_erp_db
+      DATABASE_URL: mysql://root:root@mysql:3306/auto_entrepreneur_erp_db
+      JWT_SECRET: autoentrepreneur_secret_key
+    ports:
+      - "3001:3001"
+    networks:
+      - mini-erp-network
+
+  client:
+    build: 
+      context: ./client
+    ports:
+      - "80:80"
+    networks:
+      - mini-erp-network
+
+volumes:
+  mysql_data:
+
+networks:
+  mini-erp-network:
+    driver: bridge

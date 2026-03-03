@@ -5,15 +5,21 @@ export interface User {
   firstName: string;
   lastName: string;
   phone?: string;
-  address?: string; 
+  address?: string;
+}
+export interface customer {
+  userId: string
+  ice: string
+  city: string
+  country: string
+  AutoEntrepreneurId: string
+  user: User;
 }
 
-export interface customer {
-  userId: string;
-  ice: string;
-  city?: string;
-  country?: string;
-  AutoEntrepreneurId: string;
-  isActive?: boolean;
-  user: User;
-} 
+export interface updateCustomer {
+  ice?: string
+  city?: string
+  country?: string
+  isActive?: boolean
+  user: User
+}

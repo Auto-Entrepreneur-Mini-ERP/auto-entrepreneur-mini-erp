@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { customerService } from "./customer.service.js";
 import type { CreateCustomerInput, PatchCustomerInput } from "./customer.schema.js";
 import { AppError } from "../../utils/errorHandler.js";
+import type { customer } from "./customer.types.js";
 
 const getAllCustomers = async (req: Request, res: Response) => {
    
@@ -25,11 +26,8 @@ const getAllCustomers = async (req: Request, res: Response) => {
 
 const createCustomer = async (req: Request, res: Response) => {
   try {
-    const id = req.AutoEntrepreneurID;
-    if (!id) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    const customer = await customerService.createCustomer(id, req.body);
+    let id = req.AutoEntrepreneurID;
+     const customer = await customerService.createCustomer(id as string , req.body as customer);
     return res.status(200).json(customer);
   } catch (error: any) {
  
@@ -51,8 +49,8 @@ const updateCustomer = async (
   res: Response,
 ) => {
   try {
-    const id = req.params.id as string;
-    const customer = await customerService.updateCustomer(id, req.body);
+    const { id } = req.params;
+    const customer = await customerService.updateCustomer(id as string, req.body);
     return res.status(200).json(customer);
   } catch (error: any) {
     if (error instanceof AppError) {
